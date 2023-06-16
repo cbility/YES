@@ -4,11 +4,18 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceError
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import gspread.utils as utils
 import time
+import logging
+
+#configure logging system
+
+loglevel = logging.INFO
+logging.basicConfig(level=loglevel, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def connect_to_sheet(doc_name, sheet_name):
     #set permissions
@@ -103,7 +110,7 @@ def RHI_login(username, password, driver):
             raise LoginFailed(username)
     except NoSuchElementException:
         # Login was successful
-        print(username + ": Login successful")
+        logging.info(username + ": Login successful")
 
 def get_last_submission_date(rhi_numbers, driver):
 
@@ -126,7 +133,7 @@ def get_last_submission_date(rhi_numbers, driver):
         for option in options:
             rhi = option.text[:13]
             if (rhi == rhi_number):
-                print(rhi + " selected")
+                logging.info(rhi + " selected")
                 #select RHI number
                 value = option.get_attribute("value")
                 select.select_by_value(value)
@@ -143,12 +150,12 @@ def get_last_submission_date(rhi_numbers, driver):
                     #get date
                     latest_date = driver.find_element(By.ID, f"FullWidthPlaceholder_FullWidthContentPlaceholder_gvTimeLines_lblPeriodDates_{submission_no}")
                 except NoSuchElementException as exc:
-                    print(exc)
+                    logging.warning(exc)
                     dates.append([rhi,'Never Submitted'])
                 else:
                     dates.append([rhi, latest_date.text[-11:].strip()])
                 finally:
-                    print(f"{dates[-1][0]} last submitted on {dates[-1][1]}")
+                    logging.info(f"{dates[-1][0]} last submitted on {dates[-1][1]}")
                     break
 
     return dates
@@ -206,7 +213,7 @@ if __name__ == "__main__":
                 dates = get_last_submission_date(user[2], driver)
 
                 RHI_logout(driver)
-                print("\n")
+                logging.info("\n")
 
                 for rhi in dates:
                     for index in indices:
@@ -215,7 +222,7 @@ if __name__ == "__main__":
                             new_dates[index] = rhi[1]
 
         except LoginFailed as exc:
-            print(exc)
+            logging.warning(exc)
             #Make sure username is not retried
             indices = [index for index, element in enumerate(usernames) if element == exc.username]
             for index in indices:
