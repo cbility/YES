@@ -6,7 +6,10 @@ Features:
 
 Future development:
   Add logging
+  
   Add retries for certain exceptions
+  
   Get all relevant data from website
+  
   Upload meter readings from file
   
