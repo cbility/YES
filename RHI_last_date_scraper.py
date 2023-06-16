@@ -13,7 +13,7 @@ import logging
 
 #configure logging system
 
-loglevel = logging.INFO
+loglevel = logging.DEBUG
 logging.basicConfig(level=loglevel, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -233,11 +233,19 @@ if __name__ == "__main__":
 
     #export dates to sheet
     worksheet, client = connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
-
+    
     worksheet.update(utils.rowcol_to_a1(2,dates_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,dates_col), [[i] for i in new_dates])
+                     utils.rowcol_to_a1(worksheet.row_count,dates_col), 
+                     [[i] for i in new_dates])
+    
+    worksheet.format(utils.rowcol_to_a1(2,dates_col) + ':' + 
+                     utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
+    
+
     worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,last_login_col), [[i] for i in last_login_succesful])
+                     utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
+                     [[i] for i in last_login_succesful])
+    
 
 
     
