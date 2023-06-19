@@ -179,6 +179,10 @@ class LoginFailed(Exception):
         self.username = username
         super().__init__(f"INCORRECT PASSWORD FOR {username}")
 
+def getbool(input):
+    boolean = {'TRUE': True, 'FALSE': False}
+    return boolean.get(input.upper())
+
 rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
 last_login_col = utils.a1_to_rowcol('AU1')[1]
 dates_col = utils.a1_to_rowcol('H1')[1]; 
@@ -203,10 +207,8 @@ if __name__ == "__main__":
 
     #choose web driver
    
-    # Configure Firefox options for headless mode
     head_options = Options()
-    head_options.add_argument('-headless')
-
+    head_options.add_argument('-headless')  #uncomment this line to run in background
     driver = webdriver.Firefox(options=head_options)
 
     driver.implicitly_wait(1)
@@ -215,7 +217,7 @@ if __name__ == "__main__":
         indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
 
         try:
-            if(all([last_login_succesful[index] for index in indices])):
+            if(all([getbool(last_login_succesful[index]) for index in indices])):
 
                 RHI_login(user[0], user[1], driver)
 
@@ -228,6 +230,8 @@ if __name__ == "__main__":
                         if rhis[index] == rhi[0]: #identify index of this RHI number
                             #update date
                             new_dates[index] = rhi[1]
+            else:
+                logging.warning(f"{user[0]} skipped: password incorrect.")
 
         except LoginFailed as exc:
             logging.warning(exc)
@@ -235,6 +239,12 @@ if __name__ == "__main__":
             indices = [index for index, element in enumerate(usernames) if element == exc.username]
             for index in indices:
                 last_login_succesful[index] = False
+
+            #push update to sheet
+            worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
+                     utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
+                     [[i] for i in last_login_succesful])
+            
 
     #close browser
     driver.quit()
@@ -249,7 +259,3 @@ if __name__ == "__main__":
     worksheet.format(utils.rowcol_to_a1(2,dates_col) + ':' + 
                      utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
     
-
-    worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
-                     [[i] for i in last_login_succesful])
