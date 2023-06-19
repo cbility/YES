@@ -7,13 +7,14 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 import gspread.utils as utils
 import time
 import logging
 
 #configure logging system
 
-loglevel = logging.DEBUG
+loglevel = logging.INFO
 logging.basicConfig(level=loglevel, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -39,11 +40,14 @@ def connect_to_sheet(doc_name, sheet_name):
 
     return worksheet, client
 
-def get_logins(rhi_column, username_column, last_login_column, dates_column, worksheet):
+def get_logins(rhi_column, username_column, last_login_column, dates_column, fdates_col, worksheet):
 
     #get rhi and org numbers
     rhis_orgs = worksheet.col_values(rhi_column)[1:]
     #select rhi numbers
+    logging.debug(rhis_orgs)
+    logging.debug([i.split('\n') for i in rhis_orgs])
+
     rhis = [[rhi[:13] for rhi in i.split('\n') if rhi[:3] == "RHI"][0] for i in rhis_orgs]
 
     #get usernames and passwords
@@ -67,7 +71,10 @@ def get_logins(rhi_column, username_column, last_login_column, dates_column, wor
     #get old dates
     old_dates = worksheet.col_values(dates_column)[1:]
 
-    return rhis, usernames, passwords, last_login_succesful, old_dates
+    #get first dates
+    first_dates = worksheet.col_values(fdates_col)[1:]
+
+    return rhis, usernames, passwords, last_login_succesful, old_dates, first_dates
 
 def condense_list_with_indices(lst):
     condensed_lst = []
@@ -119,6 +126,8 @@ def get_last_submission_date(rhi_numbers, driver):
 
     #initialise list of dates
     dates=[]
+    #initialise list of first dates
+    fdates = []
 
     for rhi_number in rhi_numbers:
 
@@ -138,7 +147,18 @@ def get_last_submission_date(rhi_numbers, driver):
                 value = option.get_attribute("value")
                 select.select_by_value(value)
 
-                #get date
+
+
+                #get all dates
+                date_table = driver.find_element(By.ID, "FullWidthPlaceholder_FullWidthContentPlaceholder_gvTimeLines")
+                date_rows = date_table.find_elements(By.TAG_NAME, 'tr')
+
+                #get first date
+                fdate = date_rows[-1]
+                fdates.append([rhi, fdate.text[29:28+13].strip()])
+
+
+                #get last date
                 try:
                     submission_no = 0
                     action_button = driver.find_element(By.ID, f"FullWidthPlaceholder_FullWidthContentPlaceholder_gvTimeLines_lnkAction_{submission_no}")
@@ -156,14 +176,15 @@ def get_last_submission_date(rhi_numbers, driver):
                     dates.append([rhi, latest_date.text[-11:].strip()])
                 finally:
                     logging.info(f"{dates[-1][0]} last submitted on {dates[-1][1]}")
+                    logging.info(f"{fdates[-1][0]} first submitted on {fdates[-1][1]}")
                     break
 
-    return dates
+    return dates, fdates
 
 def RHI_logout(driver):
     logout_button = driver.find_element(By.ID, "WelcomeAndLogoutPlaceHolder_Button1")
     logout_button.click()
-    time.sleep(3)
+    time.sleep(1)
     confirm_logout_button = driver.find_element(By.ID, "mainPlaceHolder_btnLogout")
     confirm_logout_button.click()
 
@@ -172,9 +193,10 @@ class LoginFailed(Exception):
         self.username = username
         super().__init__(f"INCORRECT PASSWORD FOR {username}")
 
-rhi_col = 15; userpass_col = 3; last_login_col = 47; dates_col = 9
-
-
+rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
+last_login_col = utils.a1_to_rowcol('AU1')[1]
+dates_col = utils.a1_to_rowcol('H1')[1]; 
+fdates_col = utils.a1_to_rowcol('AV1')[1]
 
 
 if __name__ == "__main__":
@@ -182,9 +204,11 @@ if __name__ == "__main__":
     worksheet, client = connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
 
     #get data from google sheet
-    rhis, usernames, passwords, last_login_succesful, old_dates = get_logins(rhi_col, userpass_col, last_login_col, dates_col, worksheet)
+    rhis, usernames, passwords, last_login_succesful, old_dates, first_dates = get_logins(rhi_col,
+     userpass_col, last_login_col, dates_col, fdates_col, worksheet)
 
     new_dates = old_dates
+    new_fdates = first_dates
 
     #create list of usernames, passwords and associated RHI numbers
     rhi_users = []
@@ -194,12 +218,15 @@ if __name__ == "__main__":
     #rhi_users = [rhi_users[1]]
 
     #choose web driver
+   
+    # Configure Firefox options for headless mode
+    head_options = Options()
+    head_options.headless = True
 
-    #run in background
-    #headOption = webdriver.FirefoxOptions()
-    #headOption.headless = True
+    # Create a Firefox WebDriver instance with the headless options
+    driver = webdriver.Firefox(options=head_options)
     
-    driver = webdriver.Firefox() 
+    #driver = webdriver.Firefox() 
     driver.implicitly_wait(2)
 
     for user in rhi_users:
@@ -210,16 +237,21 @@ if __name__ == "__main__":
 
                 RHI_login(user[0], user[1], driver)
 
-                dates = get_last_submission_date(user[2], driver)
+                dates, fdates = get_last_submission_date(user[2], driver)
 
                 RHI_logout(driver)
-                logging.info("\n")
 
-                for rhi in dates:
+                for rhi in dates: 
                     for index in indices:
                         if rhis[index] == rhi[0]: #identify index of this RHI number
                             #update date
                             new_dates[index] = rhi[1]
+
+                for frhi in fdates: 
+                    for index in indices:
+                        if rhis[index] == frhi[0]: #identify index of this RHI number
+                            #update date
+                            new_fdates[index] = frhi[1]
 
         except LoginFailed as exc:
             logging.warning(exc)
@@ -241,6 +273,12 @@ if __name__ == "__main__":
     worksheet.format(utils.rowcol_to_a1(2,dates_col) + ':' + 
                      utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
     
+    worksheet.update(utils.rowcol_to_a1(2,fdates_col) + ':' + 
+                     utils.rowcol_to_a1(worksheet.row_count,fdates_col), 
+                     [[i] for i in new_fdates])
+    
+    worksheet.format(utils.rowcol_to_a1(2,fdates_col) + ':' + 
+                     utils.rowcol_to_a1(worksheet.row_count,fdates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
 
     worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
                      utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
