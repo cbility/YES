@@ -167,17 +167,39 @@ def get_last_submission_date(rhi_numbers, driver):
                     break
     return dates
 
+
 def RHI_logout(driver):
-    logout_button = driver.find_element(By.ID, "WelcomeAndLogoutPlaceHolder_Button1")
-    logout_button.click()
-    time.sleep(1)
-    confirm_logout_button = driver.find_element(By.ID, "mainPlaceHolder_btnLogout")
-    confirm_logout_button.click()
+    max_retries = 3
+    skip = False
+    for retry in range(max_retries):
+        try:
+            logout_button = driver.find_element(By.ID, "WelcomeAndLogoutPlaceHolder_Button1")
+            logout_button.click()
+            break
+        except (StaleElementReferenceException, NoSuchElementException) as exc:
+            logging.warning(exc)
+            logging.warning(f"Attempt {retry + 1} of {max_retries} failed")
+            if retry + 1 == max_retries: 
+                logging.error("Logout button click failed. Continuing...")
+                skip = True
+    if not(skip):
+        for retry in range(max_retries):
+            try:
+                confirm_logout_button = driver.find_element(By.ID, "mainPlaceHolder_btnLogout")
+                confirm_logout_button.click()
+                break
+            except (StaleElementReferenceException, NoSuchElementException) as exc:
+                logging.warning(exc)
+                logging.warning(f"Attempt {retry + 1} of {max_retries} failed")
+                if retry + 1 == max_retries: 
+                    logging.error("Logout confirm button click failed. Continuing...")
+
 
 class LoginFailed(Exception):
     def __init__(self, username):
         self.username = username
         super().__init__(f"INCORRECT PASSWORD FOR {username}")
+
 
 rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
 last_login_col = utils.a1_to_rowcol('AU1')[1]
@@ -209,7 +231,7 @@ if __name__ == "__main__":
 
     driver = webdriver.Firefox(options=head_options)
 
-    driver.implicitly_wait(1)
+    #driver.implicitly_wait(1)
 
     for user in rhi_users:
         indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
