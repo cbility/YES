@@ -229,49 +229,46 @@ if __name__ == "__main__":
     head_options = Options()
     head_options.add_argument('-headless')
 
-    driver = webdriver.Firefox(options=head_options)
+    with webdriver.Firefox(options=head_options) as driver:
 
-    #driver.implicitly_wait(1)
+        #driver.implicitly_wait(1)
 
-    for user in rhi_users:
-        indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
+        for user in rhi_users:
+            indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
 
-        try:
-            if(all([last_login_succesful[index] for index in indices])):
+            try:
+                if(all([last_login_succesful[index] for index in indices])):
 
-                RHI_login(user[0], user[1], driver)
+                    RHI_login(user[0], user[1], driver)
 
-                dates = get_last_submission_date(user[2], driver)
+                    dates = get_last_submission_date(user[2], driver)
 
-                RHI_logout(driver)
+                    RHI_logout(driver)
 
-                for rhi in dates: 
-                    for index in indices:
-                        if rhis[index] == rhi[0]: #identify index of this RHI number
-                            #update date
-                            new_dates[index] = rhi[1]
+                    for rhi in dates: 
+                        for index in indices:
+                            if rhis[index] == rhi[0]: #identify index of this RHI number
+                                #update date
+                                new_dates[index] = rhi[1]
 
-        except LoginFailed as exc:
-            logging.warning(exc)
-            #Make sure username is not retried
-            indices = [index for index, element in enumerate(usernames) if element == exc.username]
-            for index in indices:
-                last_login_succesful[index] = False
-
-    #close browser
-    driver.quit()
+            except LoginFailed as exc:
+                logging.warning(exc)
+                #Make sure username is not retried
+                indices = [index for index, element in enumerate(usernames) if element == exc.username]
+                for index in indices:
+                    last_login_succesful[index] = False
 
     #export dates to sheet
     worksheet, client = connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
     
     worksheet.update(utils.rowcol_to_a1(2,dates_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,dates_col), 
-                     [[i] for i in new_dates])
+                    utils.rowcol_to_a1(worksheet.row_count,dates_col), 
+                    [[i] for i in new_dates])
     
     worksheet.format(utils.rowcol_to_a1(2,dates_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
+                    utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
     
 
     worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
-                     [[i] for i in last_login_succesful])
+                    utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
+                    [[i] for i in last_login_succesful])
