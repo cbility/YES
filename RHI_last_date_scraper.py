@@ -167,21 +167,44 @@ def get_last_submission_date(rhi_numbers, driver):
                     break
     return dates
 
+
 def RHI_logout(driver):
-    logout_button = driver.find_element(By.ID, "WelcomeAndLogoutPlaceHolder_Button1")
-    logout_button.click()
-    time.sleep(1)
-    confirm_logout_button = driver.find_element(By.ID, "mainPlaceHolder_btnLogout")
-    confirm_logout_button.click()
+    max_retries = 3
+    skip = False
+    for retry in range(max_retries):
+        try:
+            logout_button = driver.find_element(By.ID, "WelcomeAndLogoutPlaceHolder_Button1")
+            logout_button.click()
+            break
+        except (StaleElementReferenceException, NoSuchElementException) as exc:
+            logging.warning(exc)
+            logging.warning(f"Attempt {retry + 1} of {max_retries} failed")
+            if retry + 1 == max_retries: 
+                logging.error("Logout button click failed. Continuing...")
+                skip = True
+    if not(skip):
+        for retry in range(max_retries):
+            try:
+                confirm_logout_button = driver.find_element(By.ID, "mainPlaceHolder_btnLogout")
+                confirm_logout_button.click()
+                break
+            except (StaleElementReferenceException, NoSuchElementException) as exc:
+                logging.warning(exc)
+                logging.warning(f"Attempt {retry + 1} of {max_retries} failed")
+                if retry + 1 == max_retries: 
+                    logging.error("Logout confirm button click failed. Continuing...")
+
 
 class LoginFailed(Exception):
     def __init__(self, username):
         self.username = username
         super().__init__(f"INCORRECT PASSWORD FOR {username}")
 
+
 def getbool(input):
     boolean = {'TRUE': True, 'FALSE': False}
     return boolean.get(input.upper())
+
 
 rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
 last_login_col = utils.a1_to_rowcol('AU1')[1]
@@ -208,23 +231,29 @@ if __name__ == "__main__":
     #choose web driver
    
     head_options = Options()
+
     head_options.add_argument('-headless')  #uncomment this line to run in background
-    driver = webdriver.Firefox(options=head_options)
 
-    driver.implicitly_wait(1)
+    with webdriver.Firefox(options=head_options) as driver:
 
-    for user in rhi_users:
-        indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
 
-        try:
-            if(all([getbool(last_login_succesful[index]) for index in indices])):
+        #driver.implicitly_wait(1)
 
-                RHI_login(user[0], user[1], driver)
 
-                dates = get_last_submission_date(user[2], driver)
+        for user in rhi_users:
+            indices = user[3] #these are the indices of the rhi numbers in the master list "rhis"
 
-                RHI_logout(driver)
+          try:
+              if(all([getbool(last_login_succesful[index]) for index in indices])):
 
+
+                    RHI_login(user[0], user[1], driver)
+
+                    dates = get_last_submission_date(user[2], driver)
+
+
+                    RHI_logout(driver)
+=
                 for rhi in dates: 
                     for index in indices:
                         if rhis[index] == rhi[0]: #identify index of this RHI number
@@ -233,29 +262,34 @@ if __name__ == "__main__":
             else:
                 logging.warning(f"{user[0]} skipped: password incorrect.")
 
-        except LoginFailed as exc:
-            logging.warning(exc)
-            #Make sure username is not retried
-            indices = [index for index, element in enumerate(usernames) if element == exc.username]
-            for index in indices:
-                last_login_succesful[index] = False
+
+            except LoginFailed as exc:
+                logging.warning(exc)
+                #Make sure username is not retried
+                indices = [index for index, element in enumerate(usernames) if element == exc.username]
+                for index in indices:
+                    last_login_succesful[index] = False
 
             #push update to sheet
             worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
                      utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
                      [[i] for i in last_login_succesful])
-            
+          
 
-    #close browser
-    driver.quit()
 
     #export dates to sheet
     worksheet, client = connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
     
     worksheet.update(utils.rowcol_to_a1(2,dates_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,dates_col), 
-                     [[i] for i in new_dates])
+                    utils.rowcol_to_a1(worksheet.row_count,dates_col), 
+                    [[i] for i in new_dates])
     
     worksheet.format(utils.rowcol_to_a1(2,dates_col) + ':' + 
-                     utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
+                    utils.rowcol_to_a1(worksheet.row_count,dates_col), { "numberFormat": { "type": "DATE","pattern": "d\" \"mmm\" \"yyyy"}})
     
+
+    worksheet.update(utils.rowcol_to_a1(2,last_login_col) + ':' + 
+                    utils.rowcol_to_a1(worksheet.row_count,last_login_col), 
+                    [[i] for i in last_login_succesful])
+    
+
