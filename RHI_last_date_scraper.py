@@ -205,9 +205,9 @@ def getbool(input):
     boolean = {'TRUE': True, 'FALSE': False}
     return boolean.get(input.upper())
 
-rhi_col = utils.a1_to_rowcol('E1')[1]; userpass_col = 3
-last_login_col = utils.a1_to_rowcol('W1')[1]
-dates_col = utils.a1_to_rowcol('J1')[1]; 
+rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
+last_login_col = utils.a1_to_rowcol('V1')[1]
+dates_col = utils.a1_to_rowcol('I1')[1]; 
 
 
 if __name__ == "__main__":
