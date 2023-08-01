@@ -194,9 +194,9 @@ class LoginFailed(Exception):
         super().__init__(f"INCORRECT PASSWORD FOR {username}")
 
 rhi_col = utils.a1_to_rowcol('D1')[1]; userpass_col = 3
-last_login_col = utils.a1_to_rowcol('AU1')[1]
-dates_col = utils.a1_to_rowcol('H1')[1]; 
-fdates_col = utils.a1_to_rowcol('AV1')[1]
+last_login_col = utils.a1_to_rowcol('W1')[1]
+dates_col = utils.a1_to_rowcol('J1')[1]; 
+fdates_col = utils.a1_to_rowcol('X1')[1]
 
 
 if __name__ == "__main__":
