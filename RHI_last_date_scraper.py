@@ -153,7 +153,7 @@ def get_first_submission_date(rhi_numbers, driver):
                 fdate = date_rows[-1]
                 fdates.append([rhi, fdate.text[29:28+13].strip()])
 
-                logging.info(f"{fdates[-1][0]} first submission due on {fdates[-1][1]}")
+                logging.info(f"{fdates[-1][0]} first submission due {fdates[-1][1]}")
                 break
 
     return fdates
@@ -199,11 +199,11 @@ def get_last_submission_date(rhi_numbers, driver):
                     latest_date = driver.find_element(By.ID, f"FullWidthPlaceholder_FullWidthContentPlaceholder_gvTimeLines_lblPeriodDates_{submission_no}")
                 except NoSuchElementException as exc:
                     logging.warning(exc)
-                    dates.append([rhi,'Never Submitted'])
+                    dates.append([rhi,'Never'])
                 else:
                     dates.append([rhi, latest_date.text[-11:].strip()])
                 finally:
-                    logging.info(f"{dates[-1][0]} last submitted on {dates[-1][1]}")
+                    logging.info(f"{dates[-1][0]} last submitted {dates[-1][1]}")
                     break
     return dates
 
