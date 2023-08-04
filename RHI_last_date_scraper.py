@@ -11,6 +11,7 @@ from selenium.webdriver.firefox.options import Options
 import gspread.utils as utils
 import time
 import logging
+import re
 
 #configure logging system
 
@@ -234,6 +235,85 @@ def RHI_logout(driver):
                 if retry + 1 == max_retries: 
                     logging.error("Logout confirm button click failed. Continuing...")
 
+
+class Input:
+    def __init__(self, var):
+        self.var = var
+
+    def enter(self, id, driver):
+        field = driver.find_element(By.ID, id)
+        field.send_keys(self.var)
+
+class AU:
+    def __init__(self, title, fname, lname, middle_inital, email, phone, initials, mothers_maiden):
+        self.title = Input(title)
+        self.fname = Input(fname)
+        self.lname = Input(lname)
+        self.middle_inital = Input(middle_inital)
+        self.email = Input(email)
+        self.phone = Input(phone)
+        self.initials = Input(initials)
+        self.mothers_maiden = Input(mothers_maiden)
+
+    def add_AU(self, username, password, driver):
+        #navigate to manage users page
+        driver.get("https://rhi.ofgem.gov.uk/UserManagement/ListUsers.aspx")
+
+        #click to add additional user
+        add_new_button = driver.find_element(By.ID, "FullWidthPlaceholder_FullWidthContentPlaceholder_btnAddNew")
+        add_new_button.click()
+
+        time.sleep(3)
+
+        #fill out form
+        self.title.enter("mainPlaceHolder_ContentPlaceHolder_txtTitle",driver)
+        self.fname.enter("mainPlaceHolder_ContentPlaceHolder_txtFirstName",driver)
+        self.lname.enter("mainPlaceHolder_ContentPlaceHolder_txtLastName",driver)
+        self.middle_inital.enter("mainPlaceHolder_ContentPlaceHolder_txtMiddleInitials",driver)
+        self.email.enter("mainPlaceHolder_ContentPlaceHolder_txtEmail",driver)
+        self.email.enter("mainPlaceHolder_ContentPlaceHolder_txtConfirmEmail",driver)
+        self.phone.enter("mainPlaceHolder_ContentPlaceHolder_txtWorkTelephone",driver)
+        self.mothers_maiden.enter("mainPlaceHolder_ContentPlaceHolder_txtAnswer",driver)
+
+        username_input = driver.find_element(By.ID, "mainPlaceHolder_ContentPlaceHolder_txtUserName")
+        username_input.send_keys(username + self.initials.var)
+
+        AU_button = driver.find_element(By.ID,"mainPlaceHolder_ContentPlaceHolder_chkListRoles_0")
+        AU_button.click()
+
+        question_selector = driver.find_element(By.ID, "mainPlaceHolder_ContentPlaceHolder_ddlSecretQuestions")
+        select = Select(question_selector)
+        select.select_by_value("1")
+
+        #submit form
+        submit_button = driver.find_element(By.ID, "mainPlaceHolder_ContentPlaceHolder_btnNext")
+        submit_button.click()
+
+        #continue
+        continue_button = driver.find_element(By.ID, "mainPlaceHolder_ContentPlaceHolder_btnRequestContinue")
+        continue_button.click()
+
+
+
+        #get password character indices:
+        pass_message_element = driver.find_element(By.ID, "pPassword")
+        pass_message = pass_message_element.text
+        passindex = re.findall(r'\d+', pass_message)
+
+        char1 = driver.find_element(By.ID, "txtPasswordChar1")
+        char2 = driver.find_element(By.ID, "txtPasswordChar2")
+        char3 = driver.find_element(By.ID, "txtPasswordChar3")
+
+        index1 = int(passindex[0]) - 1
+        index2 = int(passindex[1]) - 1
+        index3 = int(passindex[2]) - 1
+
+        char1.send_keys(password[index1])
+        char2.send_keys(password[index2])
+        char3.send_keys(password[index3])
+
+        cont_button =driver.find_element(By.ID, "mainPlaceHolder_ContentPlaceHolder_VerifyAdditionalAccount1_btnContinue")
+        cont_button.click()
 
 class LoginFailed(Exception):
     def __init__(self, username):
