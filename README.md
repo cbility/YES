@@ -5,8 +5,6 @@ Features:
   Wrong password safety net: Doesn't retry wrong password without manual reset
 
 Future development:
-  Add logging;
-  Add retries for certain exceptions;
   Get all relevant data from website;
   Upload meter readings from file
   
