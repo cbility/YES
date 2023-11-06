@@ -1,11 +1,11 @@
 import gspread
 from gspread_formatting import *
-import RHI_last_date_scraper as scr
+import RHI as scr
 import gspread.utils as utils
 
 
 
-worksheet, client = scr.connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
+worksheet, client = scr.gspread_connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
 
 dates_col = 9
 

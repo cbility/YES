@@ -1,6 +1,8 @@
-from RHI_last_date_scraper import *
+from RHI import *
 import gspread.utils as utils
 import time
+
+from gspread_functions import gspread_get_RHI_logins
 
 #log onto each ORG and creat additional user
 
@@ -9,10 +11,10 @@ last_login_col = utils.a1_to_rowcol('W1')[1]
 dates_col = utils.a1_to_rowcol('J1')[1]; 
 fdates_col = utils.a1_to_rowcol('X1')[1]
 
-worksheet, client = connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
+worksheet, client = gspread_connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
 
 #get data from google sheet
-rhis, usernames, passwords, last_login_succesful, _, _ = get_logins(rhi_col,
+rhis, usernames, passwords, last_login_succesful, _, _ = gspread_get_RHI_logins(rhi_col,
      userpass_col, last_login_col, dates_col, fdates_col, worksheet)
 
 
@@ -39,7 +41,7 @@ with webdriver.Firefox(options=head_options) as driver:
         try:
             if(all([getbool(last_login_succesful[index]) for index in indices])):
             
-                RHI_login(user[0], user[1], driver)
+                login(user[0], user[1], driver)
 
                 #add AU
                 try:
@@ -48,7 +50,7 @@ with webdriver.Firefox(options=head_options) as driver:
                     logging.warning(username + "already has this username registered. Check AU list.")
                     continue
 
-                RHI_logout(driver)
+                logout(driver)
 
             else:
                 logging.warning(f"{user[0]} skipped: password incorrect")
