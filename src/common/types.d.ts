@@ -8,7 +8,7 @@ interface ScraperBatch { //single batch of inputs for scraper
 interface OfgemCheckInput { //input for Ofgem Check step function
     all: ScraperBatch[],
     current: {
-        inputs: ScraperInput[],
+        inputs: string, //stringified ScraperInput[]
         batchIndex: number,
         isFinal: Boolean,
     }
