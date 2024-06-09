@@ -102,6 +102,7 @@
         "../**/*"
     ],
     "exclude": [
-        "../SmartSuite/getTables.ts"
+        "../SmartSuite/getTables.ts",
+        "../tests/**/*",
     ]
 }

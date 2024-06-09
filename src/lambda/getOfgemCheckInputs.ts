@@ -51,7 +51,7 @@ export default async function handler() {
     let filteredServiceInputs: ScraperInput[] = [];
 
     if (nextCompleteUpdate <= now) {
-        console.log("Updating all logins")
+        console.log("Getting all logins")
 
         const allLogins = await ss.getAllRecords(loginsTable.id);
         const allLoginIDs: ScraperInput[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
@@ -59,12 +59,12 @@ export default async function handler() {
     } else {
 
         if (nextProjectUpdate <= now) {
-            console.log("Updating project logins")
+            console.log("Getting project logins")
             projectInputs = await getRelevantLoginIds(accountsTable.fields["Active Project Count"]);
         }
 
         if (nextServiceUpdate <= now) {
-            console.log("Updating service logins")
+            console.log("Getting service logins")
             const serviceInputs = await getRelevantLoginIds(accountsTable.fields["Active Service Count"]);
             //remove previously checked logins
             const projectLoginIDs = new Set(projectInputs.map(projectInput => projectInput.loginID));
@@ -75,12 +75,14 @@ export default async function handler() {
         batches = getBatches([...projectInputs, ...filteredServiceInputs])
     }
 
+    console.log(batches.length);
+
     const inputBatches: OfgemCheckInput = {
         all: batches,
         current: {
             inputs: JSON.stringify(batches[0].inputs),
             batchIndex: 0,
-            isFinal: batches.length > 1,
+            isFinal: batches.length <= 1,
         }
     }
     return inputBatches;
