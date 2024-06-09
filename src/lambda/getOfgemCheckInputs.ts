@@ -75,15 +75,15 @@ export default async function handler() {
         batches = getBatches([...projectInputs, ...filteredServiceInputs])
     }
 
-    const ofgemCheckInput: OfgemCheckInput = {
-        batches,
+    const inputBatches: OfgemCheckInput = {
+        all: batches,
         current: {
             inputs: batches[0].inputs,
             batchIndex: 0,
             isFinal: batches.length > 1,
         }
     }
-    return ofgemCheckInput;
+    return inputBatches;
 };
 
 async function getRelevantLoginIds(DeliverableCountSlug: string) {
