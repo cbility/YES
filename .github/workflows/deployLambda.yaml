@@ -6,6 +6,7 @@ on:
       - 'src/lambda/**/*'
       - 'src/common/**/*'
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
+      - '.github\workflows\deployLambda.yaml'
 
 jobs:
   build:
