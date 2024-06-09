@@ -83,7 +83,7 @@ export default async function handler() {
             isFinal: batches.length > 1,
         }
     }
-    return { inputs: ofgemCheckInput };
+    return ofgemCheckInput;
 };
 
 async function getRelevantLoginIds(DeliverableCountSlug: string) {
