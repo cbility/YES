@@ -75,7 +75,7 @@ export default async function handler() {
         }
     }
 
-    const output: OfgemCheckInput = {
+    const ofgemCheckInput: OfgemCheckInput = {
         batches,
         current: {
             inputs: batches[0].inputs,
@@ -83,7 +83,7 @@ export default async function handler() {
             isFinal: batches.length > 1,
         }
     }
-    return output;
+    return { inputs: ofgemCheckInput };
 };
 
 async function getRelevantLoginIds(DeliverableCountSlug: string) {
