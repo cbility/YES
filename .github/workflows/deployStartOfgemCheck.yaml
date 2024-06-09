@@ -3,8 +3,8 @@ name: Build and deploy functions to Lambda
 on:
   push:
     paths:
-      - 'src/lambda/**/*.'
-      - 'src/common/**/*.'
+      - 'src/lambda/**/*'
+      - 'src/common/**/*'
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
 
 jobs:
