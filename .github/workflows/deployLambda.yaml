@@ -9,7 +9,7 @@ on:
       - '.github/workflows/deployLambda.yaml'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
