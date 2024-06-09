@@ -5,7 +5,6 @@ interface LoginID { loginID: string };
 
 const batchSize = 60;
 
-
 const lambdaEndpoint = "https://tudk2x9z7h.execute-api.eu-west-2.amazonaws.com/default/YES_Scraper";
 const loginsTable = { id: "65e37da7f8428f036fd99785" };
 const accountsTable = {
