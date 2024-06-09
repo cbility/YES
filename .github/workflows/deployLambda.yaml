@@ -32,7 +32,9 @@ jobs:
       run: |
           mkdir -p zip
           cd dist
-          zip -qq -r ../zip/deployment.zip *
+          zip -r ../zip/deployment.zip *
+          cd ../zip
+          ls
 
   deploy:
     name: Deploy Lambda
