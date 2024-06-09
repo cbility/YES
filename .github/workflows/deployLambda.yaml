@@ -45,7 +45,7 @@ jobs:
         zip_file: deployment.zip
         memory_size: 128
         timeout: 30
-        handler: index_getOfgemCheckInputs
+        handler: indexGetOfgemCheckInputs.js
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
         runtime: nodejs18.x
     
