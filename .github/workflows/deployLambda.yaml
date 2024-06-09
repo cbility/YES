@@ -30,10 +30,9 @@ jobs:
 
     - name: Zip
       run: |
-          mkdir -p zip
           cd dist
-          zip -r ../zip/deployment.zip *
-          cd ../zip
+          zip -r ../deployment.zip *
+          cd ..
           ls
 
   deploy:
@@ -51,7 +50,7 @@ jobs:
             aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws_region: 'eu-west-2'
             function_name: getOfgemCheckInputs
-            zip_file: zip/deployment.zip
+            zip_file: deployment.zip
             memory_size: 128
             timeout: 30
             handler: index_getOfgemCheckInputs
