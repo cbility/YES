@@ -6,6 +6,9 @@ module.exports = {
 
 
 function handler(event: ScraperOutputEvent) {
+
+    console.log("EVENT: \n" + JSON.stringify(event, null, 2));
+
     const batchIndex: number = event.inputBatches.current.batchIndex;
     const updateSuccess = event.currentOutput.Payload.body.includes("Update Complete");
     const isFinal = event.inputBatches.current.isFinal;
