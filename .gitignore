@@ -1,0 +1,6 @@
+# node
+node_modules
+.env
+sync.sh
+dist
+.vscode
