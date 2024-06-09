@@ -1,5 +1,5 @@
 import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler";
-import fetch from "axios";
+//import fetch from "axios";
 
 interface LoginID { loginID: string };
 
@@ -163,10 +163,10 @@ async function batchUpdateLogins(loginIDs: LoginID[]) {
         try {
             const response = await fetch(lambdaEndpoint, {
                 method: 'POST',
-                data: JSON.stringify(batch),
+                body: JSON.stringify(batch),
                 //signal: controller.signal,
             });
-            let result = response.data.message;
+            let result = await response.text();
             if (!result.includes("Update Complete")) throw new Error(result);
         } catch (error) {
             console.log('Error updating logins: ' + error);

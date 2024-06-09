@@ -68,7 +68,10 @@ export default function main() {
                 console.log("Updating service logins")
                 const serviceInputs = await getRelevantLoginIds(accountsTable.fields["Active Service Count"]);
                 //remove previously checked logins
-                const filteredServiceInputs = serviceInputs.filter(input => !projectInputs.includes(input));
+                const projectLoginIDs = new Set(projectInputs.map(projectInput => projectInput.loginID));
+                const filteredServiceInputs = serviceInputs.filter(
+                    (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
+                );
                 batches.push(...getBatches(filteredServiceInputs));
             }
         }
