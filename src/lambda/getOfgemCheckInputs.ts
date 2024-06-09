@@ -46,8 +46,9 @@ export default async function handler() {
 
     let batches: ScraperBatch[] = [];
 
-    //declare project inputs now so service inputs can be filtered for duplicates
+    //declare inputs for batching
     let projectInputs: ScraperInput[] = [];
+    let filteredServiceInputs: ScraperInput[] = [];
 
     if (nextCompleteUpdate <= now) {
         console.log("Updating all logins")
@@ -60,7 +61,6 @@ export default async function handler() {
         if (nextProjectUpdate <= now) {
             console.log("Updating project logins")
             projectInputs = await getRelevantLoginIds(accountsTable.fields["Active Project Count"]);
-            batches = getBatches(projectInputs);
         }
 
         if (nextServiceUpdate <= now) {
@@ -68,11 +68,11 @@ export default async function handler() {
             const serviceInputs = await getRelevantLoginIds(accountsTable.fields["Active Service Count"]);
             //remove previously checked logins
             const projectLoginIDs = new Set(projectInputs.map(projectInput => projectInput.loginID));
-            const filteredServiceInputs = serviceInputs.filter(
+            filteredServiceInputs = serviceInputs.filter(
                 (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
             );
-            batches.push(...getBatches(filteredServiceInputs));
         }
+        batches = getBatches([...projectInputs, ...filteredServiceInputs])
     }
 
     const ofgemCheckInput: OfgemCheckInput = {
