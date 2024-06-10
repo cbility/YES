@@ -48,7 +48,7 @@ export default async function handler(batches: ScraperBatch[]) {
     //Create fails record
 
     const failRecord: Record<string, string | string[]> = {
-        [updatesTable.fields["Updated Logins"]]: successes,
+        [updatesTable.fields["Updated Logins"]]: fails,
         [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
         [updatesTable.fields["Run success"]]: "Fail",
     }
