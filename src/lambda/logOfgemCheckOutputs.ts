@@ -16,7 +16,6 @@ const updatesTable = {
 
 const now = new Date();
 
-
 export default async function handler(batches: ScraperBatch[]) {
     const successes = batches.filter(
         (batch) => batch.success).map(
@@ -25,12 +24,16 @@ export default async function handler(batches: ScraperBatch[]) {
             )
         ).flat()
 
+    console.log(`successes: ${successes}`);
+
     const fails = batches.filter(
         (batch) => !batch.success).map(
             (batch) => batch.inputs.map(
                 (input) => input.loginID
             )
         ).flat()
+
+    console.log(`fails: ${fails}`);
 
     //Create successes record
     const successRecord: Record<string, string | string[]> = {
@@ -40,7 +43,7 @@ export default async function handler(batches: ScraperBatch[]) {
     }
     //add record to SS
     ss.addNewRecords([successRecord], updatesTable.id);
-    console.log("Success update record created")
+    console.log("Success update record created " + JSON.stringify(successRecord))
 
     //Create fails record
 
@@ -51,6 +54,6 @@ export default async function handler(batches: ScraperBatch[]) {
     }
     //add record to SS
     ss.addNewRecords([failRecord], updatesTable.id);
-    console.log("Fail update record created")
+    console.log("Fail update record created " + JSON.stringify(failRecord));
 
 }
