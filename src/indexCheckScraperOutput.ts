@@ -20,6 +20,6 @@ function handler(event: ScraperOutputEvent) {
         event.inputBatches.current.inputs = JSON.stringify(event.inputBatches.all?.[batchIndex + 1].inputs);
         event.inputBatches.current.batchIndex++;
     }
-
+    console.log(event);
     return JSON.stringify(event);
 }
