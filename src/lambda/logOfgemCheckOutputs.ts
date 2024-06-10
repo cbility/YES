@@ -18,7 +18,7 @@ const now = new Date();
 
 export default async function handler(batches: ScraperBatch[]) {
     const successes = batches.filter(
-        (batch) => batch.success).map(
+        (batch) => batch.success && batch.done).map(
             (batch) => batch.inputs.map(
                 (input) => input.loginID
             )
@@ -27,7 +27,7 @@ export default async function handler(batches: ScraperBatch[]) {
     console.log(`successes: ${successes}`);
 
     const fails = batches.filter(
-        (batch) => !batch.success).map(
+        (batch) => !batch.success && batch.done).map(
             (batch) => batch.inputs.map(
                 (input) => input.loginID
             )
@@ -36,24 +36,29 @@ export default async function handler(batches: ScraperBatch[]) {
     console.log(`fails: ${fails}`);
 
     //Create successes record
-    const successRecord: Record<string, string | string[]> = {
-        [updatesTable.fields["Updated Logins"]]: successes,
-        [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
-        [updatesTable.fields["Run success"]]: "Success",
+    if (successes.length > 0) {
+        const successRecord: Record<string, string | string[]> = {
+            [updatesTable.fields["Updated Logins"]]: successes,
+            [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
+            [updatesTable.fields["Run success"]]: "Success",
+        }
+        //add record to SS
+        ss.addNewRecords([successRecord], updatesTable.id);
+        console.log("Success update record created " + JSON.stringify(successRecord))
     }
-    //add record to SS
-    ss.addNewRecords([successRecord], updatesTable.id);
-    console.log("Success update record created " + JSON.stringify(successRecord))
 
     //Create fails record
 
-    const failRecord: Record<string, string | string[]> = {
-        [updatesTable.fields["Updated Logins"]]: fails,
-        [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
-        [updatesTable.fields["Run success"]]: "Fail",
+    if (fails.length > 0) {
+
+        const failRecord: Record<string, string | string[]> = {
+            [updatesTable.fields["Updated Logins"]]: fails,
+            [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
+            [updatesTable.fields["Run success"]]: "Fail",
+        }
+        //add record to SS
+        ss.addNewRecords([failRecord], updatesTable.id);
+        console.log("Fail update record created " + JSON.stringify(failRecord));
     }
-    //add record to SS
-    ss.addNewRecords([failRecord], updatesTable.id);
-    console.log("Fail update record created " + JSON.stringify(failRecord));
 
 }
