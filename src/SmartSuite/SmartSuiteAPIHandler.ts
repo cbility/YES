@@ -146,6 +146,7 @@ export default class SmartSuiteAPIHandler {
         });
 
         if (!response.ok) throw new HTTPError(response.status, response.statusText);
+        console.log(response.status + " " + response.statusText);
 
         const result = await response.json();
         return result;
