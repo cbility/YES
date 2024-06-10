@@ -1,8 +1,5 @@
 //lambda for parsing scraper outputs in step function and updating inputs for next batch
 
-module.exports = {
-    handler
-};
 
 
 export default function handler(event: ScraperOutputEvent) {
@@ -23,6 +20,10 @@ export default function handler(event: ScraperOutputEvent) {
     console.log(event);
     return "anything";
 }
+
+module.exports = {
+    handler
+};
 
 
 const event = {
