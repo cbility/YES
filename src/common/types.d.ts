@@ -15,7 +15,7 @@ interface OfgemCheckInput { //input for Ofgem Check step function
     }
 };
 
-interface ScraperOutputEvent extends Event {
+interface ScraperOutputEvent extends Partial<Event> {
     inputBatches: OfgemCheckInput,
     currentOutput: {
         Payload: {
