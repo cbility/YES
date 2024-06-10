@@ -21,5 +21,5 @@ function handler(event: ScraperOutputEvent) {
         event.inputBatches.current.batchIndex++;
     }
 
-    return event
+    return JSON.stringify(event);
 }
