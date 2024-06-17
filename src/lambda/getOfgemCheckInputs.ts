@@ -25,7 +25,8 @@ const accountsTable = {
 const configurationsTable = {
     id: "663d2313b4e7828a33b1ac07",
     fields: {
-        "Last Run": "s3d2ee46fa"
+        "Last Run": "s3d2ee46fa",
+        "Next Run": "s8173a46ec",
     }
 }
 //Record IDs for scraper config records in Configuration table
@@ -56,11 +57,17 @@ export default async function handler() {
         const allLogins = await ss.getAllRecords(loginsTable.id);
         const allLoginIDs: ScraperInput[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
         batches = getBatches(allLoginIDs);
+
+        //TODO update last date (create a function)
+        await updateLastDate(completeUpdateConfigID);
+
     } else {
 
         if (nextProjectUpdate <= now) {
             console.log("Getting project logins")
             projectInputs = await getRelevantLoginIds(accountsTable.fields["Active Project Count"]);
+
+            await updateLastDate(projectUpdateConfigID);
         }
 
         if (nextServiceUpdate <= now) {
@@ -71,16 +78,16 @@ export default async function handler() {
             filteredServiceInputs = serviceInputs.filter(
                 (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
             );
+
+            await updateLastDate(serviceUpdateConfigID);
         }
         batches = getBatches([...projectInputs, ...filteredServiceInputs])
     }
 
-    console.log(batches.length);
-
     const inputBatches: OfgemCheckInput = {
         all: batches,
         current: {
-            inputs: JSON.stringify(batches[0].inputs),
+            inputs: JSON.stringify(batches[0]?.inputs ?? null),
             batchIndex: 0,
             isFinal: batches.length <= 1,
         }
@@ -90,11 +97,18 @@ export default async function handler() {
 
 async function getRelevantLoginIds(DeliverableCountSlug: string) {
     //get loginIDs that have either active projects or active services
-    const accountsToUpdate = await ss.filterRecords(accountsTable.id, {
-        field: DeliverableCountSlug,
-        comparison: "is_greater_than",
-        value: 0,
-    });
+    const accountsToUpdate = await ss.filterRecords(accountsTable.id, [
+        {
+            field: DeliverableCountSlug,
+            comparison: "is_greater_than",
+            value: 0,
+        },
+        {
+            field: accountsTable.fields["Login ID"],
+            comparison: "is_not_empty",
+            value: "",
+        },
+    ]);
 
     let loginIDs: ScraperInput[] = accountsToUpdate.map((accountRecord: Record<string, any>) => (
         { loginID: accountRecord[accountsTable.fields["Login ID"]] }
@@ -117,7 +131,15 @@ function getBatches(inputs: ScraperInput[]): ScraperBatch[] {
 }
 
 function getNextDate(configurations: Record<string, any>[], id: string) {
-    const nextDateFieldSlug = "s8173a46ec"; //next date field in configuration table for scraper
-    return new Date(configurations.find((record => record.id === id))?.[nextDateFieldSlug].date as string);
+    return new Date(configurations.find((record => record.id === id))?.[configurationsTable.fields["Next Run"]].date as string);
+}
+
+function updateLastDate(updateConfigID: string) {
+
+    const updateTime = (new Date()).toISOString();
+
+    ss.updateSingleRecord(configurationsTable.id, updateConfigID, {
+        [configurationsTable.fields["Last Run"]]: updateTime,
+    });
 }
 
