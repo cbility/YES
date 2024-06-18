@@ -2,11 +2,11 @@
 
 export default async function handler(event: ScraperOutputEvent) {
 
-    console.log("EVENT: \n" + JSON.stringify(event, null, 2));
+    console.log("INPUT EVENT: \n" + JSON.stringify(event, null, 2));
 
     const batchIndex: number = event.inputBatches.current.batchIndex;
     const updateSuccess = event.currentOutput.Payload.body.includes("Update Complete");
-    const isFinal = event.inputBatches.current.isFinal;
+    const isFinal: Boolean = event.inputBatches.current.isFinal;
 
     event.inputBatches.all[batchIndex].done = true;
     event.inputBatches.all[batchIndex].success = updateSuccess;
@@ -15,6 +15,8 @@ export default async function handler(event: ScraperOutputEvent) {
         event.inputBatches.current.inputs = JSON.stringify(event.inputBatches.all?.[batchIndex + 1].inputs);
         event.inputBatches.current.batchIndex++;
     }
+
+    console.log("OUTPUT EVENT: \n" + JSON.stringify(event, null, 2));
     return event;
 }
 
