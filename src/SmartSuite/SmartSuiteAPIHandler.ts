@@ -135,7 +135,7 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async addNewRecords(records: object[], tableID: string) {
+    async bulkAddNewRecords(records: Record<string, unknown>[], tableID: string) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 
         const body = { items: records };
@@ -145,12 +145,34 @@ export default class SmartSuiteAPIHandler {
             body: JSON.stringify(body),
         });
 
-        if (!response.ok) throw new HTTPError(response.status, response.statusText);
         console.log(response.status + " " + response.statusText);
+
+        if (!response.ok) throw new HTTPError(response.status, response.statusText);
+
 
         const result = await response.json();
         return result;
     }
+
+    async addNewRecord(record: Record<string, unknown>, tableID: string) {
+        const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: this.requestHeaders,
+                body: JSON.stringify(record),
+            });
+
+            console.log(response.status + " " + response.statusText);
+            if (!response.ok) throw new HTTPError(response.status, response.statusText);
+
+            const result = await response.json();
+            return result;
+
+        } catch (err) { console.log(err); }
+    }
+
 
     async getRecordsByTitle(titles: string[], tableID: string) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;

@@ -123,7 +123,7 @@ const ss = new SmartSuite("s5ch1upc", "bb7afd0906f8c666a21d15daf1924ff368843cd8"
         [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
     }
     //add record to SS
-    ss.addNewRecords([newUpdate], updatesTable.id);
+    ss.bulkAddNewRecords([newUpdate], updatesTable.id);
     console.log("Update record created")
 
 })();

@@ -46,8 +46,7 @@ export default async function handler(batches: ScraperBatch[]) {
             [updatesTable.fields["Run success"]]: "Success",
         }
         //add record to SS
-        ss.addNewRecords([successRecord], updatesTable.id);
-        console.log("Success update record created " + JSON.stringify(successRecord))
+        ss.addNewRecord(successRecord, updatesTable.id);
     }
 
     //Create fails record
@@ -60,8 +59,7 @@ export default async function handler(batches: ScraperBatch[]) {
             [updatesTable.fields["Run success"]]: "Fail",
         }
         //add record to SS
-        ss.addNewRecords([failRecord], updatesTable.id);
-        console.log("Fail update record created " + JSON.stringify(failRecord));
+        ss.bulkAddNewRecords([failRecord], updatesTable.id);
     }
 
 }
