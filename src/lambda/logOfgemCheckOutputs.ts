@@ -42,7 +42,7 @@ export default async function handler(batches: ScraperBatch[]) {
     if (successes.length > 0) {
         const successRecord: Record<string, string | string[]> = {
             [updatesTable.fields["Updated Logins"]]: successes,
-            [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
+            [updatesTable.fields["Date"]]: now.toISOString(),
             [updatesTable.fields["Run success"]]: "Success",
         }
         //add record to SS
@@ -55,11 +55,11 @@ export default async function handler(batches: ScraperBatch[]) {
 
         const failRecord: Record<string, string | string[]> = {
             [updatesTable.fields["Updated Logins"]]: fails,
-            [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
+            [updatesTable.fields["Date"]]: now.toISOString(),
             [updatesTable.fields["Run success"]]: "Fail",
         }
         //add record to SS
-        ss.bulkAddNewRecords([failRecord], updatesTable.id);
+        ss.addNewRecord(failRecord, updatesTable.id);
     }
 
 }
