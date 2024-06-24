@@ -124,7 +124,11 @@ function getBatches(inputs: ScraperInput[]): ScraperBatch[] {
     //split list of loginIDs into manageable chunks for lambda
     let batches: ScraperBatch[] = [];
     while (batches.length * batchSize < inputs.length) {
-        let batch = { inputs: inputs.splice(0, batchSize), done: false, success: null };
+        let batch = {
+            inputs: inputs.slice(batches.length * batchSize, (batches.length + 1) * batchSize),
+            done: false,
+            success: null,
+        };
         batches.push(batch);
     }
     return batches;
