@@ -14,6 +14,7 @@ export default async function handler(event: ScraperOutputEvent) {
     if (!isFinal) {
         event.inputBatches.current.inputs = JSON.stringify(event.inputBatches.all?.[batchIndex + 1].inputs);
         event.inputBatches.current.batchIndex++;
+        event.inputBatches.current.isFinal = event.inputBatches.current.batchIndex + 1 >= event.inputBatches.all.length;
     }
 
     console.log("OUTPUT EVENT: \n" + JSON.stringify(event, null, 2));
