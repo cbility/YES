@@ -1,6 +1,6 @@
 //top level index file for lambda
 
-import handler from "./lambda/logOfgemCheckOutputs";
+import handler from "./ofgemCheck/logOfgemCheckOutputs";
 
 module.exports = {
     handler
