@@ -101,8 +101,5 @@
     "include": [
         "src/**/*",
         "checkScraperOutput.ts"
-    ],
-    "exclude": [
-        "src/Ply/JSS"
     ]
 }
