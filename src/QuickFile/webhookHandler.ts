@@ -126,6 +126,10 @@ export default async function quickFileWebhookHandler(eventGroup: WebhookEventGr
                 break; //ignore keys not specified above
         }
     }
+
+    return "success";
+
+
     async function upsertNewInvoiceTemplate(newInvoice: InvoicesCreated) {
         //TODO: implement function
     }
