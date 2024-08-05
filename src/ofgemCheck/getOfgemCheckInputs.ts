@@ -2,7 +2,7 @@
 // - checks SS for what type of update is required
 // - gets IDs of login records for RHIs to be updated
 // - compiles login records into input for step function
-import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler";
+import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler.js";
 
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda

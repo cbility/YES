@@ -1,4 +1,4 @@
-import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler";
+import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler.js";
 //import fetch from "axios";
 
 interface LoginID { loginID: string };

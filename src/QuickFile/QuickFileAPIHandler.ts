@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import HTTPError from '../common/HTTPError';
+import HTTPError from '../common/HTTPError.js';
 
 export default class QuickFileAPIHandler {
     private AccNumber: string;
