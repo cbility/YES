@@ -4,13 +4,12 @@ on:
   push:
     paths:
       - 'src/ofgemCheck/**/*'
-      - 'src/common/**/*'
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployLambda.yaml'
       - 'src/indexCheckScraperOutput.ts'
       - 'src/indexGetOfgemCheckInputs.ts'
-      - src/indexLogOfgemCheckOutputs.ts
-
+      - 'src/indexLogOfgemCheckOutputs.ts'
+      - 'src/QuickFile/**/*'
 
 jobs:
   deploy:
@@ -78,5 +77,19 @@ jobs:
           memory_size: 128
           timeout: 30
           handler: indexLogOfgemCheckOutputs.handler
+          role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
+          runtime: nodejs18.x
+
+    - name: AWS Lambda Deploy QuickFileWebhookHandler
+      uses: appleboy/lambda-action@v0.2.0
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: 'eu-west-2'
+          function_name: QuickFileWebhookHandler
+          zip_file: deployment.zip
+          memory_size: 128
+          timeout: 300
+          handler: indexQuickFileWebhookHandler.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
