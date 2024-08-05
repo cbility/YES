@@ -1,11 +1,28 @@
-import HTTPError from '../common/HTTPError';
+import HTTPError from '../common/HTTPError.js';
 
 type RequestHeaders = Record<"Authorization" | "Account-Id", string>
     | Record<"Content-Type", "application/json;charset=utf-8">;
 
 interface filterElement {
     field: string,
-    comparison: string,
+    comparison: ("is" | "is_not" | "is_empty" | "is_not_empty" | "contains" | "not_contains") //strings
+    | ("is_equal_to" | "is_not_equal_to" | "is_greater_than" | "is_less_than" | "is_equal_or_greater_than" | "is_equal_or_less_than" | "is_empty" | "is_not_empty") //numbers
+    | ("is" | "is_not" | "is_any_of" | "is_none_of" | "is_empty" | "is_not_empty") //single select
+    | ("has_any_of" | "has_all_of" | "is_exactly" | "has_none_of" | "is_empty" | "is_not_empty") //multiple select/tag
+    | ("is") //yes/no
+    | ("is" | "is_not" | "is_before" | "is_on_or_before" | "is_on_or_after" | "is_empty" | "is_not_empty") //date
+    | ("is" | "is_not" | "is_before" | "is_on_or_before" | "is_on_or_after" | "is_empty" | "is_not_empty" | "is_overdue" | "is_not_overdue") //due date
+    | ("file_name_contains" | "file_type_is" | "is_empty" | "is_not_empty") //Files & Images
+    | (
+        "contains" | "not_contains" | "has_any_of" //(array of record ids)
+        | "has_all_of" //(array of record ids)
+        | "is_exactly" //(array containing single record id)
+        | "has_none_of" //(array of record ids)
+        | "is_empty" //(pass null as value)
+        | "is_not_empty" //(pass null as value))
+    ) //linked record
+    | ("is_empty" | "is_not_empty") //Smartdoc, checklist
+
     value: (string | number | string[])
 }
 interface FilterBody {
@@ -15,7 +32,10 @@ interface FilterBody {
     }
 }
 
-interface ExistingRecord { id: string;[slug: string]: unknown };
+interface ExistingRecord {
+    id: string;
+    [slug: string]: unknown
+};
 type FilterComparison = string; //TODO: support different types of comparison and adapt allowed comparisons based on input field type
 
 
@@ -30,7 +50,7 @@ export default class SmartSuiteAPIHandler {
         }
     }
 
-    async updateSingleRecord(tableID: string, recordID: string, record: { [slug: string]: any }) {
+    async updateRecord(tableID: string, recordID: string, record: { [slug: string]: any }) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
@@ -74,9 +94,9 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async getRecordsByFieldValues(fieldValues: unknown[], fieldSlug: string, tableID: string) {
+    async getRecordsByFieldValues(tableID: string, fieldSlug: string, fieldValues: unknown[]) {
+        //gets any record where the specified field has any of the given list of values
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
-
         const body = {
             "filter": {
                 "operator": "or",
@@ -116,9 +136,9 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async updateMultipleRecords(
+    async bulkUpdateRecords(
+        tableID: string,
         records: ExistingRecord[],
-        tableID: string
     ) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 

@@ -142,7 +142,7 @@ function updateLastDate(updateConfigID: string) {
 
     const updateTime = (new Date()).toISOString();
 
-    ss.updateSingleRecord(configurationsTable.id, updateConfigID, {
+    ss.updateRecord(configurationsTable.id, updateConfigID, {
         [configurationsTable.fields["Last Run"]]: updateTime,
     });
 }

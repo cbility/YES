@@ -1,6 +1,6 @@
-const lambda = require('../indexCheckScraperOutput');
+const checkOutputLambda = require('../indexCheckScraperOutput');
 
-const event = {
+const checkOutputLambdaEvent = {
     "inputBatches": {
         "all": [
             {
@@ -279,4 +279,4 @@ const event = {
 }
 
 
-lambda.handler(event);
+checkOutputLambda.handler(checkOutputLambdaEvent);
