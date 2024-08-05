@@ -2,6 +2,8 @@ name: Build and deploy functions to Lambda
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'src/ofgemCheck/**/*'
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
