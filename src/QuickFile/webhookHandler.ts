@@ -10,7 +10,7 @@ process.on('uncaughtException', function (err) { //handle uncaught exceptions
 
 export default async function quickFileWebhookHandler(eventGroup: WebhookEventGroup) {
 
-    console.log("Payload: " + JSON.stringify(eventGroup.PayLoad));
+    console.log("Payload: " + JSON.stringify(eventGroup.PayLoad, null, 2));
     const events = eventGroup.PayLoad;
 
     const QF = new QuickFileAPIHandler("6131405563",
