@@ -1,3 +1,4 @@
+//to be removed
 class HTTPError extends Error {
     status: number;
     statusText: string;
