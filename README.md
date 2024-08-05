@@ -1,2 +1,2 @@
 # YES
-Code for automating processes within YES (Your Energy Source) 
+Code for automating processes within YES (Your Energy Source)

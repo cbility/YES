@@ -1,6 +1,6 @@
 //top level index file for lambda
 
-import handler from "./ofgemCheck/logOfgemCheckOutputs.js";
+import handler from "./QuickFile/webhookHandler.js";
 
 module.exports = {
     handler

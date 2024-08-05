@@ -1,4 +1,4 @@
-import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler";
+import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler.js";
 //import fetch from "axios";
 
 interface LoginID { loginID: string };
@@ -58,7 +58,7 @@ const ss = new SmartSuite("s5ch1upc", "bb7afd0906f8c666a21d15daf1924ff368843cd8"
         updatedLogins.push(...allLoginIDs);
 
         //update configuration record with run date
-        ss.updateSingleRecord(configurationsTable.id, completeUpdateConfigID, {
+        ss.updateRecord(configurationsTable.id, completeUpdateConfigID, {
             [configurationsTable.fields["Last Run"]]: now.toISOString()
         })
     } else {
@@ -76,7 +76,7 @@ const ss = new SmartSuite("s5ch1upc", "bb7afd0906f8c666a21d15daf1924ff368843cd8"
                 updatedLogins.push(...projectLoginIDs);
 
                 //update configuration record with run date
-                ss.updateSingleRecord(configurationsTable.id, projectUpdateConfigID, {
+                ss.updateRecord(configurationsTable.id, projectUpdateConfigID, {
                     [configurationsTable.fields["Last Run"]]: now.toISOString()
                 })
 
@@ -101,7 +101,7 @@ const ss = new SmartSuite("s5ch1upc", "bb7afd0906f8c666a21d15daf1924ff368843cd8"
                 updatedLogins.push(...serviceLoginIDs);
 
                 //update configuration record with run date
-                ss.updateSingleRecord(configurationsTable.id, serviceUpdateConfigID, {
+                ss.updateRecord(configurationsTable.id, serviceUpdateConfigID, {
                     [configurationsTable.fields["Last Run"]]: now.toISOString()
                 })
 

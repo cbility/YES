@@ -1,6 +1,7 @@
 {
+    "type": "module",
     "scripts": {
-        "build": "tsc -p src/lambda/"
+        "build": "tsc -p src/ofgemCheck/"
     },
     "dependencies": {
         "@types/node": "^20.12.12",

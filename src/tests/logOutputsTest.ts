@@ -1,4 +1,4 @@
-import handler from '../lambda/logOfgemCheckOutputs';
+import handler from '../ofgemCheck/logOfgemCheckOutputs';
 
 const event = [
     {
