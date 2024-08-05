@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import HTTPError from '../common/HTTPError.js';
 
 export default class QuickFileAPIHandler {
     private AccNumber: string;
@@ -34,7 +33,7 @@ export default class QuickFileAPIHandler {
             const response = await fetch(url, { body: JSON.stringify(requestBody), method });
             if (!response.ok) {
                 console.log(await response.text())
-                throw new HTTPError(response.status, response.statusText);
+                throw new Error(response.status + " " + response.statusText);
             }
             const result = await response.json();
             return result;
