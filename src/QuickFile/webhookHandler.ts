@@ -46,6 +46,12 @@ export default async function quickFileWebhookHandler(request: { body: string })
                     }
                     break;
                 }
+                case "EST": {
+                    console.log("New Estimate: " + newInvoice.Id);
+                    //
+                    break;
+                }
+
             }
         }
     }
@@ -282,11 +288,18 @@ export default async function quickFileWebhookHandler(request: { body: string })
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
 
+        const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
+        const termDaysInMs = MS_IN_A_DAY * QFQuote.Invoice_Get.Body.InvoiceDetails.TermDays;
+
         SS.updateRecord(opportunities.id,
             SSOpportunities[0].id,
             {
                 [opportunities.structure["Quote Last Sent"].slug]: sentQuote.TimeStamp,
                 [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
+                [opportunities.structure["Quote Issue and Expiry"].slug]: {
+                    from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
+                    to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
+                }
             }
         )
     }
