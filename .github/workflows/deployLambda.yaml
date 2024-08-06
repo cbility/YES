@@ -93,5 +93,5 @@ jobs:
           memory_size: 128
           timeout: 300
           handler: indexQuickFileWebhookHandler.handler
-          role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
+          role: arn:aws:iam::211125712927:role/service-role/quickFileWebhookHandler-role-r1fvcpvz
           runtime: nodejs18.x
