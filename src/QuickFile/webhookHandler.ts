@@ -8,7 +8,9 @@ process.on('uncaughtException', function (err) { //handle uncaught exceptions
     logErrorToPly('Uncaught exception: ' + err).then(console.log);
 });
 
-export default async function quickFileWebhookHandler(eventGroup: WebhookEventGroup) {
+export default async function quickFileWebhookHandler(request: { body: string }) {
+
+    const eventGroup: WebhookEventGroup = JSON.parse(request.body);
 
     console.log("EVENT: " + JSON.stringify(eventGroup, null, 2));
     const events = eventGroup.PayLoad;
