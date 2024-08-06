@@ -1,4 +1,4 @@
-import webhookHandler from "../QuickFile/webhookHandler";
+import webhookHandler from "../QuickFile/webhookHandler.js";
 
 const testEvent = {
     "PayLoad": {

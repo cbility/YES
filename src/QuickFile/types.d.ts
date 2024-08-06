@@ -148,6 +148,7 @@ interface InvoiceGetResponse extends ResponseBody {
                         "LineTotal": number;
                     }[]
                 }
+                DirectPreviewUri?: string; // client side view URL
             }
         }
     }

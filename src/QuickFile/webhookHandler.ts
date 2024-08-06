@@ -299,7 +299,9 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 [opportunities.structure["Quote Issue and Expiry"].slug]: {
                     from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
                     to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
-                }
+                },
+                [opportunities.structure["Customer Quote Link"].slug]:
+                    QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
             }
         )
     }
