@@ -87,9 +87,12 @@ const newQuote: InvoiceUpdate = {
 
 const updateResponse = await request("invoice/create", newQuote) as InvoiceUpdateResponse;
 
-//return updateResponse;
+const invoiceGet: InvoiceGet = { InvoiceID: updateResponse.Invoice_Create.Body.InvoiceID };
+const quoteDetails = await request("invoice/get", invoiceGet) as InvoiceGetResponse;
 
-//helper functions
+//return quoteDetails;
+
+//helper functions//////////////////////////////////////////////////////
 
 async function request(endpoint: string, body: RequestBody, method: "POST" = "POST") {  //remove export to use in Ply
     //async function request(endpoint, body, method = "POST") {
