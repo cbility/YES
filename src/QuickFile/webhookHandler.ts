@@ -48,7 +48,7 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 }
                 case "EST": {
                     console.log("New Estimate: " + newInvoice.Id);
-                    //
+                    //no action for new estimates
                     break;
                 }
 
