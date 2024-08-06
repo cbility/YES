@@ -24,20 +24,24 @@ export default async function quickFileWebhookHandler(request: { body: string })
     );
 
     if (events.InvoicesCreated) { //process invoice creation before other events so updates are managed properly
+        console.log(events.InvoicesCreated?.length + " invoices created.")
         for (const newInvoice of events.InvoicesCreated) {
             //do stuff with new invoice
             switch (newInvoice.InvoiceType) {
                 case "REC": {
+                    console.log("New Recurring Invoice ID: " + newInvoice.Id);
                     //upsert new template invoice to SS table
                     await upsertNewInvoiceTemplate(newInvoice);
                     break;
                 }
                 case "INV": {
                     if (newInvoice.FromRecurring) {
+                        console.log("New Invoice from recurring template ID: " + newInvoice.Id, + ", template ID " + newInvoice.RecurringParentId!);
                         //create new recurring invoice
                         await createNewRecurringInvoice(newInvoice);
                     } else {
                         //create invoice if not existing
+                        console.log("New Invoice: " + newInvoice.Id);
                         await upsertNewSDPInvoice(newInvoice);
                     }
                     break;
@@ -49,15 +53,17 @@ export default async function quickFileWebhookHandler(request: { body: string })
     for (const eventKey in events) {
         switch (eventKey) {
             case "InvoicesUpdated": {
+                console.log(events.InvoicesUpdated?.length + "invoices updated.");
                 for (const updatedInvoice of events.InvoicesUpdated!) {
                     switch (updatedInvoice.InvoiceType) {
                         case "REC": {
                             //update template invoice in ss table
+                            console.log("Updated Recurring Invoice ID: " + updatedInvoice.Id);
                             await updateSSInvoiceTemplate(updatedInvoice.Id);
                             break;
                         }
                         case "INV": {
-                            //ss invoice update
+                            console.log("Updated Invoice ID: " + updatedInvoice.Id);
                             try {
                                 await updateSSInvoice(updatedInvoice.Id);
                             } catch (error) {
@@ -67,6 +73,7 @@ export default async function quickFileWebhookHandler(request: { body: string })
                         }
                         case "EST": {
                             //ss opportunity update
+                            console.log("Updated Estimate ID: " + updatedInvoice.Id);
                             try {
                                 await updateSSOpportunity(updatedInvoice.Id);
                             } catch (error) {
@@ -79,20 +86,25 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 break;
             }
             case "InvoicesPayment": {
+                console.log(events.InvoicesPayment?.length + "new payments recorded.");
                 for (const paidInvoice of events.InvoicesPayment!) {
+                    console.log("Payment recorded for Invoice ID: " + paidInvoice.InvoiceId);
                     await updateSSInvoice(paidInvoice.InvoiceId);
                 }
                 break;
             }
             case "InvoicesSent": {
+                console.log(events.InvoicesSent?.length + " Invoices sent.");
                 for (const sentInvoice of events.InvoicesSent!) {
                     try {
                         switch (sentInvoice.InvoiceType) {
                             case "EST": {
+                                console.log("Sent Estimate ID: " + sentInvoice.Id);
                                 await logQuoteSend(sentInvoice);
                                 break;
                             }
                             case "INV": {
+                                console.log("Sent Invoice ID: " + sentInvoice.Id);
                                 await logInvoiceSend(sentInvoice);
                                 break;
                             }
@@ -108,8 +120,10 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 break;
             }
             case "EstimatesStatusChange": { //quote acceptance or rejection
+                console.log(events.EstimatesStatusChange?.length + " Estimate status changes recorded.")
                 for (const updatedEstimate of events.EstimatesStatusChange!) {
                     try {
+                        console.log("Estimate ID " + updatedEstimate.Id + " updated to status " + updatedEstimate.Status);
                         await logOpportunityStatusChange(updatedEstimate);
                     } catch (error) {
                         await logErrorToPly((error as Error).toString());
@@ -119,7 +133,9 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 break;
             }
             case "PaymentsCreated": {
+                console.log(events.InvoicesPayment?.length + "new payments created for invoices.");
                 for (const payment of events.PaymentsCreated!) {
+                    console.log("Payment created for Invoice ID: " + payment.InvoiceId);
                     //ss invoice update
                 }
                 break;
