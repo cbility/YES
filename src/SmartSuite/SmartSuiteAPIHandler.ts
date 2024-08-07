@@ -147,7 +147,10 @@ export default class SmartSuiteAPIHandler {
             body: JSON.stringify(body),
         });
 
-        if (!response.ok) throw new Error(response.status + " " + response.statusText);
+        if (!response.ok) {
+            console.log(await response.text());
+            throw new Error(response.status + " " + response.statusText);
+        }
 
         const result = await response.json();
         return result;

@@ -30,9 +30,12 @@ export default class QuickFileAPIHandler {
             }
         }
         try {
-            const response = await fetch(url, { body: JSON.stringify(requestBody), method });
+            const response = await fetch(url, {
+                body: JSON.stringify(requestBody),
+                method,
+            });
             if (!response.ok) {
-                console.log(await response.text())
+                //console.log(await response.text())
                 throw new Error(response.status + " " + response.statusText);
             }
             const result = await response.json();
