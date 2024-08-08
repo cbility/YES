@@ -323,15 +323,26 @@ interface System_SearchEvents extends RequestBody {
     }
 }
 
+
+
 interface System_SearchEventsResponse extends ResponseBody {
-    "ReturnCount": number;
-    "ContinuationToken": null | string;
-    "Events": null | {
-        "Event": {
-            "EventTime": string; //YYYY-MM-DDTHH:mm:ss
-            "LoginUser": string;
-            "Note": string;
-        }[]
+    "System_SearchEvents": {
+        "Header": {
+            "MessageType": string;
+            "SubmissionNumber": string;
+        },
+        "Body": {
+
+            "ReturnCount": number;
+            "ContinuationToken": null | string;
+            "Events": null | {
+                "Event": {
+                    "EventTime": string; //YYYY-MM-DDTHH:mm:ss
+                    "LoginUser": string;
+                    "Note": string;
+                }[]
+            }
+        }
     }
 }
 
