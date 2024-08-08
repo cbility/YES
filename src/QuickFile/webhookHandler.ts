@@ -344,7 +344,8 @@ export default async function quickFileWebhookHandler(request: { body: string })
         SS.updateRecord(opportunities.id,
             SSOpportunities[0].id,
             {
-                [opportunities.structure["Response Received"].slug]: estimateStatusChange.TimeStamp,
+                [opportunities.structure["Response Received"].slug]:
+                    QFQuote.Invoice_Get.Body.InvoiceDetails.Status === "AGREED" ? estimateStatusChange.TimeStamp : null, //only update acceptance date for agreed quotes
                 [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             }
         )
