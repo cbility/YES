@@ -270,7 +270,7 @@ export default async function quickFileWebhookHandler(request: { body: string })
         if (missingItemErrors.length > 0) await logErrorToPly(missingItemErrors.join("; ")); //log missing items as error
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * QFQuote.Invoice_Get.Body.InvoiceDetails.TermDays;
+        const termDaysInMs = MS_IN_A_DAY * SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug];
 
         const opportunityUpdate = [{
             id: SSOpportunities[0].id,
@@ -312,7 +312,7 @@ export default async function quickFileWebhookHandler(request: { body: string })
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * QFQuote.Invoice_Get.Body.InvoiceDetails.TermDays;
+        const termDaysInMs = MS_IN_A_DAY * SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug];
 
         SS.updateRecord(opportunities.id,
             SSOpportunities[0].id,
