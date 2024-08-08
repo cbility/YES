@@ -48,33 +48,37 @@ export default class QuickFileAPIHandler {
     //Client methods
 
     async clientGet(body: ClientGet): Promise<unknown> { //TODO: implement clientGet response type
-        return await this.request("client/get", body)
+        return await this.request("client/get", body);
     }
 
     async clientCreate(body: ClientCreate): Promise<unknown> { //TODO: implement ClientCreate response type
-        return await this.request("client/create", body)
+        return await this.request("client/create", body);
     }
 
     async clientUpdate(body: ClientUpdate): Promise<unknown> { //TODO: implement ClientUpdate response type
-        return await this.request("client/update", body)
+        return await this.request("client/update", body);
     }
 
     async clientInsertContacts(body: ClientInsertContacts): Promise<unknown> { //TODO: implement ClientInsertContacts response type
-        return await this.request("client/insertcontacts", body)
+        return await this.request("client/insertcontacts", body);
     }
 
     //Invoice methods
 
     async invoiceGet(body: InvoiceGet): Promise<InvoiceGetResponse> {
-        return await this.request("invoice/get", body)
+        return await this.request("invoice/get", body);
     }
 
     async invoiceCreate(body: InvoiceCreate): Promise<InvoiceCreateResponse> {
-        return await this.request("invoice/create", body)
+        return await this.request("invoice/create", body);
     }
 
     async invoiceUpdate(body: InvoiceUpdate): Promise<InvoiceUpdateResponse> {
-        return await this.request("invoice/create", body)
+        return await this.request("invoice/create", body);
+    }
+
+    async system_SearchEvents(body: System_SearchEvents): Promise<System_SearchEventsResponse> {
+        return await this.request("system/searchevents", body);
     }
 }
 

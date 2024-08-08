@@ -299,7 +299,7 @@ interface DocumentUpload extends RequestBody {
     }[] //up to 10 documents per call
 }
 
-interface DocumentUploadResponse {
+interface DocumentUploadResponse extends ResponseBody {
     UploadTimeStamp: string; //YYYY-MM-DDTHH:mm:ss
     DocumentData: {
         Data: {
@@ -308,6 +308,36 @@ interface DocumentUploadResponse {
         }[]
     }
 }
+
+interface System_SearchEvents extends RequestBody {
+    SearchParameters: {
+        ReturnCount: number; // How many records would you like the API to return (MAX 200).
+        ContinuationToken?: string; // Represents a continuation token from the server when the operation returns a partial result.
+
+        FromDateTime?: string; //YYYY-MM-DDTHH:mm:ss
+        ToDateTime?: string; //YYYY-MM-DDTHH:mm:ss
+        SearchType?: {
+            SearchType: "Invoice" | "Client" | "Supplier" | "Purchase";
+            RefID: string; // Here you would supply the clientID, supplierID, invoiceID or purchaseID depending on the SearchType
+        }
+    }
+}
+
+interface System_SearchEventsResponse extends ResponseBody {
+    "ReturnCount": number;
+    "ContinuationToken": null | string;
+    "Events": null | {
+        "Event": {
+            "EventTime": string; //YYYY-MM-DDTHH:mm:ss
+            "LoginUser": string;
+            "Note": string;
+        }[]
+    }
+}
+
+
+
+
 
 /////////////////////WEBHOOK TYPES/////////////////////////////////
 
