@@ -63,7 +63,6 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 for (const updatedInvoice of events.InvoicesUpdated!) {
                     switch (updatedInvoice.InvoiceType) {
                         case "REC": {
-                            //update template invoice in ss table
                             console.log("Updated Recurring Invoice ID: " + updatedInvoice.Id);
                             await updateSSInvoiceTemplate(updatedInvoice.Id);
                             break;
@@ -78,7 +77,6 @@ export default async function quickFileWebhookHandler(request: { body: string })
                             break;
                         }
                         case "EST": {
-                            //ss opportunity update
                             console.log("Updated Estimate ID: " + updatedInvoice.Id);
                             try {
                                 await updateSSOpportunity(updatedInvoice.Id);
@@ -139,12 +137,36 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 break;
             }
             case "PaymentsCreated": {
-                console.log(events.InvoicesPayment?.length + "new payments created for invoices.");
+                console.log(events.InvoicesPayment?.length + " new payments created for Invoices.");
                 for (const payment of events.PaymentsCreated!) {
                     console.log("Payment created for Invoice ID: " + payment.InvoiceId);
-                    //ss invoice update
+                    //TODO: ss invoice update
                 }
                 break;
+            }
+            case "InvoicesDeleted": {
+                console.log(events.InvoicesDeleted?.length + " Invoices deleted.");
+                for (const deletedInvoiceEvent of events.InvoicesDeleted!) {
+                    const deletedInvoice = await QF.invoiceGet({ InvoiceID: deletedInvoiceEvent.Id });
+                    switch (deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType) {
+                        case "INVOICE": {
+                            //TODO: ss invoice update
+                            break;
+                        }
+                        case "ESTIMATE": {
+                            try {
+                                await updateSSOpportunity(deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID, deletedInvoice);
+                            } catch (error) {
+                                await logErrorToPly((error as Error).toString());
+                            }
+                            break;
+                        }
+                        case "RECURRING": {
+                            //TODO: ss recurring template update
+                            break;
+                        }
+                    }
+                }
             }
             default:
                 break; //ignore keys not specified above
@@ -167,12 +189,13 @@ export default async function quickFileWebhookHandler(request: { body: string })
         const template = await QF.invoiceGet({ InvoiceID: invoiceId });
         //TODO: implement function
     }
-    async function updateSSOpportunity(quoteId: number) {
+    async function updateSSOpportunity(quoteId: number, QFQuote: InvoiceGetResponse | undefined = undefined) {
         /*
         Update SmartSuite Opportunity issue and expiry, discount, total amount and QuickFile status to match QuickFile
         Update SmartSuite Quote Items price, line item description and quantity/hours  to match QuickFile
         */
-        const QFQuote = await QF.invoiceGet({ InvoiceID: quoteId });
+        if (QFQuote === undefined) QFQuote = await QF.invoiceGet({ InvoiceID: quoteId }); //allow QF quote to be passed in if fetched earlier
+
         const SSOpportunities = await SS.getRecordsByFieldValues(
             opportunities.id,
             opportunities.structure["QuickFile Quote ID"].slug,
