@@ -233,7 +233,7 @@ export default async function quickFileWebhookHandler(request: { body: string })
                 );
                 if (!SSitem?.id) {
                     console.log("item: " + item);
-                    missingItemErrors.push("Ttem " + item.ItemName + " from quote " + quoteId + " not found on SmartSuite.");
+                    missingItemErrors.push("Item " + item.ItemName + " from quote " + quoteId + " not found on SmartSuite.");
                     return; //ignore item if not found on SS
                 }
                 const updatedItem = {
