@@ -49,11 +49,11 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
     Update SmartSuite Opportunity issue and expiry, discount, total amount and QuickFile status to match QuickFile
     Update SmartSuite Quote Items price, line item description and quantity/hours  to match QuickFile
     */
-    console.log("Opportunity:");
-    console.log(opportunity);
+    //console.log("Opportunity:");
+    //console.log(opportunity);
     const QFQuote = await QF.invoiceGet({ InvoiceID: quoteId });
-    console.log("Quote: ")
-    console.log(QFQuote.Invoice_Get.Body.InvoiceDetails);
+    //console.log("Quote: ")
+    //console.log(QFQuote.Invoice_Get.Body.InvoiceDetails);
 
     const SSQuoteItems = await SS.filterRecords(
         quoteItems.id,
@@ -136,8 +136,12 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
 
     await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
     console.log("Opportunity updated successfully");
-    await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
-    console.log("Quote Items updated successfully");
+    if (quoteItemsUpdate.length > 0) {
+        await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
+        console.log("Quote Items updated successfully");
+    } else {
+        console.log("No Quote Items to update");
+    }
 }
 
 function logErrorToPly(arg0: string) {
