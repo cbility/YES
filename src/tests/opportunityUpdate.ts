@@ -52,8 +52,29 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
     //console.log("Opportunity:");
     //console.log(opportunity);
     const QFQuote = await QF.invoiceGet({ InvoiceID: quoteId });
-    //console.log("Quote: ")
-    //console.log(QFQuote.Invoice_Get.Body.InvoiceDetails);
+
+    //get quote acceptance date from events log
+
+    /*
+
+    let acceptanceDate: string | null = null;
+
+    const quoteEventHistory = await QF.system_SearchEvents({
+        SearchParameters: {
+            ReturnCount: 200,
+            SearchType: {
+                SearchType: "Invoice",
+                RefID: String(quoteId),
+            }
+        }
+    });
+
+    quoteEventHistory.System_SearchEvents.Body.Events?.Event.forEach(event => {
+        if (event.Note.includes("agreed")) {
+            acceptanceDate = event.EventTime;
+        }
+    });
+
 
     const SSQuoteItems = await SS.filterRecords(
         quoteItems.id,
@@ -115,33 +136,39 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
 
     if (missingItemErrors.length > 0) await logErrorToPly(missingItemErrors.join("; ")); //log missing items as error
 
+    */
     const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-    const termDaysInMs = MS_IN_A_DAY * QFQuote.Invoice_Get.Body.InvoiceDetails.TermDays;
+    const termDaysInMs = MS_IN_A_DAY * 30; //always use 30 days for term days
 
     const opportunityUpdate = [{
         id: opportunity.id,
         [opportunities.structure["Quote Issue and Expiry"].slug]: {
-            from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
-            to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
+            from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate.slice(0, 10), //remove timestamp from date
+            to_date: (new Date(issueDate.getTime() + termDaysInMs).toISOString()).slice(0, 10), //remove timestamp from date
         },
         [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
         [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
         [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+        //[opportunities.structure["Response Received"].slug]: acceptanceDate,
     }];
 
-    const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as {
+    /*        const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as {
         id: string;
         [slug: string]: unknown
     }[];
+    */
 
     await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
     console.log("Opportunity updated successfully");
+
+    /*
     if (quoteItemsUpdate.length > 0) {
         await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
         console.log("Quote Items updated successfully");
     } else {
         console.log("No Quote Items to update");
     }
+        */
 }
 
 function logErrorToPly(arg0: string) {

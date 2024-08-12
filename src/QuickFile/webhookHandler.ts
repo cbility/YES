@@ -22,6 +22,7 @@ process.on('uncaughtException', function (err) { //handle uncaught exceptions
 export default async function quickFileWebhookHandler(lambdaEvent: { body: string }, lambdaContext: { logStreamName: string }) {
 
     console.log("EVENT: " + JSON.stringify(lambdaEvent, null, 2));
+    console.log("CONTEXT: " + JSON.stringify(lambdaContext, null, 2));
 
     const eventGroup: WebhookEventGroup = JSON.parse(lambdaEvent.body);
     const events = eventGroup.PayLoad;
