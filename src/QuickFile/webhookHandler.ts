@@ -3,16 +3,27 @@ import SmartSuiteAPIHandler from "../SmartSuite/SmartSuiteAPIHandler.js";
 import { invoices, opportunities, quoteItems } from "../SmartSuite/tables.js"
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
+const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/"
 
 process.on('uncaughtException', function (err) { //handle uncaught exceptions
-    logErrorToPly('Uncaught exception: ' + err).then(console.log);
+    console.log(err);
+    fetch(
+        PLY_ERROR_LOG_URL,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: 'Uncaught exception: ' + err })
+        }
+    );
 });
 
-export default async function quickFileWebhookHandler(request: { body: string }) {
+export default async function quickFileWebhookHandler(lambdaEvent: { body: string }, lambdaContext: { logStreamName: string }) {
 
-    console.log("EVENT: " + JSON.stringify(request, null, 2));
+    console.log("EVENT: " + JSON.stringify(lambdaEvent, null, 2));
 
-    const eventGroup: WebhookEventGroup = JSON.parse(request.body);
+    const eventGroup: WebhookEventGroup = JSON.parse(lambdaEvent.body);
     const events = eventGroup.PayLoad;
 
     const QF = new QuickFileAPIHandler("6131405563",
@@ -350,21 +361,22 @@ export default async function quickFileWebhookHandler(request: { body: string })
             }
         )
     }
+    async function logErrorToPly(errorMessage: string) { //emails error messages to technical@yourenergysource using Ply automation, and logs to console
+        console.log(errorMessage);
+        fetch(
+            PLY_ERROR_LOG_URL,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: "Lambda log group: " + lambdaContext.logStreamName + " | " + errorMessage })
+            }
+        );
+        return errorMessage;
+    }
+
 }
 
-async function logErrorToPly(message: string) { //emails error messages to technical@yourenergysource using Ply automation, and logs to console
-    const plyAutomationUrl = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/"
-    console.log(message);
-    fetch(
-        plyAutomationUrl,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ message: message })
-        }
-    );
-    return message;
-}
+
 
