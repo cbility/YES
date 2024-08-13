@@ -234,8 +234,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                 value: true,
             }],
             "and");
-
-        const missingItemErrors: string[] = []; //collect list of missing items for error loggin in async context
+        const missingItemErrors: string[] = []; //collect list of missing items for error logging in async context
 
         const SSUpdatedItems = QFQuote.Invoice_Get.Body.InvoiceDetails.ItemLines ?
             QFQuote.Invoice_Get.Body.InvoiceDetails.ItemLines.Item.map(item => {
@@ -303,7 +302,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         }[];
 
         await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
-        await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
+        if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
     }
     async function updateSSInvoice(invoiceId: number) {
         const invoice = await QF.invoiceGet({ InvoiceID: invoiceId });
