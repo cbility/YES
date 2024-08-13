@@ -244,7 +244,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                     (SSQuoteItem: any) => item.ItemName!.startsWith(SSQuoteItem[quoteItems.structure["Sub Type Autonumber"].slug])
                 );
                 if (!SSitem?.id) {
-                    console.log("item: " + item);
+                    console.log("item: " + JSON.stringify(item));
                     missingItemErrors.push("Item " + item.ItemName + " from quote " + quoteId + " not found on SmartSuite.");
                     return; //ignore item if not found on SS
                 }
@@ -265,7 +265,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                     (SSQuoteItem: any) => task.ItemName!.startsWith(SSQuoteItem[quoteItems.structure["Sub Type Autonumber"].slug])
                 );
                 if (!SStask?.id) {
-                    console.log("item: " + task);
+                    console.log("task: " + JSON.stringify(task));
                     missingItemErrors.push("Task " + task.ItemName + " from quote " + quoteId + " not found on SmartSuite.");
                     return; //ignore task if not found on SS
                 }

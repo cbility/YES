@@ -142,10 +142,10 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
 
     const opportunityUpdate = [{
         id: opportunity.id,
-        [opportunities.structure["Quote Issue and Expiry"].slug]: {
-            from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate.slice(0, 10), //remove timestamp from date
-            to_date: (new Date(issueDate.getTime() + termDaysInMs).toISOString()).slice(0, 10), //remove timestamp from date
-        },
+        // [opportunities.structure["Quote Issue and Expiry"].slug]: {
+        //   from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate.slice(0, 10), //remove timestamp from date
+        // to_date: (new Date(issueDate.getTime() + termDaysInMs).toISOString()).slice(0, 10), //remove timestamp from date
+        // },
         [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
         [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
         [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
