@@ -1,5 +1,4 @@
 export { } //required for compiler
-const MS_IN_A_DAY = 24 * 60 * 0 * 1000;
 
 const input = { // input for testing
     quoteID: "32992559",
@@ -23,6 +22,8 @@ const input = { // input for testing
     }]
 }
 
+//////////////////////////////PLY CODE /////////////////////////
+const MS_IN_A_DAY = 24 * 60 * 0 * 1000;
 let quoteItems = []; // set price items
 let quoteTasks = [] // hourly charged items
 
