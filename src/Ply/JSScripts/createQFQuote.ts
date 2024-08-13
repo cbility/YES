@@ -8,6 +8,7 @@ const input = { // input for testing
     quoteName: "Q00303 IRM",
     hourlyRate: 85,
     currentDate: "2024-07-30",
+    issueDate: null,
     minimumHours: 2,
     invoiceNumber: "test1",
     paymentTerms: "Items with a set price are subject to an initial charge of 50% of the quoted price, invoiced when you have accepted the quote. We will not begin working on your project until this initial invoice has been issued and paid. The remaining balance will be invoiced on submission of your work. If the net total price does not exceed £200 the initial invoice will be for 100% of the quoted price.<br><br><b>Travel Costs</b><br>Free if journey is one hour or less from our office. Otherwise 45p per mile plus £35 per additional hour of travelling time.<br><br>Please note; we cannot be held responsible for issues where the government's guidance is unclear or where the government changes how they respond over time.<br><br>Our advice cannot be treated as legal advice and should be seen as a guide to current best practice only.,<br><br>Our preferred payment is by BACS transfer to:<br>ENERGY SOURCE LTD<br>Co-operative bank<br>Sort code: 08-92-99<br>Account number: 69 54 73 84",
@@ -78,8 +79,8 @@ const newQuote: InvoiceCreate = {
         Language: "en",
         Scheduling: {
             SingleInvoiceData: {
-                IssueDate: input.currentDate,
-                InvoiceNumber: input.invoiceNumber
+                IssueDate: input.issueDate ? input.issueDate : input.currentDate,
+                InvoiceNumber: input.invoiceNumber,
             }
         }
     }
