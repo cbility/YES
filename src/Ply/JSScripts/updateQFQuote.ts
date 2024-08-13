@@ -93,10 +93,11 @@ const invoiceGet: InvoiceGet = { InvoiceID: updateResponse.Invoice_Create.Body.I
 const quoteDetails = await request("invoice/get", invoiceGet) as InvoiceGetResponse;
 const expiryDate = new Date(
     new Date(quoteDetails.Invoice_Get.Body.InvoiceDetails.IssueDate).getTime() + input.termDays * MS_IN_A_DAY
-);
+).toISOString().slice(0, 10); //exclude time
 const result = { ...quoteDetails, expiryDate };
 
 //return result;
+
 
 //helper functions//////////////////////////////////////////////////////
 
