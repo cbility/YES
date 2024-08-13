@@ -293,6 +293,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
             [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
             [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+            [opportunities.structure["Customer Quote Link"].slug]:
+                QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
         }];
 
         const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as {
