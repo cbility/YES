@@ -71,7 +71,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
     for (const eventKey in events) {
         switch (eventKey) {
             case "InvoicesUpdated": {
-                console.log(events.InvoicesUpdated?.length + "invoices updated.");
+                console.log(events.InvoicesUpdated?.length + " invoices updated.");
                 for (const updatedInvoice of events.InvoicesUpdated!) {
                     switch (updatedInvoice.InvoiceType) {
                         case "REC": {
