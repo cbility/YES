@@ -1,4 +1,5 @@
 export { } //required for compiler
+const MS_IN_A_DAY = 24 * 60 * 0 * 1000;
 
 const input = { // input for testing
     quoteID: "32992559",
@@ -88,9 +89,14 @@ const newQuote: InvoiceUpdate = {
 const updateResponse = await request("invoice/create", newQuote) as InvoiceUpdateResponse;
 
 const invoiceGet: InvoiceGet = { InvoiceID: updateResponse.Invoice_Create.Body.InvoiceID };
-const quoteDetails = await request("invoice/get", invoiceGet) as InvoiceGetResponse;
 
-//return quoteDetails;
+const quoteDetails = await request("invoice/get", invoiceGet) as InvoiceGetResponse;
+const expiryDate = new Date(
+    new Date(quoteDetails.Invoice_Get.Body.InvoiceDetails.IssueDate).getTime() + input.termDays * MS_IN_A_DAY
+);
+const result = { ...quoteDetails, expiryDate };
+
+//return result;
 
 //helper functions//////////////////////////////////////////////////////
 
