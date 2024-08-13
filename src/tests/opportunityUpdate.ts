@@ -149,6 +149,8 @@ async function updateSSOpportunity(quoteId: number, opportunity: { [x: string]: 
         [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
         [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
         [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+        [opportunities.structure["Customer Quote Link"].slug]:
+            QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
         //[opportunities.structure["Response Received"].slug]: acceptanceDate,
     }];
 
