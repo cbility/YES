@@ -371,7 +371,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: "Lambda log group: " + lambdaContext.logStreamName + " | " + errorMessage })
+                body: JSON.stringify({ message: "timestamp: " + events.Timestamp + " | " + errorMessage })
             }
         );
         return errorMessage;
