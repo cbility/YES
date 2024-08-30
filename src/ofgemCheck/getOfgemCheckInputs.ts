@@ -87,7 +87,7 @@ export default async function handler() {
     const inputBatches: OfgemCheckInput = {
         all: batches,
         current: {
-            inputs: JSON.stringify(batches[0]?.inputs ?? null),
+            inputs: JSON.stringify(batches[0]?.inputs ?? []),
             batchIndex: 0,
             isFinal: batches.length <= 1,
         }
