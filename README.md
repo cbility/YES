@@ -1,9 +1,9 @@
 # YES
 Code for automating processes within YES (Your Energy Source)
 
-# Local Developer Environment Setup with npm and dotenv
+# Local Developer Environment Setup with Node and npm
 
-This guide explains how to set up a local development environment using npm and dotenv. This will allow code to be dested locally before deployment to the cloud
+This guide explains how to set up a local development environment using Node.js and npm. This will allow code to be tested locally before deployment to the cloud
 
 ## Project Structure
 
