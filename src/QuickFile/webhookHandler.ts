@@ -2,6 +2,10 @@ import QuickFileAPIHandler from "./QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../SmartSuite/SmartSuiteAPIHandler.js";
 import { invoices, opportunities, quoteItems } from "../SmartSuite/tables.js"
 
+if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
+    require('dotenv').config();
+}
+
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/"
 
@@ -29,10 +33,10 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
 
     const QF = new QuickFileAPIHandler("6131405563",
         "7275f840-8c9a-4142-ac39-2c71b4941d78", //Webhook Handler Application ID
-        "6918A4B5-2C18-4A92-8"
+        process.env.QUICKFILE_API_KEY as string
     );
     const SS = new SmartSuiteAPIHandler("s5ch1upc",
-        "bb7afd0906f8c666a21d15daf1924ff368843cd8" //technical@ API key
+        process.env.TECHNICAL_SMARTSUITE_KEY as string
     );
 
     if (events.InvoicesCreated) { //process invoice creation before other events so updates are managed properly

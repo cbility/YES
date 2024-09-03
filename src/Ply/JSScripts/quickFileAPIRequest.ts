@@ -1,10 +1,14 @@
+require('dotenv').config(); //load environment variables for debugging
+input.APIKey = process.env.QUICKFILE_API_KEY as string;
+//////////////////////////PLY CODE START //////////////////
+
 export async function request(endpoint: string, body: RequestBody, method: "POST" = "POST") {  //remove export to use in Ply
     //async function request(endpoint, body, method = "POST") {
     const url = "https://api.quickfile.co.uk/1_2/" + endpoint;
     const SubmissionNumber = uniqueId();
     const accNumber = "6131405563";
     const applicationID = "84a82f71-d19c-4c5a-b50e-797126e504fb"; //Ply Quote Drafter Application ID
-    const APIkey = "6918A4B5-2C18-4A92-8";
+    const APIkey = input.APIKey;
     const header = {
         MessageType: "Request",
         SubmissionNumber,

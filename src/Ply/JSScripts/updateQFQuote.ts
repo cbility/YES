@@ -1,6 +1,8 @@
 export { } //required for compiler
+require('dotenv').config(); //load environment variables for debugging
 
 const input = { // input for testing
+    APIKey: process.env.QUICKFILE_API_KEY as string,
     quoteID: "32992559",
     termDays: 30,
     clientID: "8028732",
@@ -109,7 +111,7 @@ async function request(endpoint: string, body: RequestBody, method: "POST" = "PO
     const SubmissionNumber = uniqueId();
     const accNumber = "6131405563";
     const applicationID = "84a82f71-d19c-4c5a-b50e-797126e504fb"; //Ply Quote Drafter Application ID
-    const APIkey = "6918A4B5-2C18-4A92-8";
+    const APIkey = input.APIKey;
     const header = {
         MessageType: "Request",
         SubmissionNumber,

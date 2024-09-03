@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'production') { //use local environment variables i
     require('dotenv').config();
 }
 
-const ss = new SmartSuite("s5ch1upc", process.env.SMARTSUITE_KEY as string);
+const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
 const batchSize = 50; //max size of batch of logins for scraper. Cannot take more than 15 minutes to process.
 

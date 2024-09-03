@@ -1,5 +1,5 @@
 export { } //required for compiler
-require('dotenv').config();
+require('dotenv').config(); //load environment variables
 const input = { // input for testing
     termDays: 30,
     clientID: "8028732",

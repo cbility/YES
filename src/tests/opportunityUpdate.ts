@@ -3,12 +3,13 @@
 import QuickFileAPIHandler from "../QuickFile/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../SmartSuite/SmartSuiteAPIHandler.js";
 import { opportunities, quoteItems } from "../SmartSuite/tables.js";
+require('dotenv').config(); //load local environment variables
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 
 const QF = new QuickFileAPIHandler("6131405563",
     "8e48b467-333a-46cc-958c-a2f286dad614",
-    "6918A4B5-2C18-4A92-8");
+    process.env.QUICKFILE_API_KEY as string);
 
 const SS = new SmartSuiteAPIHandler("s5ch1upc",
     process.env.TECHNICAL_SMARTSUITE_KEY as string
