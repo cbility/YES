@@ -1,5 +1,4 @@
 import SmartSuite from "../SmartSuite/SmartSuiteAPIHandler.js";
-//import fetch from "axios";
 
 interface LoginID { loginID: string };
 
@@ -32,7 +31,7 @@ const completeUpdateConfigID = "663d4044175c1b3c979a9afd";
 const projectUpdateConfigID = "665f350a343198c25eda5fe6";
 const serviceUpdateConfigID = "665f353ba173734d1df2211a";
 
-const ss = new SmartSuite("s5ch1upc", "bb7afd0906f8c666a21d15daf1924ff368843cd8");
+const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
 (async () => {
 
