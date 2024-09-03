@@ -1,11 +1,11 @@
 # YES
 Code for automating processes within YES (Your Energy Source)
 
-# Local Developer Environment Setup with Node and npm
+## Local Developer Environment Setup with Node and npm
 
 This guide explains how to set up a local development environment using Node.js and npm. This will allow code to be tested locally before deployment to the cloud
 
-## Project Structure
+### Project Structure
 
 Here's the structure of this project:
 ```
@@ -24,7 +24,7 @@ Here's the structure of this project:
 ├── dist # compiled javascript code for use in production
 ```
 
-## Prerequisites
+### Prerequisites
 
 - `Node.js` 20.11.1 or later installed
 - `npm` installed (to manage dependencies)
