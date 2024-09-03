@@ -1,1 +1,0 @@
-This folder contains scripts manually inserted into code blocks in several Ply features. The features they are used in are listed in a comment at the top of each file
