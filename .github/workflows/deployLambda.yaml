@@ -50,7 +50,7 @@ jobs:
         zip_file: deployment.zip
         memory_size: 128
         timeout: 30
-        handler: indexGetOfgemCheckInputs.handler
+        handler: ./lambda/indexGetOfgemCheckInputs.handler
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
         runtime: nodejs18.x
         environment: ENV_VAR_1=value1, ENV_VAR_2=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}
@@ -79,7 +79,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: indexLogOfgemCheckOutputs.handler
+          handler: ./lambda/indexLogOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
 
@@ -93,6 +93,6 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 300
-          handler: indexQuickFileWebhookHandler.handler
+          handler: ./lambda/indexQuickFileWebhookHandler.handler
           role: arn:aws:iam::211125712927:role/service-role/quickFileWebhookHandler-role-r1fvcpvz
           runtime: nodejs18.x
