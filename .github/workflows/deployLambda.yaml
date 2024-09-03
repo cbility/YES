@@ -53,6 +53,7 @@ jobs:
         handler: indexGetOfgemCheckInputs.handler
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
         runtime: nodejs18.x
+        environment: ENV_VAR_1=value1, ENV_VAR_2=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}
 
     - name: AWS Lambda Deploy CheckScraperOutput
       uses: appleboy/lambda-action@v0.2.0
@@ -64,7 +65,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: indexCheckScraperOutput.handler
+          handler: ./lambda/indexCheckScraperOutput.handler
           role: arn:aws:iam::211125712927:role/service-role/CheckScraperOutput-role-15sxaq49
           runtime: nodejs18.x
     
