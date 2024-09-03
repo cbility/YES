@@ -2,7 +2,11 @@
 //Ply sub features are not available on our plan
 
 //usage:
-//return requestInputs(input.endpoint, input.body);
+//return result;
+
+declare const input: { APIKey: string, endpoint: string, body: string };
+const result = requestInputs(input.endpoint, input.body);
+
 
 async function requestInputs(endpoint: string, //exclude "https://api.quickfile.co.uk"
     body: string) {
@@ -10,7 +14,7 @@ async function requestInputs(endpoint: string, //exclude "https://api.quickfile.
     const SubmissionNumber = uniqueId();
     const accNumber = "6131405563";
     const applicationID = "84a82f71-d19c-4c5a-b50e-797126e504fb"; //Ply Quote Drafter Application ID
-    const APIkey = "6918A4B5-2C18-4A92-8";
+    const APIkey = input.APIKey;
     const header = {
         MessageType: "Request",
         SubmissionNumber,

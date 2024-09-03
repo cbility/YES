@@ -1,7 +1,5 @@
 export { } //required for compiler
-
-
-
+require('dotenv').config();
 const input = { // input for testing
     termDays: 30,
     clientID: "8028732",
@@ -20,7 +18,8 @@ const input = { // input for testing
 •\tWhere Energy Source is not applying for the RHI on behalf of the client; the meter report will be sent directly to the client to submit themselves.
 •\tWork with the installer to resolve any issues before finalising the IRMA report.
 `, "s95ff0c392": [[["65cf389293075993f8d09e81"]]], "s9640ecb64": "980.00", "s9db9b7507": [[["64ccfc9ffb0d3586da07490d"]]], "s9f6ab85c5": true, "sa7b19abe9": "303 | test | IRM : Steam and Complex Systems", "sb782c2f07": "", "sbf9458ebe": ["66a647966b88b8d3ff84e90b"], "sc016de3ca": { "date": null, "include_time": false }, "sc647ed2c3": "IRMA", "sc65b92095": "66a647966b88b8d3ff84e90b", "sc6d3c3532": [[["66311c1d106474e99ee190f5"]]], "sc86ea09bb": "980.00", "sc949a50f6": ["65107680cc2aa6919ee5b4c0"], "sca1e1e984": "1", "scca9b3e53": [[true]], "sd4adbca96": "980.00", "sd9c00d85f": "IRM", "sd9c921c76": false, "se3e9eb5fa": { "to_date": { "date": null, "include_time": false }, "from_date": { "date": null, "include_time": false }, "is_overdue": false, "status_updated_on": null, "status_is_completed": false }, "sea2a31ee9": null, "sea2dc71ed": "", "secfbf283a": "303 IRM", "see124bc52": "IRM : Steam and Complex Systems", "sf61adfafa": true, "followed_by": [], "deleted_date": { "date": null }, "last_updated": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-07-29T09:27:44.058000Z" }, "first_created": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-07-29T09:27:44.058000Z" }, "application_id": "650168ce39fcf6ca2940a6fe", "comments_count": 0, "application_slug": "s2wrah3v"
-    }]
+    }],
+    APIKey: process.env.QUICKFILE_API_KEY,
 }
 
 /////////////////////////////////PLY CODE///////////////////////////////
@@ -111,7 +110,7 @@ async function request(endpoint: string, body: RequestBody, method: "POST" = "PO
     const SubmissionNumber = uniqueId();
     const accNumber = "6131405563";
     const applicationID = "84a82f71-d19c-4c5a-b50e-797126e504fb"; //Ply Quote Drafter Application ID
-    const APIkey = "6918A4B5-2C18-4A92-8";
+    const APIkey = input.APIKey;
     const header = {
         MessageType: "Request",
         SubmissionNumber,

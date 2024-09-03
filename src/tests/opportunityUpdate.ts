@@ -11,7 +11,7 @@ const QF = new QuickFileAPIHandler("6131405563",
     "6918A4B5-2C18-4A92-8");
 
 const SS = new SmartSuiteAPIHandler("s5ch1upc",
-    "bb7afd0906f8c666a21d15daf1924ff368843cd8" //technical@ API key
+    process.env.TECHNICAL_SMARTSUITE_KEY as string
 );
 
 const allOpportunities = await SS.getAllRecords(opportunities.id);
