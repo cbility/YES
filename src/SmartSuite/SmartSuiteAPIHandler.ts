@@ -109,7 +109,7 @@ export default class SmartSuiteAPIHandler {
 
     async updateRecord(tableID: string,
         recordID: string,
-        record: SmartSuiteRecord): Promise<SmartSuiteRecord> {
+        record: Omit<SmartSuiteRecord, "id">): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;

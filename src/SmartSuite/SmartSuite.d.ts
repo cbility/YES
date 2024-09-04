@@ -32,7 +32,7 @@ interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
     last_name: string;
 }
 
-type SmartSuiteCell = string | string[] /*linked records*/ | number | boolean | SmartSuiteCustomFieldCell; //TODO: Remove unknown when remaining fields are implemented 
+type SmartSuiteCell = string | string[] /*linked records*/ | number | boolean | SmartSuiteCustomFieldCell; //TODO: add remaining field types
 interface SmartSuiteRecord extends Record<string, SmartSuiteCell> { id: string }
 
 interface FilterElement {
@@ -70,7 +70,7 @@ type FilterComparison = StringFilterComparison | NumberFilterComparison | Single
 
 ///////RECORD TYPES///////////////
 
-interface RHIAccountRecord extends Record<string, SmartSuiteCell> {
+interface RHIAccountRecord extends SmartSuiteRecord {
     title?: string; s27463de03?: string[]; se00b833bd?: string[];
     s94016b86e?: string; s5af20d21e?: FullNameFieldCell; sa82805803?: string; s898c7779e?: {
         "phone_country": "UK",
@@ -78,11 +78,13 @@ interface RHIAccountRecord extends Record<string, SmartSuiteCell> {
     }; s906ceac06?: AddressFieldCell
 }
 
-interface RHILoginRecord extends Record<string, SmartSuiteCell> {
+interface RHILoginRecord extends SmartSuiteRecord {
+    id: string;
     s362676897: "Authorised Signatory" | "Additional User";
-    title: string; "sb4e5173b6": string;
+    title: string;
+    sb4e5173b6: string;
 }
 
-interface RHIRecord extends Record<string, SmartSuiteCell> {
+interface RHIRecord extends SmartSuiteRecord {
     //TODO: add additional fields
 }
