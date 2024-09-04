@@ -1,8 +1,37 @@
 import HTTPError from "../common/HTTPError";
 
+class LimitedList<T> {
+    private maxLength: number;
+    private items: T[];
+    constructor(maxLength: number) {
+        this.maxLength = maxLength;
+        this.items = [];
+    }
+    add(item: T) {
+        // Add the new item to the beginning of the list
+        this.items.unshift(item);
+
+        // If the list exceeds the maximum length, remove the oldest item
+        if (this.items.length > this.maxLength) {
+            this.items.pop();
+        }
+    }
+    getList() {
+        return this.items;
+    }
+    getLastItem() {
+        return this.items[this.maxLength] as number | undefined;
+    }
+}
+
 export default class SmartSuiteAPIHandler {
     private requestHeaders: RequestHeaders;
     private maxBulkRequestSize: number = 25; //Smartsuite allow a max of 25 records per bulk update request
+
+    private maxRequestsPerSecond: number = 2; //2 is the secondary limit, effective once the monthly request volume limit is reached in a given month. 
+    //To use the primary limit (faster but risk of triggering retries if primary limit reached) set equal 5.
+    //details here: https://help.smartsuite.com/en/articles/4856710-api-limits
+    private recentRequestTimestamps = new LimitedList<number>(this.maxRequestsPerSecond); //used in caching proxy limiting requests per second
 
     constructor(accountID: string, APIToken: string) {
         this.requestHeaders = {
@@ -20,6 +49,12 @@ export default class SmartSuiteAPIHandler {
         let currentDelay = delay;
         while (attempts < retries) {
             try {
+                // get ms elapsed since the request "maxRequestsPerSecond" requests previous.
+                const msSinceRelevantRequest = this.recentRequestTimestamps.getLastItem() ?? 0 - Date.now();
+                while (msSinceRelevantRequest > -1000) { //while rate limit will be exceeded
+                    await new Promise(resolve => setTimeout(resolve, 1001 - msSinceRelevantRequest)); //wait until safe to retry
+                }
+                this.recentRequestTimestamps.add(Date.now()); // set last request time for caching proxy
                 const response = await fetch(endpoint, {
                     method: init?.method ?? "GET",
                     headers: this.requestHeaders,
