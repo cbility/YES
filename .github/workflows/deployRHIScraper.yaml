@@ -1,0 +1,59 @@
+name: deploy to lambda
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/RHIScraper/**/*'
+      - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
+      - '.github/workflows/deployRHIScraper.yaml'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install and build
+      run: | 
+        npm ci --omit=dev --prefix src/RHIScraper
+        npm run build --if-present
+      env:
+        CI: true
+
+    - name: Zip
+      run: |
+        cd dist/RHIScraper
+        zip -r ../deployment.zip *
+        cd ..
+        ls
+      env:
+        CI: true
+    
+    - name: Upload to S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: yes-scraper
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-west-2'
+        SOURCE_DIR: './zip'
+      
+    - name: Deploy lambda from S3
+      uses: rotarydialer/update-lambda-s3@v1.0.0
+      env:
+        LAMBDA_NAME: YES_Scraper
+        AWS_S3_BUCKET: yes-scraper
+        AWS_S3_KEY: bundle.zip
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-west-2'
