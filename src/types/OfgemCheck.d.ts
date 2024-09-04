@@ -1,10 +1,10 @@
-interface ScraperInput { loginID: string }; //input for scraper lambda function
+interface ScraperInput { loginID: string } //input for scraper lambda function
 
 interface ScraperBatch { //single batch of inputs for scraper
     done: Boolean,
     success: Boolean | null,
     inputs: ScraperInput[],
-};
+}
 
 interface OfgemCheckInput { //input for Ofgem Check step function
     all: ScraperBatch[],
@@ -13,7 +13,7 @@ interface OfgemCheckInput { //input for Ofgem Check step function
         batchIndex: number,
         isFinal: Boolean,
     }
-};
+}
 
 interface ScraperOutputEvent extends Partial<Event> {
     inputBatches: OfgemCheckInput,
@@ -24,4 +24,4 @@ interface ScraperOutputEvent extends Partial<Event> {
             body: string, //"{\"message\":\"Update Complete\"}"
         },
     },
-};
+}

@@ -14,6 +14,24 @@ interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
     status_updated_on; //Date that the due date's linked status field was last updated (read-only)
 }
 
+
+interface AddressFieldCell extends SmartSuiteCustomFieldCell {
+    location_address?: string;
+    location_address2?: string;
+    location_city?: string;
+    location_state?: string;
+    location_zip?: string;
+    location_country?: string;
+    location_latitude?: string;
+    location_longitude?: string;
+}
+
+interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
+    first_name: string;
+    middle_name: string;
+    last_name: string;
+}
+
 type SmartSuiteCell = string | string[] /*linked records*/ | number | Boolean | SmartSuiteCustomFieldCell | unknown; //TODO: Remove unknown when remaining fields are implemented 
 
 interface FilterElement {
@@ -48,3 +66,22 @@ type SmartDocFilterComparison = ("is_empty" | "is_not_empty");
 type ChecklistFilterComparison = ("is_empty" | "is_not_empty");
 
 type FilterComparison = StringFilterComparison | NumberFilterComparison | SingleSelectFilterComparison | MultipleSelectFilterComparison | YesNoFilterComparison | DateFilterComparison | DueDateFilterComparison | FilesFilterComparison | LinkedRecordFilterComparison | SmartDocFilterComparison | ChecklistFilterComparison;
+
+///////RECORD TYPES///////////////
+
+interface RHIAccountRecord extends Record<string, SmartSuiteCell> {
+    title?: string; s27463de03?: string[]; se00b833bd?: string[];
+    s94016b86e?: string; s5af20d21e?: FullNameFieldCell; sa82805803?: string; s898c7779e?: {
+        "phone_country": "UK",
+        "phone_number": string
+    }; s906ceac06?: AddressFieldCell
+}
+
+interface RHILoginRecord extends Record<string, SmartSuiteCell> {
+    s362676897: "Authorised Signatory" | "Additional User";
+    title: string; "sb4e5173b6": string;
+}
+
+export interface RHIRecord extends Record<string, SmartSuiteCell> {
+    //TODO: add additional fields
+}
