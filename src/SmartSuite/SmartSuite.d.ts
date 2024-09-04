@@ -9,9 +9,9 @@ interface SmartSuiteCustomFieldCell { //single instance of a particular (non-pri
 interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
     from_date: string; //YYYY-MM-DDTHH:MM:SS
     to_date: string; //YYYY-MM-DDTHH:MM:SS
-    is_overdue: Boolean; //True if overdue (read-only)
-    status_is_completed; //True if complete (read-only)
-    status_updated_on; //Date that the due date's linked status field was last updated (read-only)
+    is_overdue: boolean; //True if overdue (read-only)
+    status_is_completed: boolean; //True if complete (read-only)
+    status_updated_on: boolean; //Date that the due date's linked status field was last updated (read-only)
 }
 
 
@@ -32,7 +32,8 @@ interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
     last_name: string;
 }
 
-type SmartSuiteCell = string | string[] /*linked records*/ | number | Boolean | SmartSuiteCustomFieldCell | unknown; //TODO: Remove unknown when remaining fields are implemented 
+type SmartSuiteCell = string | string[] /*linked records*/ | number | boolean | SmartSuiteCustomFieldCell; //TODO: Remove unknown when remaining fields are implemented 
+interface SmartSuiteRecord extends Record<string, SmartSuiteCell> { id: string }
 
 interface FilterElement {
     field: string,
@@ -82,6 +83,6 @@ interface RHILoginRecord extends Record<string, SmartSuiteCell> {
     title: string; "sb4e5173b6": string;
 }
 
-export interface RHIRecord extends Record<string, SmartSuiteCell> {
+interface RHIRecord extends Record<string, SmartSuiteCell> {
     //TODO: add additional fields
 }
