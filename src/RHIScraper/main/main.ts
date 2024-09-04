@@ -2,131 +2,23 @@ import {
     accountsTable,
     RHIsTable,
     loginsTable,
-    LoginRecord,
-    AccountRecord,
-} from "./globals";
-import { RHIRecord } from "./globals";
-import { HTTPError } from "./globals";
-import { getRecordsByFieldValues } from "./globals";
-import { ExistingRecord } from "./globals";
-import { SMARTSUITE_HEADERS } from "./globals";
-import { getAllRecords } from "./globals";
+} from "../../SmartSuite/tables";
+
+//import type { RHILoginRecord, RHIAccountRecord, RHIRecord } from "../../SmartSuite/SmartSuite.d.ts";
 import getLoginDetails from "./RHI/getLoginDetails";
 import getAccountDetails from "./RHI/getAccountDetails";
 import logInUser from "./RHI/logInUser";
 import validateLogin from "./RHI/validateLogin";
 import getRHIDetails from "./RHI/getRHIDetails";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
+import SmartSuite from "../../SmartSuite/SmartSuiteAPIHandler.js"
 
-type Inputs = { loginID: string }[];
+//type Inputs = { loginID: string }[];
 
-class SmartSuite {
-    @exponentialBackoff(3)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async getRecordsByTitle(titles: string[], tableID: string) {
-        const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
-
-        const body = {
-            filter: {
-                operator: "or",
-                fields: titles.map((title) => ({
-                    field: "title",
-                    comparison: "is",
-                    value: title,
-                })),
-            },
-        };
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                ...SMARTSUITE_HEADERS,
-                "Content-Type": "application/json;charset=utf-8",
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) throw new HTTPError(response.status, response.statusText, await response.text());
-
-        const result = await response.json();
-        return result.items;
-    }
-    @exponentialBackoff(3)
-    async addNewRecords(recordsToCreate: object[], tableID: string) {
-
-        const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const recordsBatch = splitIntoSubArrays(25, recordsToCreate);
-        const createdRecords: unknown[] = [];
-
-        for (const records of recordsBatch) {
-
-            const body = { items: records };
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    ...SMARTSUITE_HEADERS,
-                    "Content-Type": "application/json;charset=utf-8",
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) throw new HTTPError(response.status, response.statusText, await response.text());
-            createdRecords.push(...(await response.json()));
-        }
-        return createdRecords;
-    }
-    @exponentialBackoff(3)
-    async updateMultipleRecords(
-        recordsToUpdate: ExistingRecord[],
-        tableID: string
-    ) {
-        const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const recordsBatch = splitIntoSubArrays(25, recordsToUpdate);
-        const updatedRecords: unknown[] = [];
-
-        for (const records of recordsBatch) {
-            const body = { items: records };
-            const response = await fetch(url, {
-                method: "PATCH",
-                headers: {
-                    ...SMARTSUITE_HEADERS,
-                    "Content-Type": "application/json;charset=utf-8",
-                },
-                body: JSON.stringify(body),
-            });
-
-            if (!response.ok) throw new HTTPError(response.status, response.statusText, await response.text());
-
-            updatedRecords.push(...(await response.json()));
-        }
-        return updatedRecords;
-    }
-
-    @exponentialBackoff(3)
-    async updateSingleRecord(record: object, recordID: string, tableID: string) {
-        const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
-
-        const body = record;
-        const response = await fetch(url, {
-            method: "PATCH",
-            headers: {
-                ...SMARTSUITE_HEADERS,
-                "Content-Type": "application/json;charset=utf-8",
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) throw new HTTPError(response.status, response.statusText, await response.text());
-
-        const result = await response.json();
-        return result;
-    }
-}
-
-const SS = new SmartSuite();
+const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
 export default async function main(
-    inputs: Inputs,
+    inputs: { loginID: string }[],
     puppeteer: PuppeteerCoreNode,
     browserArgs: object,
     shallow: boolean = false //can be set to true to skip over some information checking to improve performance
@@ -134,39 +26,40 @@ export default async function main(
     if (inputs.length === 0) throw new Error("Empty input array");
     if (!("loginID" in inputs[0])) throw new Error("No loginID in first input"); //check for correct format
 
+    const inputIDs = inputs.map(input => input.loginID)
     //get login records from login table
-    const loginRecordsList: LoginRecord[] = await getRecordsByFieldValues(
-        (inputs).map((input) => input.loginID),
+    const loginRecordsList = await ss.getRecordsByFieldValues(
+        loginsTable.id,
         loginsTable.fields["Record ID (System Field)"],
-        loginsTable.id
-    );
+        inputs.map(input => input.loginID)
+    ) as RHILoginRecord[];
 
     //parse login records as dictionary with record IDs as keys
-    const loginRecords: Record<string, LoginRecord> = {};
+    const loginRecords: Record<string, RHILoginRecord> = {};
     for (const loginRecord of loginRecordsList) {
-        loginRecords[loginRecord.id] = loginRecord;
+        loginRecords[loginRecord.id as string] = loginRecord;
     }
 
-    //get RHI Records from RHI Table
-    const ExistingRHIRecords = {};
-    const ExistingRHIAccounts = {};
-    (await getAllRecords(RHIsTable.id)).forEach((RHI) => {
-        ExistingRHIRecords[RHI.title] = RHI.id;
-        ExistingRHIAccounts[RHI.title] = RHI[RHIsTable.fields["RHI Account"]];
+    //get Existing RHI Records and Accounts from RHI Table and save as dictionary
+    const ExistingRHIRecords: Record<string, string> = {};
+    const ExistingRHIAccounts: Record<string, string> = {};
+    (await ss.getAllRecords(RHIsTable.id) as { [slug: string]: string }[]).forEach((RHIRecord) => {
+        ExistingRHIRecords[RHIRecord.title] = RHIRecord.id;
+        ExistingRHIAccounts[RHIRecord.title] = RHIRecord[RHIsTable.fields["RHI Account"]];
     });
     const browser = await puppeteer.launch(browserArgs);
 
     const loginIDs = inputs.map(
         (inputLogin) => inputLogin.loginID
     );
-    const loginDetails: LoginRecord[] = [];
-    const accountDetails: (AccountRecord | Omit<AccountRecord, "id">)[] = [];
+    const loginDetails: RHILoginRecord[] = [];
+    const accountDetails: (RHIAccountRecord | Omit<RHIAccountRecord, "id">)[] = [];
     const updatedRHIDetails: RHIRecord[] = [];
     const newRHIDetails: Omit<RHIRecord, "id">[] = [];
     const page = await browser.newPage();
 
     for (const loginRecordID of loginIDs) {
-        const loginRecordToUpdate: LoginRecord =
+        const loginRecordToUpdate: RHILoginRecord =
             loginRecords[loginRecordID];
         // set the account via updating the account record, not the login record itself
         const accountID =
@@ -179,10 +72,10 @@ export default async function main(
         await logInUser(loginRecordToUpdate, page);
 
         if (!(await validateLogin(page))) {
-            SS.updateSingleRecord(
-                { [loginsTable.fields["Password Correct"]]: false },
+            ss.updateRecord(
+                loginsTable.id,
                 loginRecordID,
-                loginsTable.id
+                { [loginsTable.fields["Password Correct"]]: false }
             );
             console.log(
                 `Log in failed for ${loginRecordToUpdate[loginsTable.fields["Username"]]
@@ -195,7 +88,7 @@ export default async function main(
             }`
         );
 
-        const updatedLoginRecord: LoginRecord = await getLoginDetails(
+        const updatedLoginRecord: RHILoginRecord = await getLoginDetails(
             loginRecordToUpdate,
             page
         );
@@ -227,11 +120,10 @@ export default async function main(
             continue;
         }
 
-        const accountRecordToUpdate: AccountRecord | Omit<AccountRecord, "id"> = accountID ?
+        const accountRecordToUpdate: RHIAccountRecord | Omit<RHIAccountRecord, "id"> = accountID ?
             { id: accountID, } : {
                 //only update the linked login if account is brand new,
                 // i.e. corresponds to a new AS login
-                id: undefined,
                 [accountsTable.fields["Logins"]]: [loginRecordToUpdate.id],
             };
         /*AU logins have to be linked to pre-existing accounts on SS. That's because the account details
@@ -245,7 +137,7 @@ export default async function main(
                   updating an account record can not update the linked logins.
                   This avoids overwriting information.*/
 
-        const updatedAccountRecord: Omit<AccountRecord, "id"> = await getAccountDetails(
+        const updatedAccountRecord: Omit<RHIAccountRecord, "id"> = await getAccountDetails(
             accountRecordToUpdate,
             page
         );
@@ -275,97 +167,46 @@ export default async function main(
         return;
     }
 
-    const newAccountDetails: Omit<AccountRecord, "id">[] = accountDetails
+    const newAccountDetails: Omit<RHIAccountRecord, "id">[] = accountDetails
         .filter((account) => !account.id)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .map(({ id, ...rest }) => rest);
 
-    const updatedAccountDetails: AccountRecord[] = accountDetails.filter(
+    const updatedAccountDetails: RHIAccountRecord[] = accountDetails.filter(
         (account) => !!account.id
-    ) as AccountRecord[];
+    ) as RHIAccountRecord[];
 
     //update SmartSuite logins first to avoid overwriting links to new accounts
     if (loginDetails.length > 0) {
-        await SS.updateMultipleRecords(loginDetails, loginsTable.id);
+        await ss.bulkUpdateRecords(loginsTable.id, loginDetails);
         console.log("Login details updated");
     }
 
     //add new accounts
     if (newAccountDetails.length > 0) {
-        await SS.addNewRecords(newAccountDetails, accountsTable.id);
+        await ss.bulkAddNewRecords(accountsTable.id, newAccountDetails);
         console.log("New account details added");
     }
 
     //update existing accounts
     if (updatedAccountDetails.length > 0) {
-        await SS.updateMultipleRecords(updatedAccountDetails, accountsTable.id);
+        await ss.bulkUpdateRecords(accountsTable.id, updatedAccountDetails);
         console.log("Existing account details updated");
     }
 
     //update existing RHIs
     if (updatedRHIDetails.length > 0) {
-        await SS.updateMultipleRecords(updatedRHIDetails, RHIsTable.id);
+        await ss.bulkUpdateRecords(RHIsTable.id, updatedRHIDetails);
         console.log("Existing RHI details updated");
     }
 
     //add new RHIs
     if (newRHIDetails.length > 0) {
-        await SS.addNewRecords(newRHIDetails, RHIsTable.id);
+        await ss.bulkAddNewRecords(RHIsTable.id, newRHIDetails);
         console.log("New RHI details added");
     }
 
     console.log("all records updated");
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function exponentialBackoff(retries: number, delay: number = 30000): any {
-    // This is a decorator factory, which returns the actual decorator
-    return function (
-        target: unknown,
-        propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-
-        descriptor.value = async function (...args: unknown[]) {
-            let attempts = 0;
-            let currentDelay = delay;
-
-            while (attempts < retries) {
-                try {
-                    return await originalMethod.apply(this, args);
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } catch (error: any) {
-                    if (error.status === 429) {
-                        attempts++;
-                        console.log(
-                            `Attempt ${attempts} failed with 429 error. Retrying in ${currentDelay / 1000} seconds...`
-                        );
-                        await new Promise((resolve) => setTimeout(resolve, currentDelay));
-                        currentDelay *= 2; // Exponential backoff
-                    } /*else if (error.status === 422 && (error.message as string).includes("RATE_LIMIT_EXCEEDED")) {
-                        attempts++;
-                        console.log(
-                            // eslint-disable-next-line max-len, max-len
-                            `Attempt ${attempts} failed with 422 error and RATE_LIMIT_EXCEEDED message. 
-                            Retrying in ${currentDelay / 1000} seconds...`
-                        );
-                        await new Promise((resolve) => setTimeout(resolve, currentDelay));
-                        currentDelay *= 2; // Exponential backoff
-
-                    }*/ else {
-                        throw error; // If it's not a 429 or 422 RATE_LIMIT_EXCEEDED error, rethrow it
-                    }
-                }
-            }
-
-            throw new Error(
-                `Function failed after ${retries} attempts due to repeated 429 errors.`
-            );
-        };
-
-        return descriptor;
-    };
 }
 
 function splitIntoSubArrays<T>(subArrayLength: number, array: T[]): T[][] {

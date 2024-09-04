@@ -1,16 +1,15 @@
-import { AccountRecord } from "../globals";
-import { accountsTable } from "../globals";
-import { extractPostcodeFromAddress } from "../globals";
+import { accountsTable } from "../../../SmartSuite/tables";
 import { ElementHandle, Page } from "puppeteer-core";
+import extractPostcodeFromAddress from "../extractPostcodeFromAddress";
 import * as cheerio from "cheerio";
 
 // eslint-disable-next-line max-len
-export const ukPostalCodePattern = /\b(GIR 0AA|[A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]([0-9ABEHMNPRV-Y])?)|[0-9][A-HJKPS-UW])\s?[0-9][ABD-HJLNP-UW-Z]{2})\b/gi;
+
 
 
 export default async function getAccountDetails(
-    accountRecord: Omit<AccountRecord, "id">,
-    page: Page): Promise<Omit<AccountRecord, "id">> {
+    accountRecord: Omit<RHIAccountRecord, "id">,
+    page: Page): Promise<Omit<RHIAccountRecord, "id">> {
 
     let viewAccountButton: ElementHandle<Element> | null = null;
     while (viewAccountButton === null) {
@@ -37,13 +36,13 @@ export default async function getAccountDetails(
     };
 
     // Assign the extracted values to the address object properties
-    (accountRecord[accountsTable.fields["Account Address"]] as { location_address }).location_address =
+    (accountRecord[accountsTable.fields["Account Address"]] as { location_address: string }).location_address =
         addressData.modifiedAddress;
     (
-        accountRecord[accountsTable.fields["Account Address"]] as { location_zip }
+        accountRecord[accountsTable.fields["Account Address"]] as { location_zip: string | undefined }
     ).location_zip = addressData.postcode?.trim();
 
-    (accountRecord[accountsTable.fields["Account Address"]] as { location_country }).location_country = "UK";
+    (accountRecord[accountsTable.fields["Account Address"]] as { location_country: string }).location_country = "UK";
 
     accountRecord[accountsTable.fields["Company Phone"]] =
         [formatPhoneNumber(
@@ -56,13 +55,13 @@ export default async function getAccountDetails(
             .text().replace("\n", "").trim()];
 
     accountRecord[accountsTable.fields["AS Name"]] = {};
-    (accountRecord[accountsTable.fields["AS Name"]] as { first_name }).first_name =
+    (accountRecord[accountsTable.fields["AS Name"]] as { first_name: string }).first_name =
         $("#accordion-default-content-6 > dl:nth-child(3) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim();
-    (accountRecord[accountsTable.fields["AS Name"]] as { middle_name }).middle_name =
+    (accountRecord[accountsTable.fields["AS Name"]] as { middle_name: string }).middle_name =
         $("#accordion-default-content-6 > dl:nth-child(7) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim();
-    (accountRecord[accountsTable.fields["AS Name"]] as { last_name }).last_name =
+    (accountRecord[accountsTable.fields["AS Name"]] as { last_name: string }).last_name =
         $("#accordion-default-content-6 > dl:nth-child(5) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim();
 
