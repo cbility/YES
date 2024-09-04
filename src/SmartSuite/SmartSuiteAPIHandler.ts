@@ -116,27 +116,36 @@ export default class SmartSuiteAPIHandler {
         records: Record<string, SmartSuiteCell>[],
     ): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
+        const updatedRecords: Record<string, SmartSuiteCell>[] = [];
+        const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
 
-        const body = { items: records };
-        const response = await this.request(url, {
-            method: "PATCH",
-            body: JSON.stringify(body),
-        });
-
-        const result = await response.json();
-        return result;
+        for (const batch of recordsBatches) {
+            const body = { items: batch };
+            const response = await this.request(url, {
+                method: "PATCH",
+                body: JSON.stringify(body),
+            });
+            const result = await response.json();
+            updatedRecords.push(...result);
+        }
+        return updatedRecords;
     }
 
     async bulkAddNewRecords(tableID: string, records: Record<string, SmartSuiteCell>[]): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
+        const newRecords: Record<string, SmartSuiteCell>[] = [];
+        const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
 
-        const body = { items: records };
-        const response = await this.request(url, {
-            method: "POST",
-            body: JSON.stringify(body),
-        });
-        const result = await response.json();
-        return result;
+        for (const batch of recordsBatches) {
+            const body = { items: batch };
+            const response = await this.request(url, {
+                method: "POST",
+                body: JSON.stringify(body),
+            });
+            const result = await response.json();
+            newRecords.push(...result);
+        }
+        return newRecords;
     }
 
     async addNewRecord(tableID: string, record: Record<string, SmartSuiteCell>): Promise<Record<string, SmartSuiteCell>> {
@@ -189,4 +198,13 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
+}
+
+///////////////////Helper functions //////////////////
+function splitIntoSubArrays<T>(subArrayLength: number, array: T[]): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < array.length; i += subArrayLength) {
+        result.push(array.slice(i, i + subArrayLength));
+    }
+    return result;
 }
