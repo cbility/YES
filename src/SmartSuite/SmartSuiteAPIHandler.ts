@@ -1,3 +1,5 @@
+import HTTPError from "../common/HTTPError";
+
 type RequestHeaders = Record<"Authorization" | "Account-Id", string>
     | Record<"Content-Type", "application/json;charset=utf-8">;
 
@@ -48,23 +50,50 @@ export default class SmartSuiteAPIHandler {
         }
     }
 
+    async request(endpoint: string, init?: {
+        body: string,
+        method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+    }, retries: number = 3, delay: number = 30000): Promise<Response> {
+        let attempts = 0;
+        let currentDelay = delay;
+        while (attempts < retries) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: init?.method ?? "GET",
+                    headers: this.requestHeaders,
+                    body: init?.body,
+                })
+                if (!response.ok) throw new HTTPError(response.status, response.statusText, await response.text());
+                return response;
+
+            } catch (error: any) {
+                if (error.status === 429) { //catch rate limit error
+                    attempts++;
+                    console.log(
+                        `Attempt ${attempts} failed with 429 error. Retrying in ${currentDelay / 1000} seconds...`
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, currentDelay));
+                    currentDelay *= 2; // Exponential backoff
+                } else throw error; //rethrow other errors
+            }
+        }
+        throw new Error(
+            `Function failed after ${retries} attempts due to repeated 429 errors.`
+        );
+    }
+
+
     async updateRecord(tableID: string, recordID: string, record: { [slug: string]: any }) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "PATCH",
-            headers: this.requestHeaders,
             body: JSON.stringify(body),
         });
-
-        if (!response.ok) throw new Error(response.status + " " + response.statusText);
-
         const result = await response.json();
         return result;
     }
-
-
 
     async filterRecords(
         tableID: string,
@@ -79,16 +108,11 @@ export default class SmartSuiteAPIHandler {
                 fields
             }
         };
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "POST",
-            headers: this.requestHeaders,
             body: JSON.stringify(body),
         });
-        if (!response.ok) {
-            const errorMessage = `Error: ${response.status} ${response.statusText}`;
-            throw new Error(errorMessage);
-        }
-        const result = await response.json();
+        const result: { items: any[] } = await response.json();
         return result.items;
     }
 
@@ -105,16 +129,11 @@ export default class SmartSuiteAPIHandler {
                 }))
             }
         };
-
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "POST",
-            headers: this.requestHeaders,
             body: JSON.stringify(body)
         });
-
-        if (!response.ok) throw new Error(response.status + " " + response.statusText);
-
-        const result = await response.json();
+        const result: { items: any[] } = await response.json();
         return result.items;
     }
 
@@ -123,14 +142,11 @@ export default class SmartSuiteAPIHandler {
 
         const body = {};
 
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "POST",
-            headers: this.requestHeaders,
             body: JSON.stringify(body)
         });
-
-        if (!response.ok) throw new Error(response.status + " " + response.statusText);
-        const result = await response.json();
+        const result: { items: any[] } = await response.json();
         return result.items;
     }
 
@@ -141,16 +157,10 @@ export default class SmartSuiteAPIHandler {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 
         const body = { items: records };
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "PATCH",
-            headers: this.requestHeaders,
             body: JSON.stringify(body),
         });
-
-        if (!response.ok) {
-            console.log(await response.text());
-            throw new Error(response.status + " " + response.statusText);
-        }
 
         const result = await response.json();
         return result;
@@ -160,17 +170,10 @@ export default class SmartSuiteAPIHandler {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 
         const body = { items: records };
-        const response = await fetch(url, {
+        const response = await this.request(url, {
             method: "POST",
-            headers: this.requestHeaders,
             body: JSON.stringify(body),
         });
-
-        console.log(response.status + " " + response.statusText);
-
-        if (!response.ok) throw new Error(response.status + " " + response.statusText);
-
-
         const result = await response.json();
         return result;
     }
@@ -178,20 +181,12 @@ export default class SmartSuiteAPIHandler {
     async addNewRecord(record: Record<string, unknown>, tableID: string) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: this.requestHeaders,
-                body: JSON.stringify(record),
-            });
-
-            console.log(response.status + " " + response.statusText);
-            if (!response.ok) throw new Error(response.status + " " + response.statusText);
-
-            const result = await response.json();
-            return result;
-
-        } catch (err) { console.log(err); }
+        const response = await this.request(url, {
+            method: "POST",
+            body: JSON.stringify(record),
+        });
+        const result = await response.json();
+        return result;
     }
 
 
@@ -223,20 +218,14 @@ export default class SmartSuiteAPIHandler {
 
     async getTable(tableID: string) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/`;
-        const response = await fetch(url, {
-            method: "GET",
-            headers: this.requestHeaders
-        });
+        const response = await this.request(url);
         const result = await response.json();
         return result;
     }
 
     async listTables() {
         const url = `https://app.smartsuite.com/api/v1/applications/`;
-        const response = await fetch(url, {
-            method: "GET",
-            headers: this.requestHeaders
-        });
+        const response = await this.request(url);
         const result = await response.json();
         return result;
     }
