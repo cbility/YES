@@ -2,6 +2,7 @@ import HTTPError from "../common/HTTPError";
 
 export default class SmartSuiteAPIHandler {
     private requestHeaders: RequestHeaders;
+    private maxBulkRequestSize: number = 25; //Smartsuite allow a max of 25 records per bulk update request
 
     constructor(accountID: string, APIToken: string) {
         this.requestHeaders = {
@@ -43,8 +44,7 @@ export default class SmartSuiteAPIHandler {
         );
     }
 
-
-    async updateRecord(tableID: string, recordID: string, record: { [slug: string]: any }) {
+    async updateRecord(tableID: string, recordID: string, record: Record<string, SmartSuiteCell>) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
@@ -58,11 +58,11 @@ export default class SmartSuiteAPIHandler {
 
     async filterRecords(
         tableID: string,
-        fieldsToFilter: filterElement | filterElement[],
+        fieldsToFilter: FilterElement | FilterElement[],
         operator: "and" | "or" = "and"
-    ) {
+    ): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
-        const fields: filterElement[] = Array.isArray(fieldsToFilter) ? fieldsToFilter : [fieldsToFilter];
+        const fields: FilterElement[] = Array.isArray(fieldsToFilter) ? fieldsToFilter : [fieldsToFilter];
         const body: FilterBody = {
             filter: {
                 operator,
@@ -77,7 +77,7 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async getRecordsByFieldValues(tableID: string, fieldSlug: string, fieldValues: unknown[]) {
+    async getRecordsByFieldValues(tableID: string, fieldSlug: string, fieldValues: unknown[]): Promise<Record<string, SmartSuiteCell>[]> {
         //gets any record where the specified field has any of the given list of values
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
         const body = {
@@ -94,11 +94,11 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: any[] } = await response.json();
+        const result: { items: Record<string, SmartSuiteCell>[] } = await response.json();
         return result.items;
     }
 
-    async getAllRecords(tableID: string) {
+    async getAllRecords(tableID: string): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {};
@@ -113,8 +113,8 @@ export default class SmartSuiteAPIHandler {
 
     async bulkUpdateRecords(
         tableID: string,
-        records: ExistingRecord[],
-    ) {
+        records: Record<string, SmartSuiteCell>[],
+    ): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 
         const body = { items: records };
@@ -127,7 +127,7 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async bulkAddNewRecords(records: Record<string, unknown>[], tableID: string) {
+    async bulkAddNewRecords(tableID: string, records: Record<string, SmartSuiteCell>[]): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
 
         const body = { items: records };
@@ -139,7 +139,7 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async addNewRecord(record: Record<string, unknown>, tableID: string) {
+    async addNewRecord(tableID: string, record: Record<string, SmartSuiteCell>): Promise<Record<string, SmartSuiteCell>> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
         const response = await this.request(url, {
@@ -150,8 +150,7 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-
-    async getRecordsByTitle(titles: string[], tableID: string) {
+    async getRecordsByTitle(tableID: string, titles: string[]): Promise<Record<string, SmartSuiteCell>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {
@@ -172,7 +171,6 @@ export default class SmartSuiteAPIHandler {
         });
 
         if (!response.ok) throw new Error(response.status + " " + response.statusText);
-
         const result = await response.json();
         return result.items;
     }
