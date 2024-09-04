@@ -2,7 +2,7 @@
     "type": "module",
     "scripts": {
         "start": "node dist/tests/RHI-local.js",
-        "build": "tsc --p ./src/RHIScraper"
+        "build": "tsc"
     },
     "dependencies": {
         "@sparticuz/chromium-min": "^119.0.2",
