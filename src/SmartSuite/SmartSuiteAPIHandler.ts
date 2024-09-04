@@ -142,7 +142,7 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: any[] } = await response.json();
+        const result: { items: Record<string, SmartSuiteCell>[] } = await response.json();
         return result.items;
     }
 
