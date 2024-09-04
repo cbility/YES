@@ -14,7 +14,7 @@ interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
     status_updated_on; //Date that the due date's linked status field was last updated (read-only)
 }
 
-type SmartSuiteCell = string | number | Boolean | SmartSuiteCustomFieldCell | unknown; //TODO: Remove unknown when remaining fields are implemented 
+type SmartSuiteCell = string | string[] /*linked records*/ | number | Boolean | SmartSuiteCustomFieldCell | unknown; //TODO: Remove unknown when remaining fields are implemented 
 
 interface FilterElement {
     field: string,
