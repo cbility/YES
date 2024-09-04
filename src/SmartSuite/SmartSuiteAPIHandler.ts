@@ -1,4 +1,3 @@
-import { table } from "console";
 import HTTPError from "../common/HTTPError";
 
 class LimitedList<T> {
@@ -230,7 +229,7 @@ export default class SmartSuiteAPIHandler {
         return updatedRecords;
     }
 
-    async bulkAddNewRecords(tableID: string, records: SmartSuiteRecord[]): Promise<SmartSuiteRecord[]> {
+    async bulkAddNewRecords(tableID: string, records: Omit<SmartSuiteRecord, "id">[]): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
         const newRecords: SmartSuiteRecord[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
@@ -247,7 +246,7 @@ export default class SmartSuiteAPIHandler {
         return newRecords;
     }
 
-    async addNewRecord(tableID: string, record: SmartSuiteRecord): Promise<SmartSuiteRecord> {
+    async addNewRecord(tableID: string, record: Omit<SmartSuiteRecord, "id">): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
         const response = await this.request(url, {

@@ -6,7 +6,7 @@ export default async function handler(event: ScraperOutputEvent) {
 
     const batchIndex: number = event.inputBatches.current.batchIndex;
     const updateSuccess = event.currentOutput.Payload.body.includes("Update Complete");
-    const isFinal: Boolean = event.inputBatches.current.isFinal;
+    const isFinal: boolean = event.inputBatches.current.isFinal;
 
     event.inputBatches.all[batchIndex].done = true;
     event.inputBatches.all[batchIndex].success = updateSuccess;
