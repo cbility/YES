@@ -1,3 +1,4 @@
+import { table } from "console";
 import HTTPError from "../common/HTTPError";
 
 class LimitedList<T> {
@@ -79,7 +80,37 @@ export default class SmartSuiteAPIHandler {
         );
     }
 
-    async updateRecord(tableID: string, recordID: string, record: Record<string, SmartSuiteCell>) {
+    async filterForDataChanges(tableID: string,
+        updatedRecords: SmartSuiteRecord[],
+        useEntireTable: true): Promise<SmartSuiteRecord[]>;
+
+    async filterForDataChanges(tableID: string,
+        updatedRecords: SmartSuiteRecord[],
+        useEntireTable: false,
+        idFieldSlug: string): Promise<SmartSuiteRecord[]>;
+
+    async filterForDataChanges(tableID: string,
+        updatedRecords: SmartSuiteRecord[],
+        useEntireTable: boolean = false,
+        idFieldSlug?: string): Promise<SmartSuiteRecord[]> {
+        /*helper function to remove records which are identical to their cloud hosted copy from an update request
+        Can be configured to just check records which are listed, but needs the field slug of an ID field.
+        Can also be configured to check records against the entire table, but more computationally expensive
+        */
+        const existingRecords = useEntireTable ?
+            await this.getAllRecords(tableID) : await this.getRecordsByFieldValues(
+                tableID,
+                idFieldSlug as string,
+                updatedRecords.map(record => record.id)
+            );
+        const existingRecordsSet = new Set(existingRecords.map(record => JSON.stringify(record)));
+        const filteredRecords = updatedRecords.filter(record => !existingRecordsSet.has(JSON.stringify(record)));
+        return filteredRecords;
+    }
+
+    async updateRecord(tableID: string,
+        recordID: string,
+        record: SmartSuiteRecord): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
@@ -95,7 +126,7 @@ export default class SmartSuiteAPIHandler {
         tableID: string,
         fieldsToFilter: FilterElement | FilterElement[],
         operator: "and" | "or" = "and"
-    ): Promise<Record<string, SmartSuiteCell>[]> {
+    ): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
         const fields: FilterElement[] = Array.isArray(fieldsToFilter) ? fieldsToFilter : [fieldsToFilter];
         const body: FilterBody = {
@@ -112,7 +143,9 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async getRecordsByFieldValues(tableID: string, fieldSlug: string, fieldValues: unknown[]): Promise<Record<string, SmartSuiteCell>[]> {
+    async getRecordsByFieldValues(tableID: string,
+        fieldSlug: string,
+        fieldValues: unknown[]): Promise<SmartSuiteRecord[]> {
         //gets any record where the specified field has any of the given list of values
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
         const body = {
@@ -129,11 +162,11 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: Record<string, SmartSuiteCell>[] } = await response.json();
+        const result: { items: SmartSuiteRecord[] } = await response.json();
         return result.items;
     }
 
-    async getAllRecords(tableID: string): Promise<Record<string, SmartSuiteCell>[]> {
+    async getAllRecords(tableID: string): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {};
@@ -142,16 +175,47 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: Record<string, SmartSuiteCell>[] } = await response.json();
+        const result: { items: SmartSuiteRecord[] } = await response.json();
         return result.items;
     }
 
     async bulkUpdateRecords(
         tableID: string,
-        records: Record<string, SmartSuiteCell>[],
-    ): Promise<Record<string, SmartSuiteCell>[]> {
+        records: SmartSuiteRecord[],
+    ): Promise<SmartSuiteRecord[]>
+
+    async bulkUpdateRecords(
+        tableID: string,
+        records: SmartSuiteRecord[],
+        checkForDataChanges: true,
+        useEntireTable: true
+    ): Promise<SmartSuiteRecord[]>
+
+    async bulkUpdateRecords(
+        tableID: string,
+        records: SmartSuiteRecord[],
+        checkForDataChanges: true,
+        useEntireTable: false,
+        idFieldSlug: string
+    ): Promise<SmartSuiteRecord[]>
+
+    async bulkUpdateRecords(
+        tableID: string,
+        records: SmartSuiteRecord[],
+        checkForDataChanges: boolean = records.length > this.maxBulkRequestSize,  //if true checks for data changes before
+        // including records in update request. Helps avoid exceeding max bulk request size but uses an extra request
+        useEntireTable: boolean = false, //setting to true uses the entire table for the data change check, but
+        // does not require an ID field slug
+        idFieldSlug?: string //slug of field containing Record ID
+    ): Promise<SmartSuiteRecord[]> {
+
+        //remove unchanged records if instructed    
+        if (checkForDataChanges) records = useEntireTable ?
+            await this.filterForDataChanges(tableID, records, useEntireTable) :
+            await this.filterForDataChanges(tableID, records, useEntireTable, idFieldSlug as string);
+
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const updatedRecords: Record<string, SmartSuiteCell>[] = [];
+        const updatedRecords: SmartSuiteRecord[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
 
         for (const batch of recordsBatches) {
@@ -166,9 +230,9 @@ export default class SmartSuiteAPIHandler {
         return updatedRecords;
     }
 
-    async bulkAddNewRecords(tableID: string, records: Record<string, SmartSuiteCell>[]): Promise<Record<string, SmartSuiteCell>[]> {
+    async bulkAddNewRecords(tableID: string, records: SmartSuiteRecord[]): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const newRecords: Record<string, SmartSuiteCell>[] = [];
+        const newRecords: SmartSuiteRecord[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
 
         for (const batch of recordsBatches) {
@@ -183,7 +247,7 @@ export default class SmartSuiteAPIHandler {
         return newRecords;
     }
 
-    async addNewRecord(tableID: string, record: Record<string, SmartSuiteCell>): Promise<Record<string, SmartSuiteCell>> {
+    async addNewRecord(tableID: string, record: SmartSuiteRecord): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
         const response = await this.request(url, {
@@ -194,7 +258,7 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async getRecordsByTitle(tableID: string, titles: string[]): Promise<Record<string, SmartSuiteCell>[]> {
+    async getRecordsByTitle(tableID: string, titles: string[]): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {
