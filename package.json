@@ -5,13 +5,12 @@
     },
     "dependencies": {
         "@types/node": "^20.12.12",
-        "cheerio": "^1.0.0",
-        "postcodesio-client": "^0.3.4",
-        "puppeteer-core": "^23.2.2",
         "tsc": "^2.0.4"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "cheerio": "^1.0.0",
+        "postcodesio-client": "^0.3.4",
         "@typescript-eslint/parser": "^6.21.0",
         "dotenv": "^16.4.5",
         "eslint": "^8.57.0",
