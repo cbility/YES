@@ -29,14 +29,13 @@ for (const opportunity of allOpportunities) {
     }
     try {
         console.log("SS ID: " + opportunity.id);
-        const update = await updateSSOpportunity(quickFileID, opportunity);
+        const update = await updateSSOpportunity(quickFileID as number, opportunity);
         console.log("updated QF quote ID: " + quickFileID, " SmartSuite ID:" + opportunity.id);
         await wait(800);
 
     } catch (err) {
         console.log(err);
     }
-
 }
 
 console.log(notOnQuickFile.join(", "));

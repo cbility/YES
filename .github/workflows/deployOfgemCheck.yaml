@@ -1,4 +1,4 @@
-name: Build and deploy functions to Lambda
+name: Build and deploy Ofgem Check functions to Lambda
 
 on:
   push:
@@ -7,14 +7,11 @@ on:
     paths:
       - 'src/ofgemCheck/**/*'
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
-      - '.github/workflows/deployLambda.yaml'
-      - 'src/indexCheckScraperOutput.ts'
-      - 'src/indexGetOfgemCheckInputs.ts'
-      - 'src/indexLogOfgemCheckOutputs.ts'
-      - 'src/QuickFile/**/*'
+      - '.github/workflows/deployOfgemCheck.yaml'
+      - 'src/lambda/ofgemCheck/*'
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -50,7 +47,7 @@ jobs:
         zip_file: deployment.zip
         memory_size: 128
         timeout: 30
-        handler: ./lambda/indexGetOfgemCheckInputs.handler
+        handler: ./lambda/ofgemCheck/indexGetOfgemCheckInputs.handler
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
         runtime: nodejs18.x
         environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
@@ -65,7 +62,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./lambda/indexCheckScraperOutput.handler
+          handler: ./lambda/ofgemCheck/indexCheckScraperOutput.handler
           role: arn:aws:iam::211125712927:role/service-role/CheckScraperOutput-role-15sxaq49
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
@@ -80,22 +77,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./lambda/indexLogOfgemCheckOutputs.handler
+          handler: ./lambda/ofgemCheck/indexLogOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
-          runtime: nodejs18.x
-          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
-
-    - name: AWS Lambda Deploy quickFileWebhookHandler
-      uses: appleboy/lambda-action@v0.2.0
-      with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: 'eu-west-2'
-          function_name: quickFileWebhookHandler
-          zip_file: deployment.zip
-          memory_size: 128
-          timeout: 300
-          handler: ./lambda/indexQuickFileWebhookHandler.handler
-          role: arn:aws:iam::211125712927:role/service-role/quickFileWebhookHandler-role-r1fvcpvz
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production

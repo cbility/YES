@@ -274,7 +274,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                 }
                 const updatedTask = {
                     id: SStask.id as string,
-                    [quoteItems.structure["Quantity"].slug]: task.Qty / opportunity[opportunities.structure["Minimum Hours"].slug], //Qty is actually hours on a Task: adjust hours to quantity 
+                    [quoteItems.structure["Quantity"].slug]: task.Qty / (opportunity[opportunities.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
                     [quoteItems.structure["Line Item Description"].slug]: task.ItemDescription,
                     // hourly rate is not adjusted here because it is set in the company management solution
                 };
@@ -285,7 +285,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         if (missingItemErrors.length > 0) await logErrorToPly(missingItemErrors.join("; ")); //log missing items as error
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug];
+        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug] as number);
 
         const opportunityUpdate = [{
             id: SSOpportunities[0].id,
@@ -297,12 +297,12 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
             [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
             [opportunities.structure["Customer Quote Link"].slug]:
-                QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
+                QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
         }];
 
         const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as {
             id: string;
-            [slug: string]: unknown
+            [slug: string]: string | number;
         }[];
 
         await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
@@ -329,7 +329,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug];
+        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug] as number);
 
         SS.updateRecord(opportunities.id,
             SSOpportunities[0].id,
@@ -341,7 +341,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                     to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
                 },
                 [opportunities.structure["Customer Quote Link"].slug]:
-                    QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
+                    QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
             }
         )
     }

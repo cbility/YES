@@ -1,5 +1,5 @@
 {
-    "type": "module",
+    "type": "CommonJS",
     "scripts": {
         "build": "tsc -p src/ofgemCheck/"
     },
@@ -9,13 +9,16 @@
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "cheerio": "^1.0.0",
+        "postcodesio-client": "^0.3.4",
         "@typescript-eslint/parser": "^6.21.0",
         "dotenv": "^16.4.5",
         "eslint": "^8.57.0",
-        "eslint-config-standard-with-typescript": "^43.0.1",
+        "eslint-config-love": "^63.0.0",
         "eslint-plugin-import": "^2.29.1",
         "eslint-plugin-n": "^16.6.2",
         "eslint-plugin-promise": "^6.1.1",
-        "typescript": "^5.4.5"
+        "puppeteer": "^23.2.2",
+        "typescript": "^5.5.4"
     }
 }

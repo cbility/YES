@@ -1,0 +1,52 @@
+name: Build and deploy QuickFile Webhook Handler to Lambda
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
+      - '.github/workflows/deployQFWebhookHandler.yaml'
+      - 'src/QuickFile/**/*'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install and build
+      run: | 
+        npm ci --omit=dev
+        npm run build --if-present
+      env:
+          CI: true
+
+    - name: Zip
+      run: |
+          cd dist
+          zip -r ../deployment.zip *
+          cd ..
+          ls
+
+    - name: AWS Lambda Deploy quickFileWebhookHandler
+      uses: appleboy/lambda-action@v0.2.0
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: 'eu-west-2'
+          function_name: quickFileWebhookHandler
+          zip_file: deployment.zip
+          memory_size: 128
+          timeout: 300
+          handler: ./lambda/indexQuickFileWebhookHandler.handler
+          role: arn:aws:iam::211125712927:role/service-role/quickFileWebhookHandler-role-r1fvcpvz
+          runtime: nodejs18.x
+          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production

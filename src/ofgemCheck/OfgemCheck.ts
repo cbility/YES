@@ -122,9 +122,8 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
         [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
     }
     //add record to SS
-    ss.bulkAddNewRecords([newUpdate], updatesTable.id);
+    ss.addNewRecord(updatesTable.id, newUpdate);
     console.log("Update record created")
-
 })();
 
 

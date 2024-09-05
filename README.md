@@ -3,7 +3,9 @@ Code for automating processes within YES (Your Energy Source)
 
 ## Local Developer Environment Setup with Node and npm
 
-This guide explains how to set up a local development environment using Node.js and npm. This will allow code to be tested locally before deployment to the cloud
+This guide explains how to set up a local development environment using Node.js and npm. This will allow code to be tested locally before deployment to the cloud. 
+
+Cloud deployment is managed by pushing to the main branch of https://github.com/cbility/YES.
 
 ### Project Structure
 
@@ -15,13 +17,16 @@ Here's the structure of this project:
 ├── tsconfig.json # typescript configuration
 ├── src 
 │ └── ofgemCheck # contains code used in an AWS step function that updates the YES RHI database 
-│ └── Ply # contains code used in various Ply features. Copied and pasted from the compiled javascript files into Ply
+│ └── RHIScraper # contains code automating a browser that retrieves information from the RHI register and updates SmartSuite
 │ └── QuickFile # contains code defining how various scripts interact with the QuickFile API
 │ └── tests # for testing functions locally before deployment
 │ └── SmartSuite # contains code defining SmartSuite API interactions
 │ └── lambda # contains AWS lambda function top level index files
+│ └── Ply # contains code used in code blocks on the low-code platform https://ply.io
 │ └── .eslint.js # defines project linting configuration
 ├── dist # compiled javascript code for use in production
+├── .github 
+│ └── workflows # contains workflow files for automatic cloud deployment of AWS Lambda functions
 ```
 
 ### Prerequisites
@@ -85,3 +90,11 @@ For example, on windows, you can use fnm:
     ```shell
         node 'dist\tests\opportunityUpdate.js'
     ```
+
+    test the RHI scraper:
+    ```shell
+        cd src/RHIScraper
+        tsc
+        npm run start
+    ```
+    You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file

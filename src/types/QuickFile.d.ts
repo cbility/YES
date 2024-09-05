@@ -112,7 +112,7 @@ interface InvoiceGetResponse extends ResponseBody {
                 "TotalAmount": number;
                 "Discount": number;
                 "Notes": null | string;
-                "Viewed": Boolean;
+                "Viewed": boolean;
                 "TermDays": number;
                 "TermNotes": null | string;
                 "Language": string;
@@ -228,11 +228,11 @@ interface InvoiceCreateData {
             Frequency: number; //How many intervals should the profile run for?
             StartDate: string; //When will the first invoice be issued?
             ProRataDays?: number; //use to pro rata the first payment for x number of days
-            GoCardlessAutoBill?: Boolean; // Set as true to use the pre-authorised Direct Debit details to automatically collect payment.
+            GoCardlessAutoBill?: boolean; // Set as true to use the pre-authorised Direct Debit details to automatically collect payment.
             GoCardlessRequestAfter?: number; // Specify the number of days delay you would like to add before initiating a Direct Debit collection. max 60
-            SendByEmail?: Boolean; // Send invoices by email when they are created from this recurring template.
-            SendByPost?: Boolean; // Send invoices by post when they are created from this recurring template.
-            ActivateOnCreation?: Boolean; //  Activates the recurring profile on creation. By default this is set to false and the profile will remain in DRAFT status until it is activated in QuickFile
+            SendByEmail?: boolean; // Send invoices by email when they are created from this recurring template.
+            SendByPost?: boolean; // Send invoices by post when they are created from this recurring template.
+            ActivateOnCreation?: boolean; //  Activates the recurring profile on creation. By default this is set to false and the profile will remain in DRAFT status until it is activated in QuickFile
         }
     }
     CreditNote?: { // Credit Note Meta data for negative invoices. See here for usage: https://community.quickfile.co.uk/t/creating-a-credit-note-using-the-api/23204
@@ -323,8 +323,6 @@ interface System_SearchEvents extends RequestBody {
     }
 }
 
-
-
 interface System_SearchEventsResponse extends ResponseBody {
     "System_SearchEvents": {
         "Header": {
@@ -347,9 +345,6 @@ interface System_SearchEventsResponse extends ResponseBody {
 }
 
 
-
-
-
 /////////////////////WEBHOOK TYPES/////////////////////////////////
 
 interface WebhookEvent { }
@@ -370,7 +365,7 @@ interface SupplierEvent extends WebhookEvent {
 //invoice functions
 interface InvoicesCreated extends InvoiceEvent {
     InvoiceType: "INV" | "EST" | "REC";
-    FromRecurring: Boolean;
+    FromRecurring: boolean;
     RecurringParentId?: number;
 }
 interface InvoicesUpdated extends InvoiceEvent {
@@ -418,7 +413,7 @@ interface ClientMerged extends WebhookEvent {
     TimeStamp: string; //Date and time the event occurred
     SourceId: number; //Merging "from" client ID
     TargetId: string; //Merging "to" client ID
-    Deleted: Boolean; //Source record deleted?
+    Deleted: boolean; //Source record deleted?
 }
 
 //supplier functions
@@ -429,7 +424,7 @@ interface SupplierMerged extends WebhookEvent {
     TimeStamp: string; //Date and time the event occurred
     SourceId: number; //Merging "from" supplier ID
     TargetId: string; //Merging "to" supplier ID
-    Deleted: Boolean; //Source record deleted?
+    Deleted: boolean; //Source record deleted?
 }
 
 //Sales Payment Functions

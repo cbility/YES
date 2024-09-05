@@ -240,7 +240,7 @@ interface filterElement {
     ) //linked record
     | ("is_empty" | "is_not_empty") //Smartdoc, checklist
 
-    value: (string | number | string[] | Boolean)
+    value: (string | number | string[] | boolean)
 }
 interface FilterBody {
     "filter": {
@@ -269,11 +269,11 @@ interface TariffRate {
     sdec426b7e: { //active period
         from_date: {
             date: string;
-            include_time: Boolean
+            include_time: boolean
         }
         to_date: {
             date: string;
-            include_time: Boolean
+            include_time: boolean
         };
     };
     s4c7204412: string; //RHIs list
