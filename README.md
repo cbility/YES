@@ -90,3 +90,11 @@ For example, on windows, you can use fnm:
     ```shell
         node 'dist\tests\opportunityUpdate.js'
     ```
+
+    test the RHI scraper:
+    ```shell
+        cd src/RHIScraper
+        tsc
+        npm run start
+    ```
+    You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
