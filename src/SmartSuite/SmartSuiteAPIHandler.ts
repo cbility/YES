@@ -20,7 +20,7 @@ class LimitedList<T> {
         return this.items;
     }
     getLastItem() {
-        return this.items[this.maxLength] as number | undefined;
+        return this.items[this.maxLength - 1] as number | undefined;
     }
 }
 
