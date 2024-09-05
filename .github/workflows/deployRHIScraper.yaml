@@ -23,16 +23,16 @@ jobs:
 
     - name: Install and build
       run: | 
-        npm ci --omit=dev --prefix src/RHIScraper
+        cd src/RHIScraper
+        npm ci --omit=dev
         npm run build --if-present
       env:
         CI: true
 
     - name: Zip
       run: |
-        cd dist/RHIScraper
-        zip -r ../deployment.zip *
-        cd ..
+        mkdir -p zip
+        zip -r ./zip/deployment.zip *
         ls
       env:
         CI: true
@@ -53,7 +53,17 @@ jobs:
       env:
         LAMBDA_NAME: YES_Scraper
         AWS_S3_BUCKET: yes-scraper
-        AWS_S3_KEY: bundle.zip
+        AWS_S3_KEY: deployment.zip
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'eu-west-2'
+
+    - name: Update Lambda Configuration
+      uses: appleboy/lambda-action@v0.2.0
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: 'eu-west-2'
+          function_name: YES_Scraper
+          environment: SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          handler: ./dist/lambda/indexQuickFileWebhookHandler.handler
