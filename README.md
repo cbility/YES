@@ -93,8 +93,7 @@ For example, on windows, you can use fnm:
 
     test the RHI scraper:
     ```shell
-        cd src/RHIScraper
         tsc
-        npm run start
+        npm run start --prefix src/RHIScraper
     ```
     You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
