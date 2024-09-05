@@ -50,7 +50,10 @@ export default class SmartSuiteAPIHandler {
         while (attempts < retries) {
             try {
                 // get ms elapsed since the request "maxRequestsPerSecond" requests previous.
-                const msSinceRelevantRequest = this.recentRequestTimestamps.getLastItem() ?? 0 - Date.now();
+                const relevantRequestTimestamp = this.recentRequestTimestamps.getLastItem() ?? 0;
+                const now = Date.now();
+                const msSinceRelevantRequest = relevantRequestTimestamp - now;
+                //const msSinceRelevantRequest = this.recentRequestTimestamps.getLastItem() ?? 0 - Date.now();
                 while (msSinceRelevantRequest > -1000) { //while rate limit will be exceeded
                     await new Promise(resolve => setTimeout(resolve, 1001 - msSinceRelevantRequest)); //wait until safe to retry
                 }
