@@ -4,9 +4,11 @@ on:
     branches:
       - main
     paths:
-      - 'src/RHIScraper/**/*'
-      - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/RHIScraper/**/*'
+      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployRHIScraper.yaml'
+      - 'tsconfig.json'
+      - 'package.json'
 
 jobs:
   build_and_deploy:

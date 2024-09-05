@@ -5,11 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployQFWebhookHandler.yaml'
-      - 'src/QuickFile/**/*'
-      - 'src/lambda/tsconfig.json'
-      - 'src/lambda/indexQuickFileWebhookHandler.ts'
+      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/QuickFile/**/*'
+      - 'packages/Main/src/.QuickFileWebhookHandler/**/*'
+      - 'tsconfig.json'
+      - 'package.json'
 
 jobs:
   build_and_deploy:
@@ -33,10 +34,9 @@ jobs:
 
     - name: Zip
       run: |
-          cd dist
-          zip -r ../deployment.zip *
-          cd ..
-          ls
+        mkdir zip
+        zip -r ./zip/deployment.zip *
+        ls
 
     - name: AWS Lambda Deploy quickFileWebhookHandler
       uses: appleboy/lambda-action@v0.2.0
@@ -48,7 +48,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 300
-          handler: ./lambda/indexQuickFileWebhookHandler.handler
+          handler: ./packages/Main/dist/QuickFileWebhookHandler/lambda/indexQuickFileWebhookHandler.handler
           role: arn:aws:iam::211125712927:role/service-role/quickFileWebhookHandler-role-r1fvcpvz
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
