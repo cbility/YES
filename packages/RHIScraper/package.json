@@ -1,0 +1,16 @@
+{
+    "type": "commonjs",
+    "scripts": {
+        "start": "node ./dist/tests/RHI-local.js",
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@sparticuz/chromium-min": "^119.0.2",
+        "@types/aws-lambda": "^8.10.138",
+        "@types/node": "^22.5.3",
+        "cheerio": "^1.0.0-rc.12",
+        "postcodesio-client": "^0.3.4",
+        "puppeteer-core": "^23.2.2",
+        "typescript": "^5.2.2"
+    }
+}
