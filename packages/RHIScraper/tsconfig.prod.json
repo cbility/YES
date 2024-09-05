@@ -2,10 +2,11 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "outDir": "./dist", /* Specify an output folder for all emitted files. */
-        "rootDir": "."
+        "rootDir": "./src"
     },
     "include": [
         "src/**/*",
+        "../SmartSuite/src/SmartSuite.d.ts"
     ],
     "exclude": [
         "node_modules",
