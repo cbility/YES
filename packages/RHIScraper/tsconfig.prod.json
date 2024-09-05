@@ -2,7 +2,10 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "outDir": "./dist", /* Specify an output folder for all emitted files. */
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "typeRoots": [
+            "./node_modules/@types"
+        ]
     },
     "include": [
         "src/**/*",
