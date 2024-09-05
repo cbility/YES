@@ -2,7 +2,7 @@
     "type": "commonjs",
     "scripts": {
         "start": "node ./dist/tests/RHI-local.js",
-        "build": "tsc -build ./tsconfig.prod.json"
+        "build": "tsc -build ./tsconfig.prod.json --verbose --pretty"
     },
     "dependencies": {
         "@sparticuz/chromium-min": "^119.0.2",
