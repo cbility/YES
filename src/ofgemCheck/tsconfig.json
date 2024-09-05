@@ -104,6 +104,7 @@
     "exclude": [
         "../SmartSuite/getTables.ts",
         "../tests/**/*",
-        "../Ply/JSScripts/**/*"
+        "../Ply/JSScripts/**/*",
+        "../RHIScraper/**/*"
     ]
 }
