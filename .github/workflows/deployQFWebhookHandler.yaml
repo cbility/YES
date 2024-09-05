@@ -34,8 +34,7 @@ jobs:
 
     - name: Zip
       run: |
-        mkdir zip
-        zip -r ./zip/deployment.zip *
+        zip -r ./deployment.zip *
         ls
 
     - name: AWS Lambda Deploy quickFileWebhookHandler
