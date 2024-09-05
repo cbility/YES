@@ -1,9 +1,7 @@
-
-import { LoginRecord } from "../globals";
-import { loginsTable } from "../globals";
+import { loginsTable } from "../../../../SmartSuite/tables.js";
 import { Page } from "puppeteer-core";
 
-export default async function getLoginDetails(loginRecord: LoginRecord, page: Page): Promise<LoginRecord> {
+export default async function getLoginDetails(loginRecord: RHILoginRecord, page: Page): Promise<RHILoginRecord> {
 
     const updatePasswordLink = await page.$("#SecondaryPlaceHolder_rptLeftNavigation_hlnkLeftNav_2");
     //account is AS if option to update password is available

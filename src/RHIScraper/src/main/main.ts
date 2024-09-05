@@ -2,16 +2,16 @@ import {
     accountsTable,
     RHIsTable,
     loginsTable,
-} from "../../SmartSuite/tables";
+} from "../../../SmartSuite/tables.js";
 
-//import type { RHILoginRecord, RHIAccountRecord, RHIRecord } from "../../SmartSuite/SmartSuite.d.ts";
-import getLoginDetails from "./RHI/getLoginDetails";
-import getAccountDetails from "./RHI/getAccountDetails";
-import logInUser from "./RHI/logInUser";
-import validateLogin from "./RHI/validateLogin";
-import getRHIDetails from "./RHI/getRHIDetails";
+//import type { RHILoginRecord, RHIAccountRecord, RHIRecord } from "../../types/SmartSuite.d.ts";
+import getLoginDetails from "./RHI/getLoginDetails.js";
+import getAccountDetails from "./RHI/getAccountDetails.js";
+import logInUser from "./RHI/logInUser.js";
+import validateLogin from "./RHI/validateLogin.js";
+import getRHIDetails from "./RHI/getRHIDetails.js";
+import SmartSuite from "../../../SmartSuite/SmartSuiteAPIHandler.js"
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
-import SmartSuite from "../../SmartSuite/SmartSuiteAPIHandler.js"
 
 //type Inputs = { loginID: string }[];
 

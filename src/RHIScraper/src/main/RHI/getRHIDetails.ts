@@ -1,12 +1,8 @@
-/* eslint-disable indent */
-import { RHIRecord, RHIsTable } from "../globals";
-import { AddressField } from "../globals";
 import { Page } from "puppeteer-core";
 import * as cheerio from "cheerio";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const PostcodesIO = require("postcodesio-client");
 const postcodes = new PostcodesIO("https://api.postcodes.io");
-
+import { RHIsTable } from "../../../../SmartSuite/tables.js";
 export default async function getRHIDetails(
     accountID: string,
     page: Page,
@@ -54,9 +50,9 @@ export default async function getRHIDetails(
 
         const PeriodicDataSubmissionHTML = await page.content();
         const { firstDateOnAccount, RHIStart, lastDate } = getSubmissionDates(PeriodicDataSubmissionHTML);
-        RHI[RHIsTable.fields["Latest Submitted PDS"]] = lastDate?.toISOString().split("T")[0];
-        RHI[RHIsTable.fields["RHI Start"]] = RHIStart?.toISOString().split("T")[0];
-        RHI[RHIsTable.fields["First Reading on Account"]] = firstDateOnAccount?.toISOString().split("T")[0];
+        RHI[RHIsTable.fields["Latest Submitted PDS"]] = lastDate?.toISOString().split("T")[0] ?? null;
+        RHI[RHIsTable.fields["RHI Start"]] = RHIStart?.toISOString().split("T")[0] ?? null;
+        RHI[RHIsTable.fields["First Reading on Account"]] = firstDateOnAccount?.toISOString().split("T")[0] ?? null;
         await page.goto("https://rhi.ofgem.gov.uk/PeriodicData/SubmitPeriodicData.aspx");
     }
     return RHIRecords;
@@ -137,7 +133,7 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
                 break;
             }
             case "HH123-3": {
-                RHI[RHIsTable.fields["QHLF (KWH)"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.fields["QHLF (kWh)"]] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HA150": {
@@ -185,7 +181,7 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
                 break;
             }
             case "HC130": {
-                const address: AddressField = { "location_country": "United Kingdom" };
+                const address: AddressFieldCell = { "location_country": "United Kingdom" };
                 switch ($(element).find("td:nth-child(3)").text()) { //is account address same as install address
                     case "Yes": {
                         accreditationSummaryTableRows.each((i, e) => {

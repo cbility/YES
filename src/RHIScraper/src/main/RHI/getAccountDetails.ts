@@ -1,6 +1,6 @@
-import { accountsTable } from "../../../SmartSuite/tables";
+import { accountsTable } from "../../../../SmartSuite/tables.js";
 import { ElementHandle, Page } from "puppeteer-core";
-import extractPostcodeFromAddress from "../extractPostcodeFromAddress";
+import extractPostcodeFromAddress from "../extractPostcodeFromAddress.js";
 import * as cheerio from "cheerio";
 
 // eslint-disable-next-line max-len

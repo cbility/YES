@@ -1,6 +1,6 @@
-import { ExistingRecord, loginsTable } from "../globals";
+import { loginsTable } from "../../../../SmartSuite/tables.js";
 
-export default async function logInUser(loginRecord: ExistingRecord, page: any): Promise<void> {
+export default async function logInUser(loginRecord: RHILoginRecord, page: any): Promise<void> {
 
     const username = loginRecord[loginsTable.fields.Username];
     const password = loginRecord[loginsTable.fields.Password];
