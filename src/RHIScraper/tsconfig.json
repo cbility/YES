@@ -110,5 +110,6 @@
         "../lambda/**/*",
         "../QuickFile/**/*",
         "../SmartSuite/getTables.ts",
+        "./RHI-local.ts"
     ]
 }
