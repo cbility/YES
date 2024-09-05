@@ -2,7 +2,7 @@ import {
     accountsTable,
     RHIsTable,
     loginsTable,
-} from "../../../SmartSuite/tables.js";
+} from "../../SmartSuite/tables.js";
 
 //import type { RHILoginRecord, RHIAccountRecord, RHIRecord } from "../../types/SmartSuite.d.ts";
 import getLoginDetails from "./RHI/getLoginDetails.js";
@@ -10,10 +10,13 @@ import getAccountDetails from "./RHI/getAccountDetails.js";
 import logInUser from "./RHI/logInUser.js";
 import validateLogin from "./RHI/validateLogin.js";
 import getRHIDetails from "./RHI/getRHIDetails.js";
-import SmartSuite from "../../../SmartSuite/SmartSuiteAPIHandler.js"
+import SmartSuite from "../../SmartSuite/SmartSuiteAPIHandler.js"
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 
-//type Inputs = { loginID: string }[];
+if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
+    require("dotenv").config({ path: '../../.env' });
+    console.log("Using local environment variables")
+}
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 

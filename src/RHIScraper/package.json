@@ -1,7 +1,7 @@
 {
-    "type": "module",
+    "type": "CommonJS",
     "scripts": {
-        "start": "node dist/tests/RHI-local.js",
+        "start": "node ../../dist/RHIScraper/RHI-local.js",
         "build": "tsc"
     },
     "dependencies": {

@@ -1,7 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 import puppeteer from "puppeteer";
-import main from "../RHIScraper/src/main/main";
+import main from "./main/main.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 
 const browserArgs = {

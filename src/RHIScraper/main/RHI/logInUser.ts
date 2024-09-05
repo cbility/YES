@@ -1,4 +1,4 @@
-import { loginsTable } from "../../../../SmartSuite/tables.js";
+import { loginsTable } from "../../../SmartSuite/tables.js";
 
 export default async function logInUser(loginRecord: RHILoginRecord, page: any): Promise<void> {
 

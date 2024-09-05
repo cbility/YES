@@ -1,4 +1,4 @@
-import { loginsTable } from "../../../../SmartSuite/tables.js";
+import { loginsTable } from "../../../SmartSuite/tables.js";
 import { Page } from "puppeteer-core";
 
 export default async function getLoginDetails(loginRecord: RHILoginRecord, page: Page): Promise<RHILoginRecord> {
