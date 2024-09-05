@@ -1,4 +1,4 @@
-name: deploy to lambda
+name: Deploy RHI Scraper
 on: 
   push:
     branches:
