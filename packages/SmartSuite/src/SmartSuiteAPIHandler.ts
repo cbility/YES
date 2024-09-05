@@ -1,4 +1,4 @@
-import HTTPError from "../../common/src/HTTPError";
+import HTTPError from "../../Common/src/HTTPError";
 
 class LimitedList<T> {
     private maxLength: number;
