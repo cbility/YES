@@ -1,7 +1,7 @@
 {
     "type": "CommonJS",
     "scripts": {
-        "build": "tsc -p src/ofgemCheck/"
+        "build": "tsc -p src/lambda/"
     },
     "dependencies": {
         "@types/node": "^20.12.12",

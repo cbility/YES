@@ -8,6 +8,8 @@ on:
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployQFWebhookHandler.yaml'
       - 'src/QuickFile/**/*'
+      - 'src/lambda/tsconfig.json'
+      - 'src/lambda/indexQuickFileWebhookHandler.ts'
 
 jobs:
   build_and_deploy:

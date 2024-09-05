@@ -9,6 +9,7 @@ on:
       - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployOfgemCheck.yaml'
       - 'src/lambda/ofgemCheck/*'
+      - 'src/lambda/tsconfig.json'
 
 jobs:
   build_and_deploy:
