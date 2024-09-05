@@ -5,11 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'src/ofgemCheck/**/*'
-      - 'src/SmartSuite/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployOfgemCheck.yaml'
-      - 'src/lambda/ofgemCheck/*'
-      - 'src/lambda/tsconfig.json'
+      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/QuickFile/**/*'
+      - 'packages/Main/src/OfgemCheck/**/*'
+      - 'tsconfig.json'
+      - 'package.json'
 
 jobs:
   build_and_deploy:
@@ -33,10 +34,9 @@ jobs:
 
     - name: Zip
       run: |
-          cd dist
-          zip -r ../deployment.zip *
-          cd ..
-          ls
+        mkdir zip
+        zip -r ./zip/deployment.zip *
+        ls
 
     - name: AWS Lambda Deploy GetOfgemCheckInputs
       uses: appleboy/lambda-action@v0.2.0
@@ -48,8 +48,8 @@ jobs:
         zip_file: deployment.zip
         memory_size: 128
         timeout: 30
-        handler: ./lambda/ofgemCheck/indexGetOfgemCheckInputs.handler
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
+        handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexGetOfgemCheckInputs.handler
         runtime: nodejs18.x
         environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
 
@@ -63,7 +63,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./lambda/ofgemCheck/indexCheckScraperOutput.handler
+          handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexCheckScraperOutput.handler
           role: arn:aws:iam::211125712927:role/service-role/CheckScraperOutput-role-15sxaq49
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
@@ -78,7 +78,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./lambda/ofgemCheck/indexLogOfgemCheckOutputs.handler
+          handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexLogOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production

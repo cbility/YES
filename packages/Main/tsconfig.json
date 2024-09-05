@@ -1,0 +1,22 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist", /* Specify an output folder for all emitted files. */
+        "rootDir": "./src"
+    },
+    "include": [
+        "src/**/*",
+        "../QuickFile/src/QuickFile.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+    ],
+    "references": [
+        {
+            "path": "../SmartSuite"
+        },
+        {
+            "path": "../QuickFile"
+        },
+    ]
+}
