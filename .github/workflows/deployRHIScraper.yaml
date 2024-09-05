@@ -30,6 +30,7 @@ jobs:
 
     - name: Zip
       run: |
+        mkdir zip
         zip -r ./zip/deployment.zip *
         ls
       env:
