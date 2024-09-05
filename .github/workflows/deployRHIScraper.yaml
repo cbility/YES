@@ -47,16 +47,6 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'eu-west-2'
         SOURCE_DIR: './zip'
-      
-    - name: Deploy lambda from S3
-      uses: rotarydialer/update-lambda-s3@v1.0.0
-      env:
-        LAMBDA_NAME: YES_Scraper
-        AWS_S3_BUCKET: yes-scraper
-        AWS_S3_KEY: deployment.zip
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'eu-west-2'
 
     - name: Update Lambda Configuration
       uses: appleboy/lambda-action@v0.2.0
@@ -67,3 +57,6 @@ jobs:
           function_name: YES_Scraper
           environment: SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
           handler: ./dist/lambda/indexQuickFileWebhookHandler.handler
+          s3_bucket: yes-scraper
+          s3_key: deployment.zip
+
