@@ -1,13 +1,13 @@
 {
     "type": "commonjs",
     "scripts": {
-        "build": "tsc -p src/lambda/"
+        "build": "tsc -build packages/Main/"
     },
     "dependencies": {
-        "tsc": "^2.0.4"
+        "tsc": "^2.0.4",
+        "@types/node": "^22.5.4"
     },
     "devDependencies": {
-        "@types/node": "^22.5.4",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.21.0",
         "cheerio": "^1.0.0",
