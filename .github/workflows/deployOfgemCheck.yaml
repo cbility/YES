@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/deployOfgemCheck.yaml'
-      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/SmartSuite/src/SmartSuiteAPIHandler.ts'
       - 'packages/QuickFile/**/*'
       - 'packages/Main/src/OfgemCheck/**/*'
       - 'tsconfig.json'

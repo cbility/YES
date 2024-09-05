@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/deployQFWebhookHandler.yaml'
-      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/SmartSuite/src/SmartSuiteAPIHandler.ts'
       - 'packages/QuickFile/**/*'
       - 'packages/Main/src/.QuickFileWebhookHandler/**/*'
       - 'tsconfig.json'

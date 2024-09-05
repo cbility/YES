@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - 'packages/RHIScraper/**/*'
-      - 'packages/SmartSuite/SmartSuiteAPIHandler.ts'
+      - 'packages/SmartSuite/src/SmartSuiteAPIHandler.ts'
       - '.github/workflows/deployRHIScraper.yaml'
       - 'tsconfig.json'
       - 'package.json'
