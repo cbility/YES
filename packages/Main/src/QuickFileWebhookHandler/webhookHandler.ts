@@ -1,6 +1,6 @@
-import QuickFileAPIHandler from "../../../QuickFile/src/QuickFileAPIHandler.js";
-import SmartSuiteAPIHandler from "../../../SmartSuite/src/SmartSuiteAPIHandler.js";
-import { invoices, opportunities, quoteItems } from "../../../SmartSuite/src/tables.js"
+import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
+import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
+import { invoices, opportunities, quoteItems } from "../../../SmartSuite/dist/tables.js"
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
     require('dotenv').config();

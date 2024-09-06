@@ -1,8 +1,8 @@
 //update all opportunities on SmartSuite to reflect values on QuickFile
 
-import QuickFileAPIHandler from "../../../../QuickFile/src/QuickFileAPIHandler.js";
-import SmartSuiteAPIHandler from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
-import { opportunities, quoteItems } from "../../../../SmartSuite/src/tables.js";
+import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.js";
+import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
+import { opportunities, quoteItems } from "../../../../SmartSuite/dist/tables.js";
 require('dotenv').config(); //load local environment variables
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;

@@ -1,4 +1,4 @@
-import SmartSuite from "../../../SmartSuite/src/SmartSuiteAPIHandler.js";
+import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
 interface LoginID { loginID: string };
 

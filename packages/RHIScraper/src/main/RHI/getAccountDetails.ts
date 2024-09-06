@@ -1,4 +1,4 @@
-import { accountsTable } from "../../../../SmartSuite/src/tables.js";
+import { accountsTable } from "../../../../SmartSuite/dist/tables.js";
 import { ElementHandle, Page } from "puppeteer-core";
 import extractPostcodeFromAddress from "../extractPostcodeFromAddress.js";
 import * as cheerio from "cheerio";

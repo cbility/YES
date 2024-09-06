@@ -2,15 +2,13 @@ import {
     accountsTable,
     RHIsTable,
     loginsTable,
-} from "../../../SmartSuite/src/tables.js";
-
-//import type { RHILoginRecord, RHIAccountRecord, RHIRecord } from "../../types/SmartSuite.d.ts";
+} from "../../../SmartSuite/dist/tables.js";
+import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
 import getLoginDetails from "./RHI/getLoginDetails.js";
 import getAccountDetails from "./RHI/getAccountDetails.js";
 import logInUser from "./RHI/logInUser.js";
 import validateLogin from "./RHI/validateLogin.js";
 import getRHIDetails from "./RHI/getRHIDetails.js";
-import SmartSuite from "../../../SmartSuite/src/SmartSuiteAPIHandler.js"
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env

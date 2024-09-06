@@ -1,4 +1,4 @@
-import SmartSuite from "../../../SmartSuite/src/SmartSuiteAPIHandler.js";
+import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
     require('dotenv').config();
