@@ -305,8 +305,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
             [slug: string]: string | number;
         }[];
 
-        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
-        if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate);
+        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate, false);
+        if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate, false);
     }
     async function updateSSInvoice(invoiceId: number) {
         const invoice = await QF.invoiceGet({ InvoiceID: invoiceId });

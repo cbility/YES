@@ -41,12 +41,13 @@ export default async function main(
         loginRecords[loginRecord.id as string] = loginRecord;
     }
 
-    //get Existing RHI Records and Accounts from RHI Table and save as dictionary
+    //get Existing RHI Records and Accounts from RHI Table and save as dictionary for fast lookup of record IDs from RHI numbers
     const ExistingRHIRecords: Record<string, string> = {};
     const ExistingRHIAccounts: Record<string, string> = {};
-    (await ss.getAllRecords(RHIsTable.id) as { [slug: string]: string }[]).forEach((RHIRecord) => {
-        ExistingRHIRecords[RHIRecord.title] = RHIRecord.id;
-        ExistingRHIAccounts[RHIRecord.title] = RHIRecord[RHIsTable.fields["RHI Account"]];
+    const ExistingRHIRecordsList: RHIRecord[] = await ss.getAllRecords(RHIsTable.id);
+    (await ss.getAllRecords(RHIsTable.id)).forEach((RHIRecord) => {
+        ExistingRHIRecords[RHIRecord.title as string] = RHIRecord.id;
+        ExistingRHIAccounts[RHIRecord.title as string] = RHIRecord[RHIsTable.fields["RHI Account"]] as string;
     });
     const browser = await puppeteer.launch(browserArgs);
 
@@ -178,7 +179,7 @@ export default async function main(
 
     //update SmartSuite logins first to avoid overwriting links to new accounts
     if (loginDetails.length > 0) {
-        await ss.bulkUpdateRecords(loginsTable.id, loginDetails);
+        await ss.bulkUpdateRecords(loginsTable.id, loginDetails, true, true, { entireTableRecords: loginRecordsList });
         console.log("Login details updated");
     }
 
@@ -190,13 +191,13 @@ export default async function main(
 
     //update existing accounts
     if (updatedAccountDetails.length > 0) {
-        await ss.bulkUpdateRecords(accountsTable.id, updatedAccountDetails);
+        await ss.bulkUpdateRecords(accountsTable.id, updatedAccountDetails, true, false, { idFieldSlug: accountsTable.fields["Record ID (System Field)"] });
         console.log("Existing account details updated");
     }
 
     //update existing RHIs
     if (updatedRHIDetails.length > 0) {
-        await ss.bulkUpdateRecords(RHIsTable.id, updatedRHIDetails);
+        await ss.bulkUpdateRecords(RHIsTable.id, updatedRHIDetails, true, true, { entireTableRecords: ExistingRHIRecordsList });
         console.log("Existing RHI details updated");
     }
 

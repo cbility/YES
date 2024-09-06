@@ -82,30 +82,44 @@ export default class SmartSuiteAPIHandler {
 
     async filterForDataChanges(tableID: string,
         updatedRecords: SmartSuiteRecord[],
-        useEntireTable: true): Promise<SmartSuiteRecord[]>;
+        useEntireTable: true,
+        additionalInfo?: { entireTableRecords: SmartSuiteRecord[] }): Promise<SmartSuiteRecord[]>;
 
     async filterForDataChanges(tableID: string,
         updatedRecords: SmartSuiteRecord[],
         useEntireTable: false,
-        idFieldSlug: string): Promise<SmartSuiteRecord[]>;
+        additionalInfo: { idFieldSlug: string }): Promise<SmartSuiteRecord[]>;
 
     async filterForDataChanges(tableID: string,
         updatedRecords: SmartSuiteRecord[],
-        useEntireTable: boolean = false,
-        idFieldSlug?: string): Promise<SmartSuiteRecord[]> {
+        useEntireTable: boolean,
+        additionalInfo?: { idFieldSlug?: string; entireTableRecords?: SmartSuiteRecord[] }): Promise<SmartSuiteRecord[]> {
         /*helper function to remove records which are identical to their cloud hosted copy from an update request
         Can be configured to just check records which are listed, but needs the field slug of an ID field.
-        Can also be configured to check records against the entire table, but more computationally expensive
+        Can also be configured to check records against the entire table, but more computationally expensive. Entire table can be supplier or is requested
         */
         const existingRecords = useEntireTable ?
-            await this.getAllRecords(tableID) : await this.getRecordsByFieldValues(
+            additionalInfo?.entireTableRecords ?
+                additionalInfo.entireTableRecords :
+                await this.getAllRecords(tableID) :
+            await this.getRecordsByFieldValues(
                 tableID,
-                idFieldSlug as string,
+                additionalInfo?.idFieldSlug as string,
                 updatedRecords.map(record => record.id)
             );
-        const existingRecordsSet = new Set(existingRecords.map(record => JSON.stringify(record)));
-        const filteredRecords = updatedRecords.filter(record => !existingRecordsSet.has(JSON.stringify(record)));
-        return filteredRecords;
+
+        const changedRecords = updatedRecords.filter((updatedRecord) => {
+            const recordToUpdate = existingRecords.find(existingRecord => existingRecord.id === updatedRecord.id);
+            return recordToUpdate ? !checkRecordEquivalence(updatedRecord, recordToUpdate) : true; //update the record if not found in the supplied record list
+        })
+        return changedRecords;
+
+
+        //helper function
+        function checkRecordEquivalence(source: SmartSuiteRecord, reference: SmartSuiteRecord): boolean {
+            //returns false if any field value in the source differs from that field value in the reference, else returns true
+            return Object.keys(source).every(key => deepEqual(reference[key], source[key]));
+        }
     }
 
     async updateRecord(tableID: string,
@@ -178,41 +192,46 @@ export default class SmartSuiteAPIHandler {
         const result: { items: SmartSuiteRecord[] } = await response.json();
         return result.items;
     }
-
-    async bulkUpdateRecords(
-        tableID: string,
-        records: SmartSuiteRecord[],
-    ): Promise<SmartSuiteRecord[]>
-
-    async bulkUpdateRecords(
-        tableID: string,
-        records: SmartSuiteRecord[],
-        checkForDataChanges: true,
-        useEntireTable: true
-    ): Promise<SmartSuiteRecord[]>
-
     async bulkUpdateRecords(
         tableID: string,
         records: SmartSuiteRecord[],
         checkForDataChanges: true,
         useEntireTable: false,
-        idFieldSlug: string
+        additionalInfo: { idFieldSlug: string }
     ): Promise<SmartSuiteRecord[]>
 
     async bulkUpdateRecords(
         tableID: string,
         records: SmartSuiteRecord[],
-        checkForDataChanges: boolean = records.length > this.maxBulkRequestSize,  //if true checks for data changes before
+        checkForDataChanges: true,
+        useEntireTable: true,
+        additionalInfo?: { entireTableRecords: SmartSuiteRecord[] }
+    ): Promise<SmartSuiteRecord[]>
+
+    async bulkUpdateRecords(
+        tableID: string,
+        records: SmartSuiteRecord[],
+        checkForDataChanges: false
+    ): Promise<SmartSuiteRecord[]>
+
+    async bulkUpdateRecords(
+        tableID: string,
+        records: SmartSuiteRecord[],
+        checkForDataChanges: boolean = records.length > 2 * this.maxBulkRequestSize,  //if true checks for data changes before
         // including records in update request. Helps avoid exceeding max bulk request size but uses an extra request
         useEntireTable: boolean = false, //setting to true uses the entire table for the data change check, but
         // does not require an ID field slug
-        idFieldSlug?: string //slug of field containing Record ID
+        additionalInfo?: { idFieldSlug?: string /*slug of field containing Record ID*/; entireTableRecords?: SmartSuiteRecord[] /*list of entire table contents. Only use if already retrieved*/ }
     ): Promise<SmartSuiteRecord[]> {
+
+        if (records.length <= 2 * this.maxBulkRequestSize && additionalInfo?.entireTableRecords === undefined) checkForDataChanges = false; //don't check for data changes when it won't save on the total number of requests
 
         //remove unchanged records if instructed    
         if (checkForDataChanges) records = useEntireTable ?
-            await this.filterForDataChanges(tableID, records, useEntireTable) :
-            await this.filterForDataChanges(tableID, records, useEntireTable, idFieldSlug as string);
+            await this.filterForDataChanges(tableID, records, true, additionalInfo as { entireTableRecords: SmartSuiteRecord[] } | undefined) :
+            await this.filterForDataChanges(tableID, records, false, additionalInfo as { idFieldSlug: string });
+
+        if (records.length === 0) return []; // skip request if no records to update
 
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
         const updatedRecords: SmartSuiteRecord[] = [];
@@ -306,4 +325,24 @@ function splitIntoSubArrays<T>(subArrayLength: number, array: T[]): T[][] {
         result.push(array.slice(i, i + subArrayLength));
     }
     return result;
+}
+
+function deepEqual(obj1: any, obj2: any): boolean {
+    // If both are strictly equal (covers primitives)
+    if (obj1 === obj2) return true;
+    // If either is not an object, they are not equal (handles nulls, functions, etc.)
+    if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
+        return false;
+    }
+    // Compare the length of their keys (to ensure no extra fields)
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) return false;
+    // Check each key recursively
+    for (const key of keys1) {
+        if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+            return false;
+        }
+    }
+    return true;
 }

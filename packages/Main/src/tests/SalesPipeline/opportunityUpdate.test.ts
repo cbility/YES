@@ -160,7 +160,7 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
         }[];
         */
 
-        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate);
+        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate, false);
         console.log("Opportunity updated successfully");
 
         /*
