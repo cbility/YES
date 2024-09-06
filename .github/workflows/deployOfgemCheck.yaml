@@ -48,7 +48,7 @@ jobs:
         memory_size: 128
         timeout: 30
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
-        handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexGetOfgemCheckInputs.handler
+        handler: ./packages/Main/dist/OfgemCheck/lambda/indexGetOfgemCheckInputs.handler
         runtime: nodejs18.x
         environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
 
@@ -62,7 +62,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexCheckScraperOutput.handler
+          handler: ./packages/Main/dist/OfgemCheck/lambda/indexCheckScraperOutput.handler
           role: arn:aws:iam::211125712927:role/service-role/CheckScraperOutput-role-15sxaq49
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
@@ -77,7 +77,7 @@ jobs:
           zip_file: deployment.zip
           memory_size: 128
           timeout: 30
-          handler: ./packages/Main/dist/indexGetOfgemCheck/OfgemCheck/lambda/indexLogOfgemCheckOutputs.handler
+          handler: ./packages/Main/dist/OfgemCheck/lambda/indexLogOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
