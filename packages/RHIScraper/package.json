@@ -1,7 +1,7 @@
 {
     "type": "commonjs",
     "scripts": {
-        "start": "node ./dist/tests/RHI-local.js",
+        "start": "node ./dist/tests/RHI-local.test.js",
         "build": "tsc -build ./tsconfig.prod.json --verbose --pretty"
     },
     "dependencies": {
