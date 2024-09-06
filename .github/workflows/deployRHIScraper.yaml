@@ -58,7 +58,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: 'eu-west-2'
           function_name: YES_Scraper
-          environment: SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          environment: TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
           handler: ./packages/RHIScraper/dist/lambda/indexRHIScraper.handler
           s3_bucket: yes-scraper
           s3_key: deployment.zip
