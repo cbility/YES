@@ -34,7 +34,8 @@ jobs:
 
     - name: Zip
       run: |
-        zip -r ./deployment.zip *
+        mkdir zip
+        zip -r ./zip/deployment.zip *
         ls
       env:
         CI: true
