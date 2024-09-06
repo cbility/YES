@@ -12,5 +12,8 @@
         "postcodesio-client": "^0.3.4",
         "puppeteer-core": "^23.2.2",
         "typescript": "^5.2.2"
+    },
+    "devDependencies": {
+        "puppeteer": "^23.3.0"
     }
 }
