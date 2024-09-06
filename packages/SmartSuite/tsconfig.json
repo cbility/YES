@@ -1,7 +1,6 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "esnext",
         "outDir": "./dist", /* Specify an output folder for all emitted files. */
         "rootDir": "./src",
     },
