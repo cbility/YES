@@ -4,8 +4,8 @@ import extractPostcodeFromAddress from "../extractPostcodeFromAddress.js";
 import * as cheerio from "cheerio";
 
 export default async function getAccountDetails(
-    accountRecord: Omit<RHIAccountRecord, "id">,
-    page: Page): Promise<Omit<RHIAccountRecord, "id">> {
+    accountRecord: RHIAccountRecordUpdate,
+    page: Page): Promise<RHIAccountRecordUpdate> {
 
     let viewAccountButton: ElementHandle<Element> | null = null;
     while (viewAccountButton === null) {
@@ -41,10 +41,11 @@ export default async function getAccountDetails(
     (accountRecord[accountsTable.fields["Account Address"]] as { location_country: string }).location_country = "UK";
 
     accountRecord[accountsTable.fields["Company Phone"]] =
-        [formatPhoneNumber(
-            $("#accordion-default-content-3 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
-                .text().replace("\n", "").trim())
-        ];
+        {
+            phone_number: formatPhoneNumber(
+                $("#accordion-default-content-3 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
+                    .text().replace("\n", "").trim())
+        } as Update<PhoneNumberFieldCell>;
 
     accountRecord[accountsTable.fields["Company Number"]] =
         [$("#accordion-default-content-5 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
