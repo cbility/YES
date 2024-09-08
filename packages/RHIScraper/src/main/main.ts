@@ -29,7 +29,7 @@ export default async function main(
 
     const inputIDs = inputs.map(input => input.loginID)
     //get login records from login table
-    const loginRecordsList = await ss.getRecordsByFieldValues(
+    const loginRecordsList: RHILoginRecord[] = await ss.getRecordsByFieldValues(
         loginsTable.id,
         loginsTable.fields["Record ID (System Field)"],
         inputs.map(input => input.loginID)
@@ -55,7 +55,7 @@ export default async function main(
         (inputLogin) => inputLogin.loginID
     );
     const loginDetails: RHILoginRecord[] = [];
-    const accountDetails: (RHIAccountRecord | Omit<RHIAccountRecord, "id">)[] = [];
+    const accountDetails: (RHIAccountRecordUpdate)[] = [];
     const updatedRHIDetails: RHIRecord[] = [];
     const newRHIDetails: Omit<RHIRecord, "id">[] = [];
     const page = await browser.newPage();
@@ -122,7 +122,7 @@ export default async function main(
             continue;
         }
 
-        const accountRecordToUpdate: RHIAccountRecord | Omit<RHIAccountRecord, "id"> = accountID ?
+        const accountRecordToUpdate: RHIAccountRecordUpdate | Omit<RHIAccountRecordUpdate, "id"> = accountID ?
             { id: accountID, } : {
                 //only update the linked login if account is brand new,
                 // i.e. corresponds to a new AS login
@@ -139,8 +139,8 @@ export default async function main(
                   updating an account record can not update the linked logins.
                   This avoids overwriting information.*/
 
-        const updatedAccountRecord: Omit<RHIAccountRecord, "id"> = await getAccountDetails(
-            accountRecordToUpdate,
+        const updatedAccountRecord: RHIAccountRecordUpdate = await getAccountDetails(
+            accountRecordToUpdate as RHIAccountRecordUpdate,
             page
         );
 
@@ -169,13 +169,13 @@ export default async function main(
         return;
     }
 
-    const newAccountDetails: Omit<RHIAccountRecord, "id">[] = accountDetails
+    const newAccountDetails: Omit<RHIAccountRecordUpdate, "id">[] = accountDetails
         .filter((account) => !account.id)
         .map(({ id, ...rest }) => rest);
 
-    const updatedAccountDetails: RHIAccountRecord[] = accountDetails.filter(
+    const updatedAccountDetails: RHIAccountRecordUpdate[] = accountDetails.filter(
         (account) => !!account.id
-    ) as RHIAccountRecord[];
+    );
 
     //update SmartSuite logins first to avoid overwriting links to new accounts
     if (loginDetails.length > 0) {

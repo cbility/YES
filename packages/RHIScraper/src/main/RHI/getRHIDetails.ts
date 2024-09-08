@@ -181,7 +181,7 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
                 break;
             }
             case "HC130": {
-                const address: AddressFieldCell = { "location_country": "United Kingdom" };
+                const address: Partial<AddressFieldCell> = { "location_country": "United Kingdom" };
                 switch ($(element).find("td:nth-child(3)").text()) { //is account address same as install address
                     case "Yes": {
                         accreditationSummaryTableRows.each((i, e) => {
@@ -240,7 +240,11 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
                         break;
                     }
                 }
-                RHI[RHIsTable.fields["Location"]] = address;
+                let key: keyof AddressFieldCell;
+                for (key in address) {
+                    if (address[key] === undefined) throw new Error(`${key} not found in address for RHI ${RHI.title}`)
+                }
+                RHI[RHIsTable.fields["Location"]] = address as AddressFieldCell;
                 break;
             }
         }

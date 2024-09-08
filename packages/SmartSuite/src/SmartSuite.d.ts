@@ -4,9 +4,6 @@ type RequestHeaders = Record<"Authorization" | "Account-Id", string>
 
 //docs: https://developers.smartsuite.com/docs/intro
 
-interface SmartSuiteCustomFieldCell { //single instance of a particular (non-primitive) field in a particular record
-}
-
 interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
     from_date: string; //YYYY-MM-DDTHH:MM:SS
     to_date: string; //YYYY-MM-DDTHH:MM:SS
@@ -15,16 +12,31 @@ interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
     status_updated_on: boolean; //Date that the due date's linked status field was last updated (read-only)
 }
 
+interface PhoneNumberFieldCell extends SmartSuiteCustomFieldCell {
+    phone_country: string; // Alpha-2 code for the phone number. http://help.smartsuite.com/en/articles/6455502-rest-api-country-names-codes
+    phone_number: string; //Valid separators include space, hyphen and period, as well as parenthesis. The number can also be specified without separators, e.g. “9135555555"
+    phone_type: number; /*An integer representing the type of phone number from the list below:
+    OFFICE = 1
+    MOBILE = 2
+    HOME = 4
+    FAX = 5
+    MAIN = 6
+    OTHER = 8 */
+    sys_root: string | ReadOnly; //Unformatted phone number (read only)
+    sys_title: string | ReadOnly; //Formatted phone number (read only)
+    phone_extension: string; //should contain alphanumeric characters only and no spaces. Note that it will be displayed by the field with an “x” prefix
+}
+
 
 interface AddressFieldCell extends SmartSuiteCustomFieldCell {
-    location_address?: string;
-    location_address2?: string;
-    location_city?: string;
-    location_state?: string;
-    location_zip?: string;
-    location_country?: string;
-    location_latitude?: string;
-    location_longitude?: string;
+    location_address: string;
+    location_address2: string;
+    location_city: string;
+    location_state: string;
+    location_zip: string;
+    location_country: string;
+    location_latitude: string;
+    location_longitude: string;
 }
 
 interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
@@ -32,9 +44,19 @@ interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
     middle_name: string;
     last_name: string;
 }
+interface SmartSuiteCustomFieldCell { //single instance of a particular (non-primitive) field in a particular record
+}
 
+//downloaded from cloud
 type SmartSuiteCell = null | string | string[] /*linked records*/ | number | boolean | SmartSuiteCustomFieldCell; //TODO: add remaining field types
-interface SmartSuiteRecord extends Record<string, SmartSuiteCell> { id: string }
+interface SmartSuiteRecord { id: string, application_id: string, [slug: string]: SmartSuiteCell }
+//used to update cloud
+type SmartSuiteCellUpdate = null | string | string[] /*linked records*/ | number | boolean | Update<SmartSuiteCustomFieldCell>; //TODO: add remaining field types
+interface SmartSuiteRecordUpdate { id: string, [slug: string]: SmartSuiteCellUpdate }
+
+//used for excluding readonly fields from update requests
+interface ReadOnly extends never { }
+type Update<T> = Partial<Exclude<T, ReadOnly>>
 
 interface FilterElement {
     field: string,
@@ -71,26 +93,24 @@ type FilterComparison = StringFilterComparison | NumberFilterComparison | Single
 
 ///////RECORD TYPES///////////////
 
-interface RHIAccountRecord extends SmartSuiteRecord {
+interface RHIAccountRecordUpdate extends SmartSuiteRecord {
     title: string;
-    s27463de03: string[];
-    se00b833bd: string[];
-    s94016b86e: string;
-    s5af20d21e: FullNameFieldCell;
-    sa82805803: string;
-    s898c7779e: {
-        "phone_country": "UK",
-        "phone_number": string
-    }; s906ceac06: AddressFieldCell
+    s27463de03: string[]; //AS email
+    se00b833bd: string[]; //Remittance Email
+    s94016b86e: string; //AS Job Title
+    s5af20d21e: Update<FullNameFieldCell>; //AS Name
+    sa82805803: string; //Company Number
+    s898c7779e: Update<PhoneNumberFieldCell>; //Company Phone
+    s906ceac06: Update<AddressFieldCell> //Account Address
 }
 
 interface RHILoginRecord extends SmartSuiteRecord {
     id: string;
     s362676897: "Authorised Signatory" | "Additional User";
-    title: string;
-    sb4e5173b6: string;
+    //title: string;
+    //sb4e5173b6: string;
 }
 
 interface RHIRecord extends SmartSuiteRecord {
-    //TODO: add additional fields
+    //TODO: add fields
 }

@@ -116,9 +116,9 @@ export default class SmartSuiteAPIHandler {
 
 
         //helper function
-        function checkRecordEquivalence(source: SmartSuiteRecord, reference: SmartSuiteRecord): boolean {
+        function checkRecordEquivalence(source: Partial<SmartSuiteRecord>, reference: SmartSuiteRecord): boolean {
             //returns false if any field value in the source differs from that field value in the reference, else returns true
-            return Object.keys(source).every(key => deepEqual(reference[key], source[key]));
+            return Object.keys(source).every(key => checkObjectEquivalence(source[key], reference[key]));
         }
     }
 
@@ -341,6 +341,26 @@ function deepEqual(obj1: any, obj2: any): boolean {
     // Check each key recursively
     for (const key of keys1) {
         if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function checkObjectEquivalence(source: any, reference: any): boolean {
+    //returns false if any field value in the source differs from that field value in the reference, else returns true
+    // Covers primitives
+    if (source === reference) return true;
+    // If either is not an object, they are not equal (handles nulls, functions, etc.)
+    if (typeof source !== "object" || typeof reference !== "object" || source === null || reference === null) {
+        return false;
+    }
+    const sourceKeys = Object.keys(source);
+    const refKeys = Object.keys(reference);
+
+    // Check each key recursively
+    for (const key of sourceKeys) {
+        if (!refKeys.includes(key) || !checkObjectEquivalence(source[key], reference[key])) {
             return false;
         }
     }
