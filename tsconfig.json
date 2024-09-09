@@ -117,5 +117,8 @@
         {
             "path": "./packages/SmartSuite"
         },
+        {
+            "path": "./packages/Ply"
+        },
     ]
 }
