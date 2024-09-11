@@ -1,9 +1,10 @@
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-
-if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
-    require('dotenv').config();
+import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
+if (process.env.NODE_ENV !== "production") {
+    bootstrapEnvironment();
 }
-const ss = new SmartSuite("s5ch1upc", process.env.SMARTSUITE_KEY as string);
+
+const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
 const updatesTable = {
     id: "663d3d23a1a0542114b1ac24",
