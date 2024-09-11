@@ -1,10 +1,9 @@
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { invoices, opportunities, quoteItems } from "../../../SmartSuite/dist/tables.js"
+import { invoices as invoicesTable, opportunitiesTable, quoteItems } from "../../../SmartSuite/dist/tables.js"
+import bootstrapEnvironment from "../../../Common/dist/BootstrapEnvironment.js";
 
-if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
-    require('dotenv').config();
-}
+bootstrapEnvironment();
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/"
@@ -23,7 +22,9 @@ process.on('uncaughtException', function (err) { //handle uncaught exceptions
     );
 });
 
-export default async function quickFileWebhookHandler(lambdaEvent: { body: string }, lambdaContext?: { logStreamName: string }) {
+interface QuickFileEvent extends Record<string, unknown> { body: string }
+
+export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEvent, lambdaContext?: { logStreamName: string }) {
 
     console.log("EVENT: " + JSON.stringify(lambdaEvent, null, 2));
     console.log("CONTEXT: " + JSON.stringify(lambdaContext, null, 2));
@@ -148,7 +149,6 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                     } catch (error) {
                         await logErrorToPly((error as Error).toString());
                     }
-                    break;
                 }
                 break;
             }
@@ -213,8 +213,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         if (QFQuote === undefined) QFQuote = await QF.invoiceGet({ InvoiceID: quoteId }); //allow QF quote to be passed in if fetched earlier
 
         const SSOpportunities = await SS.getRecordsByFieldValues(
-            opportunities.id,
-            opportunities.structure["QuickFile Quote ID"].slug,
+            opportunitiesTable.id,
+            opportunitiesTable.structure["QuickFile Quote ID"].slug,
             [quoteId]);
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for QuickFile quote ID " + quoteId); //throw error and break out
@@ -274,7 +274,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
                 }
                 const updatedTask = {
                     id: SStask.id as string,
-                    [quoteItems.structure["Quantity"].slug]: task.Qty / (opportunity[opportunities.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
+                    [quoteItems.structure["Quantity"].slug]: task.Qty / (opportunity[opportunitiesTable.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
                     [quoteItems.structure["Line Item Description"].slug]: task.ItemDescription,
                     // hourly rate is not adjusted here because it is set in the company management solution
                 };
@@ -285,18 +285,18 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         if (missingItemErrors.length > 0) await logErrorToPly(missingItemErrors.join("; ")); //log missing items as error
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug] as number);
+        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunitiesTable.structure["Term Days (System Field)"].slug] as number);
 
         const opportunityUpdate = [{
             id: SSOpportunities[0].id,
-            [opportunities.structure["Quote Issue and Expiry"].slug]: {
+            [opportunitiesTable.structure["Quote Issue and Expiry"].slug]: {
                 from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
                 to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
             },
-            [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
-            [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
-            [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
-            [opportunities.structure["Customer Quote Link"].slug]:
+            [opportunitiesTable.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
+            [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
+            [opportunitiesTable.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+            [opportunitiesTable.structure["Customer Quote Link"].slug]:
                 QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
         }];
 
@@ -305,7 +305,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
             [slug: string]: string | number;
         }[];
 
-        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate, false);
+        await SS.bulkUpdateRecords(opportunitiesTable.id, opportunityUpdate, false);
         if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate, false);
     }
     async function updateSSInvoice(invoiceId: number) {
@@ -317,8 +317,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
     }
     async function logQuoteSend(sentQuote: InvoicesSent) {
         const SSOpportunities = await SS.getRecordsByFieldValues(
-            opportunities.id,
-            opportunities.structure["QuickFile Quote ID"].slug,
+            opportunitiesTable.id,
+            opportunitiesTable.structure["QuickFile Quote ID"].slug,
             [sentQuote.Id]);
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for sent QuickFile quote with ID " + sentQuote.Id); //throw error and break out
@@ -329,26 +329,26 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
-        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunities.structure["Term Days (System Field)"].slug] as number);
+        const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunitiesTable.structure["Term Days (System Field)"].slug] as number);
 
-        SS.updateRecord(opportunities.id,
+        SS.updateRecord(opportunitiesTable.id,
             SSOpportunities[0].id,
             {
-                [opportunities.structure["Quote Last Sent"].slug]: sentQuote.TimeStamp,
-                [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
-                [opportunities.structure["Quote Issue and Expiry"].slug]: {
+                [opportunitiesTable.structure["Quote Last Sent"].slug]: sentQuote.TimeStamp,
+                [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
+                [opportunitiesTable.structure["Quote Issue and Expiry"].slug]: {
                     from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
                     to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
                 },
-                [opportunities.structure["Customer Quote Link"].slug]:
+                [opportunitiesTable.structure["Customer Quote Link"].slug]:
                     QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
             }
         )
     }
     async function logOpportunityStatusChange(estimateStatusChange: EstimatesStatusChange) {
         const SSOpportunities = await SS.getRecordsByFieldValues(
-            opportunities.id,
-            opportunities.structure["QuickFile Quote ID"].slug,
+            opportunitiesTable.id,
+            opportunitiesTable.structure["QuickFile Quote ID"].slug,
             [estimateStatusChange.Id]);
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id); //throw error and break out
@@ -358,12 +358,12 @@ export default async function quickFileWebhookHandler(lambdaEvent: { body: strin
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: estimateStatusChange.Id });
 
-        SS.updateRecord(opportunities.id,
+        SS.updateRecord(opportunitiesTable.id,
             SSOpportunities[0].id,
             {
-                [opportunities.structure["Response Received"].slug]:
+                [opportunitiesTable.structure["Response Received"].slug]:
                     QFQuote.Invoice_Get.Body.InvoiceDetails.Status === "AGREED" ? estimateStatusChange.TimeStamp : null, //only update acceptance date for agreed quotes
-                [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
+                [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             }
         )
     }
