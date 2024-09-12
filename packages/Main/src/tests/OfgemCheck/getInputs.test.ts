@@ -1,3 +1,3 @@
-const lambda = require('../indexGetOfgemCheckInputs');
+import { handler } from "../../OfgemCheck/getOfgemCheckInputs.js"
 
-lambda.handler();
+handler();

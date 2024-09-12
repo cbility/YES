@@ -1,4 +1,4 @@
-const checkOutputLambda = require('../indexCheckScraperOutput');
+import { handler } from '../../OfgemCheck/checkScraperOutput.js';
 
 const checkOutputLambdaEvent = {
     "inputBatches": {
@@ -278,5 +278,4 @@ const checkOutputLambdaEvent = {
     }
 }
 
-
-checkOutputLambda.handler(checkOutputLambdaEvent);
+handler(checkOutputLambdaEvent);

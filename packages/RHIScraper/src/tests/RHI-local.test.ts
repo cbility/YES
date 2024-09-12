@@ -1,9 +1,11 @@
-require("dotenv").config();
 import puppeteer from "puppeteer";
 import main from "../main/main.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { loginsTable } from "../../../SmartSuite/dist/tables.js";
+import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
+
+bootstrapEnvironment();
 
 const browserArgs = {
     headless: "new", //using new headless mode, set to false to disable headless
@@ -50,8 +52,7 @@ const browserArgs = {
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
-            require("dotenv").config({ path: '../../.env' });
-            console.log("Using local environment variables")
+            bootstrapEnvironment();
         }
 
         const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);

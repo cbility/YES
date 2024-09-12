@@ -2,11 +2,12 @@
 // - checks SS for what type of update is required
 // - gets IDs of login records for RHIs to be updated
 // - compiles login records into input for step function
+import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
-    require('dotenv').config();
+    bootstrapEnvironment();
 }
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);

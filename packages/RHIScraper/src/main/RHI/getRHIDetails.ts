@@ -1,6 +1,6 @@
 import { Page } from "puppeteer-core";
 import * as cheerio from "cheerio";
-const PostcodesIO = require("postcodesio-client");
+import PostcodesIO from "postcodesio-client";
 const postcodes = new PostcodesIO("https://api.postcodes.io");
 import { RHIsTable } from "../../../../SmartSuite/dist/tables.js";
 export default async function getRHIDetails(

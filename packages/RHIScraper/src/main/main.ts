@@ -10,9 +10,10 @@ import logInUser from "./RHI/logInUser.js";
 import validateLogin from "./RHI/validateLogin.js";
 import getRHIDetails from "./RHI/getRHIDetails.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
+import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
-    require("dotenv").config({ path: '../../.env' });
+    bootstrapEnvironment();
     console.log("Using local environment variables")
 }
 

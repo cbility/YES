@@ -1,5 +1,6 @@
+import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
 import QuickFileAPIHandler from "../QuickFileAPIHandler.js";
-require('dotenv').config();
+bootstrapEnvironment();
 
 const QF = new QuickFileAPIHandler("6131405563",
     "8e48b467-333a-46cc-958c-a2f286dad614",
