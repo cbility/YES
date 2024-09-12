@@ -23,22 +23,17 @@ export default async function getAccountDetails(
         $("#accordion-default-content-1 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim();
 
-    accountRecord[accountsTable.fields["Account Address"]] = {};
-
     const addressData: { modifiedAddress: string; postcode: string | undefined } = {
         ...extractPostcodeFromAddress($(
             "#accordion-default-content-2 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
             .text().trim())
     };
 
-    // Assign the extracted values to the address object properties
-    (accountRecord[accountsTable.fields["Account Address"]] as { location_address: string }).location_address =
-        addressData.modifiedAddress;
-    (
-        accountRecord[accountsTable.fields["Account Address"]] as { location_zip: string | undefined }
-    ).location_zip = addressData.postcode?.trim();
-
-    (accountRecord[accountsTable.fields["Account Address"]] as { location_country: string }).location_country = "UK";
+    accountRecord[accountsTable.fields["Account Address"]] = {
+        location_address: addressData.modifiedAddress,
+        location_country: "UK",
+        location_zip: addressData.postcode?.trim()
+    } as AddressFieldCell;
 
     accountRecord[accountsTable.fields["Company Phone"]] =
         {
@@ -51,16 +46,14 @@ export default async function getAccountDetails(
         [$("#accordion-default-content-5 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim()];
 
-    accountRecord[accountsTable.fields["AS Name"]] = {};
-    (accountRecord[accountsTable.fields["AS Name"]] as { first_name: string }).first_name =
-        $("#accordion-default-content-6 > dl:nth-child(3) > div > dd.govuk-summary-list__value")
-            .text().replace("\n", "").trim();
-    (accountRecord[accountsTable.fields["AS Name"]] as { middle_name: string }).middle_name =
-        $("#accordion-default-content-6 > dl:nth-child(7) > div > dd.govuk-summary-list__value")
-            .text().replace("\n", "").trim();
-    (accountRecord[accountsTable.fields["AS Name"]] as { last_name: string }).last_name =
-        $("#accordion-default-content-6 > dl:nth-child(5) > div > dd.govuk-summary-list__value")
-            .text().replace("\n", "").trim();
+    accountRecord[accountsTable.fields["AS Name"]] = {
+        first_name: $("#accordion-default-content-6 > dl:nth-child(3) > div > dd.govuk-summary-list__value")
+            .text().replace("\n", "").trim(),
+        middle_name: $("#accordion-default-content-6 > dl:nth-child(7) > div > dd.govuk-summary-list__value")
+            .text().replace("\n", "").trim(),
+        last_name: $("#accordion-default-content-6 > dl:nth-child(5) > div > dd.govuk-summary-list__value")
+            .text().replace("\n", "").trim(),
+    };
 
     accountRecord[accountsTable.fields["AS Email"]] =
         [$("#accordion-default-content-6 > dl:nth-child(13) > div > dd.govuk-summary-list__value")

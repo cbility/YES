@@ -4,15 +4,47 @@ type RequestHeaders = Record<"Authorization" | "Account-Id", string>
 
 //docs: https://developers.smartsuite.com/docs/intro
 
-interface DueDateFieldCell extends SmartSuiteCustomFieldCell {
-    from_date: string; //YYYY-MM-DDTHH:MM:SS
-    to_date: string; //YYYY-MM-DDTHH:MM:SS
+/* new discriminated union structure - in progress
+interface SmartSuiteTable {
+    name: string;
+    id: string;
+    structure: {
+        [internalName: string]: {
+            label: string;
+            slug: string;
+            field_type: string;
+            target_field_type: string; //give format information for formula fields
+        }
+    }
+}
+
+interface BaseField<T> {
+    label: string;
+    slug: string;
+    field_type: T
+}
+interface TextField extends BaseField<"text"> {
+}
+interface NumberField extends BaseField<"number"> {
+}
+type SmartSuiteField = TextField | NumberField;
+
+interface FieldCell<SmartSuiteField> {
+    SmartSuiteField.label === "text""
+}
+
+*/
+//TODO: finish the above
+
+interface DueDateFieldCell {
+    from_date: DateFieldCell;
+    to_date: DateFieldCell;
     is_overdue: boolean; //True if overdue (read-only)
     status_is_completed: boolean; //True if complete (read-only)
     status_updated_on: boolean; //Date that the due date's linked status field was last updated (read-only)
 }
 
-interface PhoneNumberFieldCell extends SmartSuiteCustomFieldCell {
+interface PhoneNumberFieldCell {
     phone_country: string; // Alpha-2 code for the phone number. http://help.smartsuite.com/en/articles/6455502-rest-api-country-names-codes
     phone_number: string; //Valid separators include space, hyphen and period, as well as parenthesis. The number can also be specified without separators, e.g. “9135555555"
     phone_type: number; /*An integer representing the type of phone number from the list below:
@@ -28,7 +60,7 @@ interface PhoneNumberFieldCell extends SmartSuiteCustomFieldCell {
 }
 
 
-interface AddressFieldCell extends SmartSuiteCustomFieldCell {
+interface AddressFieldCell {
     location_address: string;
     location_address2: string;
     location_city: string;
@@ -39,16 +71,31 @@ interface AddressFieldCell extends SmartSuiteCustomFieldCell {
     location_longitude: string;
 }
 
-interface FullNameFieldCell extends SmartSuiteCustomFieldCell {
+interface FullNameFieldCell {
     first_name: string;
     middle_name: string;
     last_name: string;
 }
-interface SmartSuiteCustomFieldCell { //single instance of a particular (non-primitive) field in a particular record
-}
 
-//downloaded from cloud
-type SmartSuiteCell = null | string | string[] /*linked records*/ | number | boolean | SmartSuiteCustomFieldCell; //TODO: add remaining field types
+interface DateFieldCell {
+    date: string; //datestring
+    include_time: boolean;
+}
+interface StatusFieldCell {
+    value: string; //value slug, not literal value 
+    updated_on: string; //datestring
+}
+interface FirstCreatedFieldCell {
+    by: string; //user id
+    on: string; //datestring
+}
+type SmartSuiteCustomFieldCell = FullNameFieldCell | AddressFieldCell | PhoneNumberFieldCell | DueDateFieldCell | DateFieldCell | StatusFieldCell | FirstCreatedFieldCell /*lookups/* //TODO: add rest of cell types and switch to discriminated union type structure 
+
+
+*/
+
+type SmartSuiteCell = null | string | string[]  /*linked records, assignees*/ | number | boolean | SmartSuiteCell[] /* lookups */ | SmartSuiteCustomFieldCell; //TODO: add remaining field types
+
 interface SmartSuiteRecord { id: string, application_id: string, [slug: string]: SmartSuiteCell }
 //used to update cloud
 type SmartSuiteCellUpdate = null | string | string[] /*linked records*/ | number | boolean | Update<SmartSuiteCustomFieldCell>; //TODO: add remaining field types
@@ -94,6 +141,7 @@ type FilterComparison = StringFilterComparison | NumberFilterComparison | Single
 ///////RECORD TYPES///////////////
 
 interface RHIAccountRecordUpdate extends SmartSuiteRecord {
+    keyof
     title: string;
     s27463de03: string[]; //AS email
     se00b833bd: string[]; //Remittance Email
