@@ -14,7 +14,7 @@ export async function handler(event: { body: string, queryStringParameters: { sh
     const inputs = JSON.parse(event.body);
 
     try {
-
+        throw new Error("oops!");
         await main(inputs, puppeteer, {
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
