@@ -3,7 +3,7 @@ import main from "../main/main.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { loginsTable } from "../../../SmartSuite/dist/tables.js";
-import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
 bootstrapEnvironment();
 

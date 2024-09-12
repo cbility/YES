@@ -2,7 +2,7 @@
 // - checks SS for what type of update is required
 // - gets IDs of login records for RHIs to be updated
 // - compiles login records into input for step function
-import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
 

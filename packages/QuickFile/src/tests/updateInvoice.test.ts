@@ -1,4 +1,4 @@
-import bootstrapEnvironment from "../../../Common/src/bootstrapEnvironment.js";
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import QuickFileAPIHandler from "../QuickFileAPIHandler.js";
 bootstrapEnvironment();
 

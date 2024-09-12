@@ -3,7 +3,7 @@
 import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { opportunitiesTable, quoteItemsTable } from "../../../../SmartSuite/dist/tables.js";
-import bootstrapEnvironment from "../../../../Common/src/bootstrapEnvironment.js";
+import bootstrapEnvironment from "../../../../Common/dist/bootstrapEnvironment.js";
 if (process.env.NODE_ENV !== "production") {
     bootstrapEnvironment();
 }
