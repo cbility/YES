@@ -5,8 +5,6 @@
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
-const testLogins: ScraperInput[] = [{ loginID: "not a correct id" }]; //for testing purposes
-
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
     bootstrapEnvironment();
 }
@@ -37,10 +35,11 @@ const projectUpdateConfigID = "665f350a343198c25eda5fe6";
 const serviceUpdateConfigID = "665f353ba173734d1df2211a";
 
 
-export async function handler(event: { test?: boolean }) {
+export async function handler(event: { test?: boolean, inputs: { loginID: string }[] }) {
     console.log("EVENT: " + JSON.stringify(event));
 
     if (event.test) {
+        const testLogins: ScraperInput[] = event.inputs; //for testing purposes
         const testInput: OfgemCheckInput = {
             all: getBatches(testLogins),
             current: {
