@@ -29,7 +29,7 @@ jobs:
     - name: Install and build
       run: | 
         npm ci --omit=dev
-        npm run build --if-present
+        npm run build-qf-webhookHandler --if-present
       env:
           CI: true
 
