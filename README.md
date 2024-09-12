@@ -12,19 +12,25 @@ Cloud deployment is managed by pushing to the main branch of https://github.com/
 Here's the structure of this project:
 ```
 .
-├── package.json # define dependencies needed for production and development
+├── package.json # define dependencies needed for production (excluding RHI Scraper production) and development
 ├── package-lock.json
-├── tsconfig.json # typescript configuration
-├── src 
-│ └── ofgemCheck # contains code used in an AWS step function that updates the YES RHI database 
+├── tsconfig.json #  main project typescript configuration
+├── packages
+│ ├── Common # contains code used by all packages
+│ ├── SmartSuite # contains code defining SmartSuite API interactions
+│ ├── QuickFile # contains code defining QuickFile API interactions
 │ └── RHIScraper # contains code automating a browser that retrieves information from the RHI register and updates SmartSuite
-│ └── QuickFile # contains code defining how various scripts interact with the QuickFile API
-│ └── tests # for testing functions locally before deployment
-│ └── SmartSuite # contains code defining SmartSuite API interactions
-│ └── lambda # contains AWS lambda function top level index files
+│ │ ├── package.json # define RHI scraper dependencies
+│ │ ├── tsconfig.json # individual package typescript configuration
+│ │ ├── tsconfig.prod.json # individual package production typescript configuration
+│ │ └── src # source code files
+│ └── Main # contains code that uses several other packages
+│ │ ├── tsconfig.json # individual package typescript configuration
+│ │ ├── OfgemCheck # used in an AWS step function that updates the YES RHI database 
+│ │ ├── QuickFileWebhookHandler # handles webhooks from the QuickFile financial platform
+│ │ └── tests # tests for main code
 │ └── Ply # contains code used in code blocks on the low-code platform https://ply.io
-│ └── .eslint.js # defines project linting configuration
-├── dist # compiled javascript code for use in production
+├── .eslint.js # defines project linting configuration
 ├── .github 
 │ └── workflows # contains workflow files for automatic cloud deployment of AWS Lambda functions
 ```
@@ -84,16 +90,16 @@ For example, on windows, you can use fnm:
 
     Compile project for dev environment
     ```shell
-        tsc
+        tsc -b
     ```
     run a test:
     ```shell
-        node 'dist\tests\opportunityUpdate.js'
+        node 'packages\main\tests\OfgemCheck\checkOutput.test.js'
     ```
 
     test the RHI scraper:
     ```shell
-        tsc
-        npm run start --prefix src/RHIScraper
+        tsc -b
+        npm run start --prefix packages/RHIScraper
     ```
     You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
