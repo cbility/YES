@@ -21,7 +21,3 @@ export default async function handler(event: ScraperOutputEvent) {
     console.log("OUTPUT EVENT: \n" + JSON.stringify(event, null, 2));
     return event;
 }
-
-module.exports = {
-    handler
-};

@@ -2,6 +2,4 @@
 
 import handler from "../getOfgemCheckInputs.js";
 
-module.exports = {
-    handler
-};
+export default handler;

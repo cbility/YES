@@ -2,6 +2,4 @@
 
 import handler from "../webhookHandler.js";
 
-module.exports = {
-    handler
-};
+export default handler;

@@ -2,6 +2,4 @@
 
 import handler from "../logOfgemCheckOutputs.js";
 
-module.exports = {
-    handler
-};
+export default handler;

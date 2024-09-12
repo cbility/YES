@@ -50,6 +50,4 @@ const handler: Handler = async (event) => {
     }
 };
 
-module.exports = {
-    handler
-};
+export default handler;
