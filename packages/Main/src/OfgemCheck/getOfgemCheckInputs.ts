@@ -38,6 +38,8 @@ const serviceUpdateConfigID = "665f353ba173734d1df2211a";
 
 
 export async function handler(event: { body: string }) {
+    console.log("EVENT: " + JSON.stringify(event));
+
     if (JSON.parse(event.body).test) {
         const testInput: OfgemCheckInput = {
             all: getBatches(testLogins),
