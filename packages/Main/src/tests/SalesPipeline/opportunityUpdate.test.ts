@@ -2,9 +2,9 @@
 
 import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { opportunities, quoteItems } from "../../../../SmartSuite/dist/tables.js";
-require('dotenv').config(); //load local environment variables
-
+import { opportunitiesTable, quoteItemsTable } from "../../../../SmartSuite/dist/tables.js";
+import bootstrapEnvironment from "../../../../Common/src/bootstrapEnvironment.js";
+bootstrapEnvironment();
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 
 const QF = new QuickFileAPIHandler("6131405563",
@@ -15,13 +15,13 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
     process.env.TECHNICAL_SMARTSUITE_KEY as string
 );
 (async () => {
-    const allOpportunities = await SS.getAllRecords(opportunities.id);
+    const allOpportunities = await SS.getAllRecords(opportunitiesTable.id);
     const notOnQuickFile = [];
 
     //allOpportunities.forEach(async (opportunity: { [x: string]: any; }) => {
 
     for (const opportunity of allOpportunities) {
-        const quickFileID = opportunity[opportunities.structure["QuickFile Quote ID"].slug];
+        const quickFileID = opportunity[opportunitiesTable.structure["QuickFile Quote ID"].slug];
         if (!quickFileID) {
             console.log(opportunity.id + " not found on QF")
             notOnQuickFile.push(opportunity.id);
@@ -146,10 +146,10 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
             //   from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate.slice(0, 10), //remove timestamp from date
             // to_date: (new Date(issueDate.getTime() + termDaysInMs).toISOString()).slice(0, 10), //remove timestamp from date
             // },
-            [opportunities.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
-            [opportunities.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
-            [opportunities.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
-            [opportunities.structure["Customer Quote Link"].slug]:
+            [opportunitiesTable.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
+            [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
+            [opportunitiesTable.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+            [opportunitiesTable.structure["Customer Quote Link"].slug]:
                 QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
             //[opportunities.structure["Response Received"].slug]: acceptanceDate,
         }];
@@ -160,7 +160,7 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
         }[];
         */
 
-        await SS.bulkUpdateRecords(opportunities.id, opportunityUpdate, false);
+        await SS.bulkUpdateRecords(opportunitiesTable.id, opportunityUpdate, false);
         console.log("Opportunity updated successfully");
 
         /*

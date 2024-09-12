@@ -1,7 +1,7 @@
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { invoices as invoicesTable, opportunitiesTable, quoteItems } from "../../../SmartSuite/dist/tables.js"
-import bootstrapEnvironment from "../../../Common/dist/BootstrapEnvironment.js";
+import { invoicesTable, opportunitiesTable, quoteItemsTable } from "../../../SmartSuite/dist/tables.js"
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
 bootstrapEnvironment();
 
@@ -226,14 +226,14 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         const opportunity = SSOpportunities[0]; //update first opportunity if there is more than one
 
         const SSQuoteItems = await SS.filterRecords(
-            quoteItems.id,
+            quoteItemsTable.id,
             [{
-                field: quoteItems.structure["Opportunity ID (System Field)"].slug,
+                field: quoteItemsTable.structure["Opportunity ID (System Field)"].slug,
                 comparison: "is",
                 value: opportunity.id,
             },
             {
-                field: quoteItems.structure["In Opportunity"].slug,
+                field: quoteItemsTable.structure["In Opportunity"].slug,
                 comparison: "is",
                 value: true,
             }],
@@ -244,7 +244,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             QFQuote.Invoice_Get.Body.InvoiceDetails.ItemLines.Item.map(item => {
                 if (!item.ItemName) return; //ignore system items
                 const SSitem = SSQuoteItems.find(
-                    (SSQuoteItem: any) => item.ItemName!.startsWith(SSQuoteItem[quoteItems.structure["Sub Type Autonumber"].slug])
+                    (SSQuoteItem: any) => item.ItemName!.startsWith(SSQuoteItem[quoteItemsTable.structure["Sub Type Autonumber"].slug])
                 );
                 if (!SSitem?.id) {
                     console.log("item: " + JSON.stringify(item));
@@ -253,9 +253,9 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 const updatedItem = {
                     id: SSitem.id as string,
-                    [quoteItems.structure["Quantity"].slug]: item.Qty,
-                    [quoteItems.structure["Line Item Description"].slug]: item.ItemDescription,
-                    [quoteItems.structure["Price"].slug]: (item.LineTotal / item.Qty)
+                    [quoteItemsTable.structure["Quantity"].slug]: item.Qty,
+                    [quoteItemsTable.structure["Line Item Description"].slug]: item.ItemDescription,
+                    [quoteItemsTable.structure["Price"].slug]: (item.LineTotal / item.Qty)
                 };
                 return updatedItem;
             }).filter(updatedItem => !!updatedItem) //remove ignored items
@@ -265,7 +265,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             QFQuote.Invoice_Get.Body.InvoiceDetails.TaskLines.Task.map(task => {
                 if (!task.ItemName) return; //ignore system items
                 const SStask = SSQuoteItems.find(
-                    (SSQuoteItem: any) => task.ItemName!.startsWith(SSQuoteItem[quoteItems.structure["Sub Type Autonumber"].slug])
+                    (SSQuoteItem: any) => task.ItemName!.startsWith(SSQuoteItem[quoteItemsTable.structure["Sub Type Autonumber"].slug])
                 );
                 if (!SStask?.id) {
                     console.log("task: " + JSON.stringify(task));
@@ -274,8 +274,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 const updatedTask = {
                     id: SStask.id as string,
-                    [quoteItems.structure["Quantity"].slug]: task.Qty / (opportunity[opportunitiesTable.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
-                    [quoteItems.structure["Line Item Description"].slug]: task.ItemDescription,
+                    [quoteItemsTable.structure["Quantity"].slug]: task.Qty / (opportunity[opportunitiesTable.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
+                    [quoteItemsTable.structure["Line Item Description"].slug]: task.ItemDescription,
                     // hourly rate is not adjusted here because it is set in the company management solution
                 };
                 return updatedTask;
@@ -306,7 +306,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         }[];
 
         await SS.bulkUpdateRecords(opportunitiesTable.id, opportunityUpdate, false);
-        if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItems.id, quoteItemsUpdate, false);
+        if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItemsTable.id, quoteItemsUpdate, false);
     }
     async function updateSSInvoice(invoiceId: number) {
         const invoice = await QF.invoiceGet({ InvoiceID: invoiceId });
