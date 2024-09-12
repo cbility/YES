@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/deployQFWebhookHandler.yaml'
+      - 'packages/Common/src/**/*'
       - 'packages/SmartSuite/src/**/*'
       - 'packages/QuickFile/**/*'
       - 'packages/Main/src/.QuickFileWebhookHandler/**/*'
