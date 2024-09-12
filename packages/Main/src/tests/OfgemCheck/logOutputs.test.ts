@@ -1,4 +1,4 @@
-import handler from '../../OfgemCheck/logOfgemCheckOutputs.js'
+import { handler } from '../../OfgemCheck/logOfgemCheckOutputs.js'
 
 const event = [
     {
