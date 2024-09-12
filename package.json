@@ -8,6 +8,7 @@
         "tsc": "^2.0.4"
     },
     "devDependencies": {
+        "@rollup/plugin-typescript": "^11.1.6",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.21.0",
         "cheerio": "^1.0.0",
@@ -19,6 +20,7 @@
         "eslint-plugin-promise": "^6.1.1",
         "postcodesio-client": "^0.3.4",
         "puppeteer": "^23.2.2",
-        "typescript": "^5.5.4"
+        "rollup": "^4.21.2",
+        "typescript": "^5.6.2"
     }
 }
