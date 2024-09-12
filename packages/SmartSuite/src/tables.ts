@@ -1,4 +1,4 @@
-export const invoices = {
+export const invoicesTable = {
     "name": "Invoices & Payments",
     "id": "64f592e6ad303253e811e6eb",
     "structure": {
