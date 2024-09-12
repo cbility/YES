@@ -699,7 +699,7 @@ export const accountsTable = {
         "AS Job Title": "s94016b86e",
         "Remittance Email": "se00b833bd"
     }
-} as const;
+}; //TODO: add "as const" and refactor SS type system
 export const RHIsTable = {
     id: "64d155a9c71c81dc0b41d52d", fields: {
         "RHI Number": "title",
