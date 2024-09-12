@@ -1,12 +1,11 @@
 import main from "../main/main.js"
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium-min";
-import { Handler } from "aws-lambda";
 
 chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
 
-const handler: Handler = async (event) => {
+export async function handler(event: { body: string, queryStringParameters: { shallow?: boolean } }) {
 
     const shallow: boolean = Boolean(event.queryStringParameters?.shallow);
 
@@ -48,6 +47,4 @@ const handler: Handler = async (event) => {
         };
         return errorResponse;
     }
-};
-
-export default handler;
+}

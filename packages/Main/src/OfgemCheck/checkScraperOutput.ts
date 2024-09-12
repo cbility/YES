@@ -1,6 +1,6 @@
 //lambda for parsing scraper outputs in step function and updating inputs for next batch
 
-export default async function handler(event: ScraperOutputEvent) {
+export async function handler(event: ScraperOutputEvent) {
 
     console.log("INPUT EVENT: \n" + JSON.stringify(event, null, 2));
 

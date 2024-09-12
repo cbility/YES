@@ -35,7 +35,7 @@ const projectUpdateConfigID = "665f350a343198c25eda5fe6";
 const serviceUpdateConfigID = "665f353ba173734d1df2211a";
 
 
-export default async function handler() {
+export async function handler() {
 
     // get configuration table in RHI Scraper
     const configurations: Record<string, unknown>[] = await ss.getAllRecords(configurationsTable.id);

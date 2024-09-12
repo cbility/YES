@@ -17,7 +17,7 @@ const updatesTable = {
 
 const now = new Date();
 
-export default async function handler(batches: ScraperBatch[]) {
+export async function handler(batches: ScraperBatch[]) {
 
     console.log("EVENT: \n" + JSON.stringify(batches, null, 2));
 
