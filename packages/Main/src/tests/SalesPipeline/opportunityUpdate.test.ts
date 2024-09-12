@@ -4,7 +4,9 @@ import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.
 import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { opportunitiesTable, quoteItemsTable } from "../../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../../Common/src/bootstrapEnvironment.js";
-bootstrapEnvironment();
+if (process.env.NODE_ENV !== "production") {
+    bootstrapEnvironment();
+}
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 
 const QF = new QuickFileAPIHandler("6131405563",

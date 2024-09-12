@@ -1,5 +1,7 @@
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
-bootstrapEnvironment();
+if (process.env.NODE_ENV !== "production") {
+    bootstrapEnvironment();
+}
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 
 const QF = new QuickFileAPIHandler("6131405563",

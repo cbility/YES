@@ -2,7 +2,9 @@
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { projectsTable, metricsTable, opportunitiesTable, tasksTable } from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
-bootstrapEnvironment();
+if (process.env.NODE_ENV !== "production") {
+    bootstrapEnvironment();
+}
 
 const input = {
     APIKey: process.env.TECHNICAL_SMARTSUITE_KEY

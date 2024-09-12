@@ -1,6 +1,8 @@
 export { } //required for compiler
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
-bootstrapEnvironment();
+if (process.env.NODE_ENV !== "production") {
+    bootstrapEnvironment();
+}
 
 const input = { // input for testing
     APIKey: process.env.QUICKFILE_API_KEY as string,
