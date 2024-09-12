@@ -2,12 +2,14 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "module": "esnext",
+        "target": "esnext",
         "outDir": "dist", /* Specify an output folder for all emitted files. */
         "rootDir": "./src"
     },
     "include": [
         "src/**/*",
-        "../QuickFile/src/QuickFile.d.ts"
+        "../QuickFile/src/QuickFile.d.ts",
+        "../SmartSuite/src/SmartSuite.d.ts"
     ],
     "exclude": [
         "node_modules",

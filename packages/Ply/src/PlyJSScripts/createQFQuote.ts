@@ -1,5 +1,7 @@
 export { } //required for compiler
-require('dotenv').config(); //load environment variables
+import path from "path";
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
+bootstrapEnvironment();
 const input = { // input for testing
     termDays: 30,
     clientID: "8028732",

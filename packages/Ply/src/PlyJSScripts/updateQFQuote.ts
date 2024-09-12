@@ -1,5 +1,6 @@
 export { } //required for compiler
-require('dotenv').config(); //load environment variables for debugging
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
+bootstrapEnvironment();
 
 const input = { // input for testing
     APIKey: process.env.QUICKFILE_API_KEY as string,

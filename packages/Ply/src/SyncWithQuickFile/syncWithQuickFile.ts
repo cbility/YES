@@ -1,3 +1,5 @@
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
+bootstrapEnvironment();
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 
 const QF = new QuickFileAPIHandler("6131405563",

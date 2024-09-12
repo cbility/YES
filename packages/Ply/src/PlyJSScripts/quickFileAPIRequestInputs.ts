@@ -4,7 +4,8 @@
 //usage:
 //return result;
 
-require('dotenv').config(); //load environment variables for debugging
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
+bootstrapEnvironment();
 input.APIKey = process.env.QUICKFILE_API_KEY as string;
 declare const input: { APIKey: string, endpoint: string, body: string };
 

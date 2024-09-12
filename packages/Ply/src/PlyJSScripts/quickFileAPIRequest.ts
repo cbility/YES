@@ -1,5 +1,8 @@
-require('dotenv').config(); //load environment variables for debugging
-input.APIKey = process.env.QUICKFILE_API_KEY as string;
+import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
+bootstrapEnvironment();
+const input = {
+    APIKey: process.env.QUICKFILE_API_KEY as string
+};
 //////////////////////////PLY CODE START //////////////////
 
 export async function request(endpoint: string, body: RequestBody, method: "POST" = "POST") {  //remove export to use in Ply
