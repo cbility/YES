@@ -143,9 +143,9 @@ export const invoices = {
             "field_type": "lookupfield"
         }
     }
-}
+} as const;
 
-export const opportunities = {
+export const opportunitiesTable = {
     "name": "Opportunities",
     "id": "6500787202fb914f79f202e8",
     "structure": {
@@ -409,9 +409,9 @@ export const opportunities = {
             "field_type": "currencyfield"
         }
     }
-}
+} as const
 
-export const quoteItems = {
+export const quoteItemsTable = {
     "name": "Quote Items",
     "id": "650168ce39fcf6ca2940a6fe",
     "structure": {
@@ -652,7 +652,7 @@ export const quoteItems = {
             "target_field_type": "textareafield"
         }
     }
-}
+} as const;
 
 //TODO: update RHI tables to include field type and target field type
 export const loginsTable = {
@@ -671,7 +671,7 @@ export const loginsTable = {
         Account: "s69317bdee",
         "RHI Record IDs (System Field)": "sdf91c49ec"
     }
-};
+} as const;
 export const accountsTable = {
     id: "64d155a9c71c81dc0b41d527", fields: {
         "Account Name": "title",
@@ -699,7 +699,7 @@ export const accountsTable = {
         "AS Job Title": "s94016b86e",
         "Remittance Email": "se00b833bd"
     }
-};
+} as const;
 export const RHIsTable = {
     id: "64d155a9c71c81dc0b41d52d", fields: {
         "RHI Number": "title",
@@ -755,5 +755,864 @@ export const RHIsTable = {
         "Coefficient of Performance (COP)": "sbe757d43c",
         "Seasonal Performance Factor (SPF)": "sceb80d3b9",
     }
-};
+} as const;
 
+export const projectsTable = {
+    "name": "Projects",
+    "id": "64f6098f4f57d448c30044ed",
+    "structure": {
+        "Project Name": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "Project Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Status": {
+            "slug": "s88e7dacd4",
+            "field_type": "statusfield"
+        },
+        "Client": {
+            "slug": "sf828da6c0",
+            "field_type": "linkedrecordfield"
+        },
+        "Job Type Code (System Field)": {
+            "slug": "s89e3b91f6",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Project Overview Old": {
+            "slug": "s3a4f706df",
+            "field_type": "richtextareafield"
+        },
+        "Job Sub-Type": {
+            "slug": "sf3d820a7f",
+            "field_type": "linkedrecordfield"
+        },
+        "Project Folder Code": {
+            "slug": "sa91201eb9",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Link to Problems": {
+            "slug": "s4velkzw",
+            "field_type": "linkedrecordfield"
+        },
+        "Legacy Project Code": {
+            "slug": "s2c5e7d743",
+            "field_type": "textfield"
+        },
+        "Legacy Job folder link": {
+            "slug": "saf746c70c",
+            "field_type": "textfield"
+        },
+        "Local Job Folder": {
+            "slug": "sgf23n2h",
+            "field_type": "buttonfield"
+        },
+        "Total Chargeable Time Tracked": {
+            "slug": "s4c8be909d",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Outstanding Payment": {
+            "slug": "s587106504",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Total Non-chargeable Time Tracked": {
+            "slug": "sc234dd494",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "% Tasks Complete": {
+            "slug": "sf49e099cb",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Current Time Cost": {
+            "slug": "s89b4fbcfd",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Next Task Due": {
+            "slug": "s5c076a520",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Record ID (System Field)": {
+            "slug": "sb26ad886b",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Legacy Project Price": {
+            "slug": "s288856269",
+            "field_type": "textfield"
+        },
+        "Initial Email Template": {
+            "slug": "s92ff8890a",
+            "field_type": "lookupfield"
+        },
+        "Follow-up Email Template": {
+            "slug": "sbdaf83537",
+            "field_type": "lookupfield"
+        },
+        "Late invoices": {
+            "slug": "s6a9d62800",
+            "field_type": "lookupfield"
+        },
+        "Quote": {
+            "slug": "sf78c857f5",
+            "field_type": "linkedrecordfield"
+        },
+        "Milestone": {
+            "slug": "s6ea69296a",
+            "field_type": "statusfield"
+        },
+        "Project Lead": {
+            "slug": "s32c34a296",
+            "field_type": "userfield"
+        },
+        "Project Name (System Field)": {
+            "slug": "s910e48bd5",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Internal Project Name": {
+            "slug": "s5438714b9",
+            "field_type": "textfield"
+        },
+        "(old) Last Communication": {
+            "slug": "sfda00eb96",
+            "field_type": "datefield"
+        },
+        "Action": {
+            "slug": "saf903f71f",
+            "field_type": "statusfield"
+        },
+        "Linked Travel Form": {
+            "slug": "sjt3naco",
+            "field_type": "linkedrecordfield"
+        },
+        "Escalate to Management?": {
+            "slug": "s37d5796df",
+            "field_type": "yesnofield"
+        },
+        "Management Notes": {
+            "slug": "s25bd47b47",
+            "field_type": "textfield"
+        },
+        "Milestone (from tasks)": {
+            "slug": "s0519bfc9b",
+            "field_type": "formulafield",
+            "target_field_type": "statusfield"
+        },
+        "Used Templates": {
+            "slug": "s19958832a",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "RHI": {
+            "slug": "s93fbb49b6",
+            "field_type": "linkedrecordfield"
+        },
+        "RO Generator": {
+            "slug": "sebc175246",
+            "field_type": "linkedrecordfield"
+        },
+        "Project Contacts": {
+            "slug": "s4318eac37",
+            "field_type": "linkedrecordfield"
+        },
+        "RHI Login ID": {
+            "slug": "sc61d5ce25",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Installation (from quote)": {
+            "slug": "s56a14741d",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Dropbox folder location": {
+            "slug": "s87d0ba68f",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Installation Name": {
+            "slug": "s54883f798",
+            "field_type": "lookupfield",
+            "target_field_type": "textfield"
+        },
+        "Legacy installation name": {
+            "slug": "s404d19180",
+            "field_type": "textfield"
+        },
+        "Old Account": {
+            "slug": "sc9cf8960f",
+            "field_type": "linkedrecordfield"
+        },
+        "New Account": {
+            "slug": "szula6z0",
+            "field_type": "linkedrecordfield"
+        },
+        "Legacy Who Is Paying?": {
+            "slug": "s856626e67",
+            "field_type": "textfield"
+        },
+        "RHI logins": {
+            "slug": "sd1ede30da",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Local Explorer Link": {
+            "slug": "sdbf9f5fe9",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Tinyurl link": {
+            "slug": "s9d718cf7b",
+            "field_type": "textfield"
+        },
+        "Blocking RHI Submissions": {
+            "slug": "s458f3e77d",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Link to Management Projects": {
+            "slug": "sf14641692",
+            "field_type": "linkedrecordfield"
+        },
+        "RHI Accreditation Status": {
+            "slug": "s2b384891b",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "RHI Application Status": {
+            "slug": "s1ea8e9f8f",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "Client and Contact Emails": {
+            "slug": "s2b05571aa",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "NEW Project Contacts": {
+            "slug": "sme7amif",
+            "field_type": "linkedrecordfield"
+        },
+        "Project Updates": {
+            "slug": "s9yfvzw4",
+            "field_type": "linkedrecordfield"
+        },
+        "Project Overview": {
+            "slug": "sbgryirq",
+            "field_type": "textareafield"
+        },
+        "Expected Income": {
+            "slug": "s33683d8c7",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Accreditation Status": {
+            "slug": "s48b51e4fd",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "Link to Invoice Items": {
+            "slug": "shbqnk8c",
+            "field_type": "linkedrecordfield"
+        },
+        "Client Lookup": {
+            "slug": "sb240034c4",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Travel Price": {
+            "slug": "s2573db4e7",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Link to High Priority Clients": {
+            "slug": "srud0crw",
+            "field_type": "linkedrecordfield"
+        },
+        "Work Started": {
+            "slug": "s7c844a190",
+            "field_type": "datefield"
+        },
+        "Project Submitted": {
+            "slug": "sea91dab79",
+            "field_type": "datefield"
+        },
+        "Contains Outdated Values": {
+            "slug": "sc9c81e63a",
+            "field_type": "yesnofield"
+        },
+        "Client ID": {
+            "slug": "sf6b62d819",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "RO Logins TBC": {
+            "slug": "s4ee12c375",
+            "field_type": "textfield"
+        },
+        "Project Tasks": {
+            "slug": "s6c9e47694",
+            "field_type": "linkedrecordfield"
+        },
+        "RO Logins": {
+            "slug": "swompkpv",
+            "field_type": "formulafield"
+        },
+        "Days to Complete": {
+            "slug": "s641cb7901",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Project Installation Type": {
+            "slug": "s129da1cd0",
+            "field_type": "singleselectfield"
+        },
+        "Installation": {
+            "slug": "sbe56543a8",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Action Changes": {
+            "slug": "sfanh85l",
+            "field_type": "linkedrecordfield"
+        },
+        "Latest Update": {
+            "slug": "s7a61cfe51",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "RHI Username": {
+            "slug": "sf3c39acca",
+            "field_type": "formulafield",
+            "target_field_type": "recordtitlefield"
+        },
+        "RHI Password": {
+            "slug": "s7f7e353c7",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Woodsure Number": {
+            "slug": "s030a5e628",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Site visit form": {
+            "slug": "sgf2rra6",
+            "field_type": "linkedrecordfield"
+        },
+        "Opportunity": {
+            "slug": "s1f118fe1e",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Legacy Project Status": {
+            "slug": "s87b8d29b4",
+            "field_type": "formulafield",
+            "target_field_type": "statusfield"
+        },
+        "Project Information Filled": {
+            "slug": "s98d31d9ff",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Project Billing Type": {
+            "slug": "s6e57702da",
+            "field_type": "singleselectfield"
+        },
+        "Project Billing Type (System Field)": {
+            "slug": "s46f535e7e",
+            "field_type": "formulafield",
+            "target_field_type": "singleselectfield"
+        },
+        "Update Preview Lookup": {
+            "slug": "sc377aee26",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Status Last Modified": {
+            "slug": "stj1gojo",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Months Old": {
+            "slug": "s9fdfcdb12",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Recent Changes from YES to Regulator": {
+            "slug": "s872549cd5",
+            "field_type": "countfield"
+        },
+        "Legacy Information Filled": {
+            "slug": "s360500173",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Link to Program Management": {
+            "slug": "s6mpqkva",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Applications and Amendments": {
+            "slug": "smc5227b",
+            "field_type": "linkedrecordfield"
+        },
+        "Active Support Service Manager": {
+            "slug": "sd06c97ab6",
+            "field_type": "lookupfield",
+            "target_field_type": "userfield"
+        },
+        "Active Support Service": {
+            "slug": "sumt1fi5",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        }
+    }
+} as const
+
+export const metricsTable = {
+    "name": "Staff Member Metrics",
+    "id": "66cdf0118258a1e146782909",
+    "structure": {
+        "Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "Staff Member": {
+            "slug": "sc5135d496",
+            "field_type": "linkedrecordfield"
+        },
+        "Total Jobs Quoted": {
+            "slug": "s06830d4c5",
+            "field_type": "numberfield"
+        },
+        "Total Quotes Converted": {
+            "slug": "s205f19177",
+            "field_type": "numberfield"
+        },
+        "Total Live Projects": {
+            "slug": "s6ce5dcadc",
+            "field_type": "numberfield"
+        },
+        "Live Amendment Projects with YES": {
+            "slug": "s8cf5965c6",
+            "field_type": "numberfield"
+        },
+        "Total Live Amendment Projects": {
+            "slug": "sdb8924599",
+            "field_type": "numberfield"
+        },
+        "Total Live ASA Projects": {
+            "slug": "s656725ec6",
+            "field_type": "numberfield"
+        },
+        "Total Live Woodsure Projects": {
+            "slug": "s986dfc96a",
+            "field_type": "numberfield"
+        },
+        "Live Woodsure Projects with YES": {
+            "slug": "sdf823d88c",
+            "field_type": "numberfield"
+        },
+        "Total Live FMS Projects": {
+            "slug": "s94a282082",
+            "field_type": "numberfield"
+        },
+        "Live FMS Projects with YES": {
+            "slug": "sb0365e197",
+            "field_type": "numberfield"
+        },
+        "Projects Submitted (past week)": {
+            "slug": "sa247625ab",
+            "field_type": "numberfield"
+        },
+        "New Projects (past week)": {
+            "slug": "s0e1d18857",
+            "field_type": "numberfield"
+        },
+        "Live Projects With Regulator": {
+            "slug": "sf500b4fef",
+            "field_type": "numberfield"
+        },
+        "Live ASA Projects with YES": {
+            "slug": "s71b2b7e0a",
+            "field_type": "numberfield"
+        },
+        "Total Live Tasks": {
+            "slug": "s528564e04",
+            "field_type": "numberfield"
+        },
+        "Total Live Hard Deadlines": {
+            "slug": "s693329b18",
+            "field_type": "numberfield"
+        },
+        "Total Overdue Invoices": {
+            "slug": "s5d4f88abf",
+            "field_type": "numberfield"
+        },
+        "Total Unsent Invoice Items": {
+            "slug": "s85873af2f",
+            "field_type": "numberfield"
+        },
+        "Date": {
+            "slug": "s7e63a9fa6",
+            "field_type": "datefield"
+        },
+        "Text": {
+            "slug": "s08y5olb",
+            "field_type": "textfield"
+        },
+        "Assigned To": {
+            "slug": "se9205aa11",
+            "field_type": "userfield"
+        }
+    }
+} as const
+
+export const tasksTable = {
+    "name": "Tasks",
+    "id": "64f6098f4f57d448c3004519",
+    "structure": {
+        "Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "Subtasks": {
+            "slug": "sa5fbbd37c",
+            "field_type": "checklistfield"
+        },
+        "Status": {
+            "slug": "s4237122ae",
+            "field_type": "statusfield"
+        },
+        "Hard Due Date": {
+            "slug": "s2b170d112",
+            "field_type": "duedatefield"
+        },
+        "Due Date Grouping (System Field)": {
+            "slug": "se4120b568",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Estimated Due Date": {
+            "slug": "s6f94d48c2",
+            "field_type": "duedatefield"
+        },
+        "Site": {
+            "slug": "s8c9e4d2ca",
+            "field_type": "linkedrecordfield"
+        },
+        "Installation Name": {
+            "slug": "s0a57bdc74",
+            "field_type": "linkedrecordfield"
+        },
+        "Task Detail": {
+            "slug": "s5f143ae1a",
+            "field_type": "richtextareafield"
+        },
+        "Client": {
+            "slug": "sf16928c0a",
+            "field_type": "linkedrecordfield"
+        },
+        "Due Date (Soonest)": {
+            "slug": "s99be6c0bc",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Time Cost (Timesheets)": {
+            "slug": "sa6ab3edfc",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Timesheet Entries": {
+            "slug": "sirtahsi",
+            "field_type": "linkedrecordfield"
+        },
+        "Task": {
+            "slug": "sf07e8dbb2",
+            "field_type": "textfield"
+        },
+        "Task Lead": {
+            "slug": "szm6g7jn",
+            "field_type": "userfield"
+        },
+        "Total Time Tracked (Timesheets)": {
+            "slug": "s9999c6832",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Time Spent on task": {
+            "slug": "s6572689e8",
+            "field_type": "timetrackingfield"
+        },
+        "Track time?": {
+            "slug": "s4d116c931",
+            "field_type": "singleselectfield"
+        },
+        "Record ID (System Field)": {
+            "slug": "s23c37cbe1",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Attachment": {
+            "slug": "s822c1d881",
+            "field_type": "filefield"
+        },
+        "Task Template Details (System Field)": {
+            "slug": "s6772c3254",
+            "field_type": "linkedrecordfield"
+        },
+        "Attachment (View Only)": {
+            "slug": "s9e6732f09",
+            "field_type": "lookupfield",
+            "target_field_type": "filefield"
+        },
+        "Link to Management Projects": {
+            "slug": "s3jf8yz0",
+            "field_type": "linkedrecordfield"
+        },
+        "Deadline List Flag": {
+            "slug": "s4624b61be",
+            "field_type": "yesnofield"
+        },
+        "Choose title": {
+            "slug": "sc9d8e8aaa",
+            "field_type": "multipleselectfield"
+        },
+        "RHI Number": {
+            "slug": "s9bb4ebba9",
+            "field_type": "linkedrecordfield"
+        },
+        "RO Generator": {
+            "slug": "s3c762620d",
+            "field_type": "linkedrecordfield"
+        },
+        "Estimated Due Date (Form Field)": {
+            "slug": "s925af62dd",
+            "field_type": "datefield"
+        },
+        "Hard Due Date (Form Field)": {
+            "slug": "s10mz10j",
+            "field_type": "datefield"
+        },
+        "Task Name (System Field)": {
+            "slug": "s1ef201c6a",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Extra Information": {
+            "slug": "s6d76ae0ab",
+            "field_type": "textfield"
+        },
+        "Date Complete": {
+            "slug": "s8f98aece6",
+            "field_type": "datefield"
+        },
+        "Type of task": {
+            "slug": "s675d904d4",
+            "field_type": "singleselectfield"
+        },
+        "Contact": {
+            "slug": "s3227287b0",
+            "field_type": "linkedrecordfield"
+        },
+        "Included on Deadline List (System Field)": {
+            "slug": "sd195c52e9",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Due Date is internal (system field)": {
+            "slug": "s59088446c",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Hard Due Date (Read Only)": {
+            "slug": "sc9a6592c2",
+            "field_type": "formulafield",
+            "target_field_type": "duedatefield"
+        },
+        "Estimated Due Date (Read Only)": {
+            "slug": "s678084c13",
+            "field_type": "formulafield",
+            "target_field_type": "duedatefield"
+        },
+        "Milestone": {
+            "slug": "s9a9e811c8",
+            "field_type": "statusfield"
+        },
+        "Earliest task milestone": {
+            "slug": "s245d42100",
+            "field_type": "formulafield",
+            "target_field_type": "statusfield"
+        },
+        "Timeline view due date (System Field)": {
+            "slug": "s218a49cc0",
+            "field_type": "datefield"
+        },
+        "Job sub-type": {
+            "slug": "s89f23add2",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Opportunities": {
+            "slug": "s6djdsxn",
+            "field_type": "linkedrecordfield"
+        },
+        "Status Group": {
+            "slug": "s42a7bf1f6",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Link to Meetings": {
+            "slug": "s29ngt25",
+            "field_type": "linkedrecordfield"
+        },
+        "Problem": {
+            "slug": "sl5ht9rm",
+            "field_type": "linkedrecordfield"
+        },
+        "Urgency": {
+            "slug": "s2a62827d6",
+            "field_type": "statusfield"
+        },
+        "Improvement": {
+            "slug": "ss7wyh0e",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to High Priority Clients": {
+            "slug": "swg759pz",
+            "field_type": "linkedrecordfield"
+        },
+        "Project": {
+            "slug": "s20vbooq",
+            "field_type": "linkedrecordfield"
+        },
+        "Updates from Project": {
+            "slug": "s3ol0zty",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Support Service": {
+            "slug": "s0ab4lre",
+            "field_type": "linkedrecordfield"
+        },
+        "RHI Status Updates": {
+            "slug": "s0vvhlo3",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Craig Dashboard": {
+            "slug": "she4mkx1",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Gregor Dashboard": {
+            "slug": "sapvmw6r",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Craig Dashboard 1": {
+            "slug": "sdsq3yrs",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Trudy Dashboard 1": {
+            "slug": "sy9ls3md",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Craig Dashboard 2": {
+            "slug": "sm3berx9",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Craig Dashboard 3": {
+            "slug": "s17r7vun",
+            "field_type": "linkedrecordfield"
+        },
+        "Link to Craig Dashboard 4": {
+            "slug": "s2yl9p4l",
+            "field_type": "linkedrecordfield"
+        },
+        "Program": {
+            "slug": "sidf4t97",
+            "field_type": "linkedrecordfield"
+        },
+        "Text": {
+            "slug": "sc659fdw",
+            "field_type": "textfield"
+        },
+        "Text 1": {
+            "slug": "st05odxe",
+            "field_type": "textfield"
+        },
+        "Text 2": {
+            "slug": "s365txwd",
+            "field_type": "textfield"
+        },
+        "Text 3": {
+            "slug": "sl5vg867",
+            "field_type": "textfield"
+        },
+        "Text 4": {
+            "slug": "s78r24kz",
+            "field_type": "textfield"
+        }
+    }
+} as const;
