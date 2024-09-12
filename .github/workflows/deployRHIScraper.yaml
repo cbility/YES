@@ -36,7 +36,7 @@ jobs:
     - name: Zip
       run: |
         mkdir zip
-        zip -r ./zip/deployment.zip node_modules packages/*/dist packages/*/node_modules
+        zip -r ./zip/deployment.zip node_modules packages/*/dist packages/*/node_modules package.json
         ls
       env:
         CI: true

@@ -35,7 +35,7 @@ jobs:
 
     - name: Zip
       run: |
-        zip -r ./deployment.zip node_modules packages/*/dist
+        zip -r ./deployment.zip node_modules packages/*/dist package.json
         ls
 
     - name: AWS Lambda Deploy GetOfgemCheckInputs
