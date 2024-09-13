@@ -5,4 +5,5 @@ sync.sh
 packages/*/dist
 dist
 .vscode
+.VSCodeCounter/**/*
 **/*.tsbuildinfo
