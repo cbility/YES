@@ -72,7 +72,6 @@ export async function handler(event: { test?: boolean, inputs: { loginID: string
         const allLoginIDs: ScraperInput[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
         batches = getBatches(allLoginIDs);
 
-        //TODO update last date (create a function)
         await updateLastDate(completeUpdateConfigID);
 
     } else {
