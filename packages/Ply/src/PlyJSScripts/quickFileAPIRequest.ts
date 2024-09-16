@@ -1,6 +1,6 @@
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 const input = {
     APIKey: process.env.QUICKFILE_API_KEY as string

@@ -1,8 +1,8 @@
-export default function bootstrapEnvironment() {
+export default async function bootstrapEnvironment() {
     if (process.env.NODE_ENV !== "production") {
-        const dotenv = require('dotenv');
-        const path = require('path');
-        const { fileURLToPath } = require('url');
+        const dotenv = await import('dotenv');
+        const path = await import('path');
+        const { fileURLToPath } = await import('url');
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
         const relativeDotenvPath = "../../../.env";

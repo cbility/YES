@@ -2,7 +2,7 @@ export { }; //required for compiler
 
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 
 const input = { //test data

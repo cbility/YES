@@ -1,6 +1,6 @@
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 

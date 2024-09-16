@@ -13,7 +13,7 @@ import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
     console.log("Using local environment variables")
 }
 

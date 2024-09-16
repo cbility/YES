@@ -1,9 +1,9 @@
 
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { projectsTable, metricsTable, opportunitiesTable, tasksTable } from "../../../SmartSuite/dist/tables.js"
+import { projectsTable, metricsTable, opportunitiesTable, tasksTable, supportServicesTable } from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 
 const input = {
@@ -25,13 +25,19 @@ await (async () => {
         comparison: "is_not",
         value: "Complete"
     });
+    const supportServices = await ss.filterRecords(supportServicesTable.id, {
+        field: supportServicesTable.structure["Status"].slug,
+        comparison: "is_not",
+        value: "Left Service"
+    });
 
     //get assignees
     const projectsAssignees = projects.map(project => (project[projectsTable.structure["Project Lead"].slug] as string[])).flat();
     const opportunityAssignees = opportunities.map(opp => (opp[opportunitiesTable.structure["Lead"].slug]) as string[]).flat();
     const taskAssignees = tasks.map(task => (task[tasksTable.structure["Task Lead"].slug] as string[])).flat();
+    const serviceAssignees = supportServices.map(service => (service[supportServicesTable.structure["Manager"].slug] as string[])).flat();
 
-    const assigneesSet = new Set([...projectsAssignees, ...opportunityAssignees, ...taskAssignees]);
+    const assigneesSet = new Set([...projectsAssignees, ...opportunityAssignees, ...taskAssignees, ...serviceAssignees]);
 
     //calculate metrics
 
@@ -122,12 +128,12 @@ await (async () => {
         ).length; //Total live ASA projects
 
         //quoting
-        metricRecords[index][metricsTable.structure["Total Jobs Quoted"].slug] = opportunities.filter(
+        metricRecords[index][metricsTable.structure["Total Opportunties Quoted"].slug] = opportunities.filter(
             opp => (opp[opportunitiesTable.structure["Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (opp[opportunitiesTable.structure["Status"].slug] as StatusFieldCell).value !== "backlog" // slug for "Scoping"
         ).length; //Total opportunities quoted
 
-        metricRecords[index][metricsTable.structure["Total Quotes Converted"].slug] = opportunities.filter(
+        metricRecords[index][metricsTable.structure["Total Opportunities Converted"].slug] = opportunities.filter(
             opp => (opp[opportunitiesTable.structure["Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (opp[opportunitiesTable.structure["Status"].slug] as StatusFieldCell).value === "ready_for_review" // slug for "Closed - Won"
         ).length; //Total opportunities converted
@@ -139,8 +145,39 @@ await (async () => {
 
         metricRecords[index][metricsTable.structure["Total Live Hard Deadlines"].slug] = tasks.filter(
             task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
-                (task[tasksTable.structure["Hard Due Date"].slug] as DueDateFieldCell).from_date.date != null
+                (task[tasksTable.structure["Hard Due Date"].slug] as DueDateFieldCell).to_date.date != null
         ).length; //Total live hard deadlines
+
+        //support service
+        metricRecords[index][metricsTable.structure["Total RHI Support Services"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string)
+        ).length; //Total live support services
+
+        metricRecords[index][metricsTable.structure["Support Services Window Open"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                service[supportServicesTable.structure["RHI Window Open"].slug] === true
+        ).length; //RHI Window Open
+
+        metricRecords[index][metricsTable.structure["Support Services Window Open Soon"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                service[supportServicesTable.structure["RHI Window Open Within 2 Weeks"].slug] === true
+        ).length; //RHI Window Open within 2 weeks
+
+        metricRecords[index][metricsTable.structure["Data Issues"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (service[supportServicesTable.structure["Data Issue Submissions"].slug] as unknown[]).length > 0
+        ).length; //Data Issue services
+
+        metricRecords[index][metricsTable.structure["Open Comment Services"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (service[supportServicesTable.structure["Open Comments"].slug] as number) > 0
+        ).length; //Open Comment Services
+
+        metricRecords[index][metricsTable.structure["Sites Awaiting Submission"].slug] = supportServices.filter(
+            service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (service[supportServicesTable.structure["Submission Due?"].slug] as string) === "Quarter Due"
+        ).length; //Sites awaiting submission
+
     });
 
     //add records to metrics table

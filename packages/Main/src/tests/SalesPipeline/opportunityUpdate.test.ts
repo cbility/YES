@@ -5,7 +5,7 @@ import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandl
 import { opportunitiesTable, quoteItemsTable } from "../../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../../Common/dist/bootstrapEnvironment.js";
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 

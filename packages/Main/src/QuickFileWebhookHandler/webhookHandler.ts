@@ -4,7 +4,7 @@ import { invoicesTable, opportunitiesTable, quoteItemsTable } from "../../../Sma
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
 if (process.env.NODE_ENV !== "production") {
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;

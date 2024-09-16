@@ -6,7 +6,7 @@ import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
-    bootstrapEnvironment();
+    await bootstrapEnvironment();
 }
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);

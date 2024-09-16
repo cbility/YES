@@ -5,7 +5,7 @@ import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { loginsTable } from "../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
-bootstrapEnvironment();
+await bootstrapEnvironment();
 
 const browserArgs = {
     headless: "new", //using new headless mode, set to false to disable headless
@@ -52,7 +52,7 @@ const browserArgs = {
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
-            bootstrapEnvironment();
+            await bootstrapEnvironment();
         }
 
         const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
