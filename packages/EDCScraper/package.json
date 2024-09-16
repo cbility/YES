@@ -1,0 +1,25 @@
+{
+    "name": "edcscraper",
+    "version": "1.0.0",
+    "main": "./dist/main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "type": "module",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@types/node": "^22.5.4",
+        "@types/readline-sync": "^1.4.8"
+    },
+    "dependencies": {
+        "fs": "^0.0.1-security",
+        "os": "^0.1.2",
+        "path": "^0.12.7",
+        "puppeteer": "^23.3.0",
+        "readline-sync": "^1.4.10",
+        "xlsx": "^0.18.5"
+    }
+}

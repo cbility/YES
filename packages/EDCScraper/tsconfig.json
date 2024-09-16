@@ -1,0 +1,23 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "target": "ES2015",
+        "module": "es2015",
+        "moduleResolution": "Bundler",
+        "outDir": "./dist", /* Specify an output folder for all emitted files. */
+        "rootDir": "./src",
+        "declaration": false,
+        "declarationMap": false, /* Create sourcemaps for d.ts files. */
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ]
+    },
+    "include": [
+        "src/**/*",
+    ],
+    "exclude": [
+        "node_modules",
+    ],
+}
