@@ -1201,6 +1201,10 @@ export const metricsTable = {
             "slug": "title",
             "field_type": "recordtitlefield"
         },
+        "Open Comment Services": {
+            "slug": "saa40377e5",
+            "field_type": "numberfield"
+        },
         "First Created": {
             "slug": "first_created",
             "field_type": "firstcreatedfield"
@@ -1221,24 +1225,16 @@ export const metricsTable = {
             "slug": "autonumber",
             "field_type": "autonumberfield"
         },
-        "Staff Member": {
-            "slug": "sc5135d496",
-            "field_type": "linkedrecordfield"
-        },
-        "Total Jobs Quoted": {
+        "Total Opportunties Quoted": {
             "slug": "s06830d4c5",
             "field_type": "numberfield"
         },
-        "Total Quotes Converted": {
+        "Total Opportunities Converted": {
             "slug": "s205f19177",
             "field_type": "numberfield"
         },
         "Total Live Projects": {
             "slug": "s6ce5dcadc",
-            "field_type": "numberfield"
-        },
-        "Live Amendment Projects with YES": {
-            "slug": "s8cf5965c6",
             "field_type": "numberfield"
         },
         "Total Live Amendment Projects": {
@@ -1301,13 +1297,37 @@ export const metricsTable = {
             "slug": "s7e63a9fa6",
             "field_type": "datefield"
         },
-        "Text": {
-            "slug": "s08y5olb",
-            "field_type": "textfield"
-        },
         "Assigned To": {
             "slug": "se9205aa11",
             "field_type": "userfield"
+        },
+        "Live Amendment Projects with YES": {
+            "slug": "s8cf5965c6",
+            "field_type": "numberfield"
+        },
+        "Total RHI Support Services": {
+            "slug": "se7d9a7e04",
+            "field_type": "numberfield"
+        },
+        "Support Services Window Open": {
+            "slug": "sd280c2ffe",
+            "field_type": "numberfield"
+        },
+        "Support Services Window Open Soon": {
+            "slug": "swu6kxej",
+            "field_type": "numberfield"
+        },
+        "Awaiting Submission": {
+            "slug": "s306e05e64",
+            "field_type": "numberfield"
+        },
+        "Data Issues": {
+            "slug": "s5bc1ad486",
+            "field_type": "numberfield"
+        },
+        "Sites Awaiting Submission": {
+            "slug": "s040d5336e",
+            "field_type": "numberfield"
         }
     }
 } as const
@@ -1613,6 +1633,349 @@ export const tasksTable = {
         "Text 4": {
             "slug": "s78r24kz",
             "field_type": "textfield"
+        }
+    }
+} as const;
+
+export const supportServicesTable = {
+    "name": "Support Services",
+    "id": "6616a080f17f6389848d38d0",
+    "structure": {
+        "Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "RHI": {
+            "slug": "s84dfbfaae",
+            "field_type": "linkedrecordfield"
+        },
+        "RO Generator": {
+            "slug": "s4664a17d0",
+            "field_type": "linkedrecordfield"
+        },
+        "Invoices": {
+            "slug": "scc496d41f",
+            "field_type": "linkedrecordfield"
+        },
+        "Legacy Service Start": {
+            "slug": "s711e0f6c5",
+            "field_type": "datefield"
+        },
+        "Job Sub-Type": {
+            "slug": "sb5e285126",
+            "field_type": "linkedrecordfield"
+        },
+        "RO Submissions": {
+            "slug": "s69073a333",
+            "field_type": "linkedrecordfield"
+        },
+        "Installation Name": {
+            "slug": "s90c1b09ce",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Manager": {
+            "slug": "s4891236cd",
+            "field_type": "userfield"
+        },
+        "TinyURL dropbox link": {
+            "slug": "se2b1d6760",
+            "field_type": "textfield"
+        },
+        "Local Folder": {
+            "slug": "sc7952506b",
+            "field_type": "buttonfield"
+        },
+        "Status": {
+            "slug": "s1c53d88cd",
+            "field_type": "statusfield"
+        },
+        "Link to RHI Submissions": {
+            "slug": "sf80nbpd",
+            "field_type": "linkedrecordfield"
+        },
+        "RHI Installation Name": {
+            "slug": "sd153d7e7a",
+            "field_type": "lookupfield",
+            "target_field_type": "textfield"
+        },
+        "Record ID (System Field)": {
+            "slug": "sc591e2fdc",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Job Type": {
+            "slug": "s5e166cf4d",
+            "field_type": "lookupfield",
+            "target_field_type": "linkedrecordfield"
+        },
+        "RHI Window Open": {
+            "slug": "sac96473a5",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "RHI Window Open Within 2 Weeks": {
+            "slug": "sq98hz40",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Next Due Submission": {
+            "slug": "s68e84e107",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Submission Due?": {
+            "slug": "s7a66d9cae",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Client": {
+            "slug": "sdc4d7db0b",
+            "field_type": "linkedrecordfield"
+        },
+        "Quote": {
+            "slug": "s749521306",
+            "field_type": "linkedrecordfield"
+        },
+        "AS Username": {
+            "slug": "s5ohq1ag",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "AS Password": {
+            "slug": "s685cecfc6",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Client Emails": {
+            "slug": "s34433fdd0",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Service Contact Emails Lookup": {
+            "slug": "s2f074abd6",
+            "field_type": "lookupfield",
+            "target_field_type": "emailfield"
+        },
+        "Status Grouping": {
+            "slug": "sf61834160",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Service Contact Emails": {
+            "slug": "s915de1be8",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Service Contact Emails Search String": {
+            "slug": "sfomizhf",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Service Start": {
+            "slug": "scd4d0581e",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "RHI Blocking Projects": {
+            "slug": "s2phg3zs",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Latest RHI Submission End Date": {
+            "slug": "s7ccdfb9c5",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "First Unreviewed or Data Issue RHI Submission": {
+            "slug": "s230042c42",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Next Due Quarter": {
+            "slug": "sb02a0bcbc",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Quarter Ends": {
+            "slug": "s0f4a66230",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "RHI Application Status": {
+            "slug": "scf04e32bf",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "RHI Accreditation Status": {
+            "slug": "s3abf846fc",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "Link to Problems": {
+            "slug": "sa5iy97z",
+            "field_type": "linkedrecordfield"
+        },
+        "Service Contacts": {
+            "slug": "smckefcf",
+            "field_type": "linkedrecordfield"
+        },
+        "Sister Services": {
+            "slug": "sf7c1e7ee4",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Service Has Sister Services": {
+            "slug": "s466ac2d26",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Late Data Chase Emails": {
+            "slug": "sb7882fca7",
+            "field_type": "lookupfield",
+            "target_field_type": "emailfield"
+        },
+        "Latest Submission Start Date": {
+            "slug": "s70288d16c",
+            "field_type": "formulafield",
+            "target_field_type": "datefield"
+        },
+        "Last RHI portal update": {
+            "slug": "s3efa2c264",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "First Data Issue group name (System Field)": {
+            "slug": "sb686f77cf",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Next Quarter group name (System Field)": {
+            "slug": "s919bcc0d1",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "RHI Technology": {
+            "slug": "s6849ecec0",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "Submission Report Emails": {
+            "slug": "s8a5808c7c",
+            "field_type": "lookupfield",
+            "target_field_type": "emailfield"
+        },
+        "Tier 1 cut-off": {
+            "slug": "s00dbb04e4",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Sustainability Reporting": {
+            "slug": "s70d9f0527",
+            "field_type": "lookupfield",
+            "target_field_type": "singleselectfield"
+        },
+        "FMS": {
+            "slug": "sbdb648ee5",
+            "field_type": "filefield"
+        },
+        "FMS Approval Email": {
+            "slug": "sef69d9a58",
+            "field_type": "filefield"
+        },
+        "FMS Approval": {
+            "slug": "s0bc1d45f7",
+            "field_type": "datefield"
+        },
+        "Current BSL Number": {
+            "slug": "s3a1b300cf",
+            "field_type": "textfield"
+        },
+        "Approved Fuel Types": {
+            "slug": "syvqborr",
+            "field_type": "linkedrecordfield"
+        },
+        "Date Left Service": {
+            "slug": "s11da23dbe",
+            "field_type": "datefield"
+        },
+        "Reason For Leaving": {
+            "slug": "s21f39ed43",
+            "field_type": "textfield"
+        },
+        "Using heat from another installation?": {
+            "slug": "sfb6a98409",
+            "field_type": "singleselectfield"
+        },
+        "Paired Installation": {
+            "slug": "s5af27df46",
+            "field_type": "linkedrecordfield"
+        },
+        "Client Lookup": {
+            "slug": "s1dd3f5b62",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
+        },
+        "Link to Service Invoice Items": {
+            "slug": "sp4r0dqc",
+            "field_type": "linkedrecordfield"
+        },
+        "Tasks": {
+            "slug": "sa26451a92",
+            "field_type": "linkedrecordfield"
+        },
+        "Folder Code": {
+            "slug": "s76eba2fc8",
+            "field_type": "textfield"
+        },
+        "Legacy Cumulative EHO": {
+            "slug": "sad700597f",
+            "field_type": "numberfield"
+        },
+        "Legacy Woodsure Number": {
+            "slug": "s96b1e558c",
+            "field_type": "textfield"
+        },
+        "Legacy Client Name": {
+            "slug": "sef1f0d7fd",
+            "field_type": "textfield"
+        },
+        "Legacy Notes": {
+            "slug": "sb19be2999",
+            "field_type": "textareafield"
+        },
+        "Approved GHG Calculation": {
+            "slug": "s4d43a8544",
+            "field_type": "filefield"
+        },
+        "Auxiliary Fossil Fuel": {
+            "slug": "sbf382a409",
+            "field_type": "yesnofield"
+        },
+        "Data Issue Submissions": {
+            "slug": "sb3fc3944e",
+            "field_type": "lookupfield",
+            "target_field_type": "recordtitlefield"
         }
     }
 } as const;
