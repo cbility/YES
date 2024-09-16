@@ -98,6 +98,7 @@ export default class SmartSuiteAPIHandler {
         Can be configured to just check records which are listed, but needs the field slug of an ID field.
         Can also be configured to check records against the entire table, but more computationally expensive. Entire table can be supplier or is requested
         */
+        console.log("Getting current record values...");
         const existingRecords = useEntireTable ?
             additionalInfo?.entireTableRecords ?
                 additionalInfo.entireTableRecords :
@@ -107,6 +108,7 @@ export default class SmartSuiteAPIHandler {
                 additionalInfo?.idFieldSlug as string,
                 updatedRecords.map(record => record.id)
             );
+        console.log("Filtering out unchanged records...");
 
         const changedRecords = updatedRecords.filter((updatedRecord) => {
             const recordToUpdate = existingRecords.find(existingRecord => existingRecord.id === updatedRecord.id);
@@ -232,6 +234,7 @@ export default class SmartSuiteAPIHandler {
             await this.filterForDataChanges(tableID, records, false, additionalInfo as { idFieldSlug: string })
         ) : records
         if (recordsToUpdate.length === 0) return []; // skip request if no records to update
+        console.log("Updating " + recordsToUpdate.length + " changed records");
 
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
         const updatedRecords: SmartSuiteRecord[] = [];
