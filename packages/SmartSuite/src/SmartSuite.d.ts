@@ -154,7 +154,7 @@ interface RHIAccountRecordUpdate extends SmartSuiteRecord {
 
 interface RHILoginRecord extends SmartSuiteRecord {
     id: string;
-    s362676897: "Authorised Signatory" | "Additional User";
+    s362676897: "eRuOB"/*authorised signatory*/ | "fIKh7" /*additional user*/ | "FrLDR" /*undetermined*/;
     //title: string;
     //sb4e5173b6: string;
 }

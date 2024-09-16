@@ -6,9 +6,9 @@ export default async function getLoginDetails(loginRecord: RHILoginRecord, page:
     const updatePasswordLink = await page.$("#SecondaryPlaceHolder_rptLeftNavigation_hlnkLeftNav_2");
     //account is AS if option to update password is available
     if (updatePasswordLink) {
-        loginRecord[loginsTable.fields["Login Type"]] = "Authorised Signatory";
+        loginRecord[loginsTable.fields["Login Type"]] = "eRuOB"; //authorised signatory
     } else {
-        loginRecord[loginsTable.fields["Login Type"]] = "Additional User";
+        loginRecord[loginsTable.fields["Login Type"]] = "fIKh7"; //id for additional user option
         return loginRecord; //account name not available on AU logins
     }
     return loginRecord;

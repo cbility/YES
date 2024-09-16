@@ -99,7 +99,7 @@ export default async function main(
         // Account information not available on AU logins
         if (
             updatedLoginRecord[loginsTable.fields["Login Type"]] ===
-            "Additional User"
+            "fIKh7" //additional user
         ) {
             const RHIDetails = await getRHIDetails(accountID, page, shallow);
             if (!RHIDetails[0]) continue;
