@@ -8,7 +8,7 @@ import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 await bootstrapEnvironment();
 
 const browserArgs = {
-    headless: "new", //using new headless mode, set to false to disable headless
+    headless: "shell", //using old faster headless mode, set to false to disable headless
     defaultViewport: null,
     args: [
         "--autoplay-policy=user-gesture-required",
@@ -48,7 +48,7 @@ const browserArgs = {
 
 (async () => {
 
-    const COMPLETE_UPDATE = true;
+    const COMPLETE_UPDATE = false;
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
@@ -77,8 +77,7 @@ const browserArgs = {
         updateLogins(100, 0);
     } else {
         //change inputs here
-        const body = JSON.parse("[{\"loginID\":\"65e37da7f8428f036fd99bd0\"},{\"loginID\":\"65e37da7f8428f036fd9981b\"},{\"loginID\":\"65e37da7f8428f036fd99856\"},{\"loginID\":\"65e37da7f8428f036fd9985b\"},{\"loginID\":\"65e37da7f8428f036fd99876\"},{\"loginID\":\"65e37da7f8428f036fd99890\"},{\"loginID\":\"65e37da7f8428f036fd998a6\"},{\"loginID\":\"65e37da7f8428f036fd998aa\"},{\"loginID\":\"65e37da7f8428f036fd99921\"},{\"loginID\":\"65e37da7f8428f036fd99979\"},{\"loginID\":\"65e37da7f8428f036fd999c3\"},{\"loginID\":\"65e37da7f8428f036fd99a19\"},{\"loginID\":\"65e37da7f8428f036fd99a1f\"},{\"loginID\":\"65e37da7f8428f036fd99a40\"},{\"loginID\":\"65e37da7f8428f036fd99ac1\"},{\"loginID\":\"65e37da7f8428f036fd99acf\"},{\"loginID\":\"65e37da7f8428f036fd99bea\"},{\"loginID\":\"65e37da7f8428f036fd99bec\"},{\"loginID\":\"66048a2deacc4d19bab05b96\"},{\"loginID\":\"66048a2deacc4d19bab05b97\"},{\"loginID\":\"66048a2deacc4d19bab05b98\"},{\"loginID\":\"66048a2deacc4d19bab05b99\"},{\"loginID\":\"66048a2deacc4d19bab05b9a\"},{\"loginID\":\"66048a2deacc4d19bab05b9b\"},{\"loginID\":\"66048a2deacc4d19bab05b9c\"},{\"loginID\":\"66048a2deacc4d19bab05b9d\"},{\"loginID\":\"66048a2deacc4d19bab05b9e\"},{\"loginID\":\"66048a2deacc4d19bab05b9f\"},{\"loginID\":\"66048a2deacc4d19bab05ba0\"},{\"loginID\":\"66048a2deacc4d19bab05ba2\"},{\"loginID\":\"66048a2deacc4d19bab05ba3\"},{\"loginID\":\"66048a2deacc4d19bab05ba8\"},{\"loginID\":\"66048a2deacc4d19bab05ba9\"},{\"loginID\":\"66048a2deacc4d19bab05bac\"},{\"loginID\":\"66048a2deacc4d19bab05bae\"},{\"loginID\":\"66048a2deacc4d19bab05bb1\"},{\"loginID\":\"66048a2deacc4d19bab05bb2\"},{\"loginID\":\"66048a2deacc4d19bab05bb3\"},{\"loginID\":\"66048a2deacc4d19bab05bb4\"},{\"loginID\":\"66048a2deacc4d19bab05bb5\"},{\"loginID\":\"66048a2deacc4d19bab05bb6\"},{\"loginID\":\"66048a2deacc4d19bab05bb7\"},{\"loginID\":\"66048a2deacc4d19bab05bb8\"},{\"loginID\":\"66048a2deacc4d19bab05bbb\"},{\"loginID\":\"66aa4d60a5815e4e94d5f402\"}]");
-
+        const body = JSON.parse("[{\"loginID\":\"65e37da7f8428f036fd99987\"}]")
         await main(body,
             puppeteer as unknown as PuppeteerCoreNode,
             browserArgs,
