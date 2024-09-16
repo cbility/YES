@@ -7,6 +7,7 @@
     },
     "dependencies": {
         "@types/node": "^22.5.4",
+        "dotenv": "^16.4.5",
         "tsc": "^2.0.4"
     },
     "devDependencies": {
@@ -14,7 +15,6 @@
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.21.0",
         "cheerio": "^1.0.0",
-        "dotenv": "^16.4.5",
         "eslint": "^8.57.0",
         "eslint-config-love": "^63.0.0",
         "eslint-plugin-import": "^2.29.1",
