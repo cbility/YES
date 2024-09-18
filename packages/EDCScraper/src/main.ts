@@ -79,7 +79,7 @@ export interface SubmissionData {
                 ).flat()
             ));
 
-            excelData[RHIIndex].sheetData[0] = [RHIs[RHIIndex].RHIName, ...meters.map((_) => undefined), "Capacity (kWt):", RHIs[RHIIndex].capacity]
+            excelData[RHIIndex].sheetData[0] = [RHIs[RHIIndex].RHIName, undefined, undefined, undefined, "Capacity (kWt):", RHIs[RHIIndex].capacity]
             excelData[RHIIndex].sheetData[1] = [undefined, "Date", "EHO (kWht)", ...meters.map((_) => undefined), "Payment (£)", "Load Factor"]//first row
             excelData[RHIIndex].sheetData[2] = ["Meter Label", undefined, undefined, ...meters.map(meter => meter.label)];
             excelData[RHIIndex].sheetData[3] = ["Meter Serial", undefined, undefined, ...meters.map(meter => meter.serial)];
@@ -99,12 +99,20 @@ export interface SubmissionData {
                 //add reading row to sheet data
                 excelData[RHIIndex].sheetData[sheetRow] = [undefined,
                     submission.submissionDate,
-                    submission.eho,
+                    (RHIs[RHIIndex].capacity < 1000 ? submission.eho :
+                        submissionIndex % 3 === 1 ? submission.eho :
+                            undefined),
                     ...meterReadings,
-                    submission.payment,
+                    (RHIs[RHIIndex].capacity < 1000 ? submission.payment :
+                        submissionIndex % 3 === 1 ? submission.payment :
+                            undefined),
                     sheetRow > 5 ?
-                        `=$C8/($E$1*24*(B${sheetRow}-B${sheetRow - 1}))` /*load factor formula*/ : undefined];
-
+                        (
+                            RHIs[RHIIndex].capacity < 1000 ?
+                                `=$C${sheetRow + 1}/($F$1*24*(B${sheetRow + 1}-B${sheetRow}))` //quarterly submission load factor
+                                : `=IF(MOD(ROW(),3)=2, $C${sheetRow + 1}/($F$1*24*(B${sheetRow + 1}-B${sheetRow - 2})), "")` //monthly submission load factor
+                        )
+                        : undefined];
             }
         }
 
