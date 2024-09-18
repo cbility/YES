@@ -77,7 +77,7 @@ const browserArgs = {
         updateLogins(100, 0);
     } else {
         //change inputs here
-        const body = JSON.parse("[{\"loginID\":\"65e37da7f8428f036fd99987\"}]")
+        const body = JSON.parse("[{\"loginID\":\"65e37da7f8428f036fd99b78\"}]")
         await main(body,
             puppeteer as unknown as PuppeteerCoreNode,
             browserArgs,

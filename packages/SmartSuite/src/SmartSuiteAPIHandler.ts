@@ -228,13 +228,17 @@ export default class SmartSuiteAPIHandler {
 
         if (records.length <= 2 * this.maxBulkRequestSize && additionalInfo?.entireTableRecords === undefined) checkForDataChanges = false; //don't check for data changes when it won't save on the total number of requests
 
+        console.log("Bulk updating " + records.length + " records");
+        if (checkForDataChanges) console.log("Removing unchanged records...");
+
         //remove unchanged records if instructed    
         const recordsToUpdate = checkForDataChanges ? (useEntireTable ?
             await this.filterForDataChanges(tableID, records, true, additionalInfo as { entireTableRecords: SmartSuiteRecord[] } | undefined) :
             await this.filterForDataChanges(tableID, records, false, additionalInfo as { idFieldSlug: string })
         ) : records
         if (recordsToUpdate.length === 0) return []; // skip request if no records to update
-        console.log("Updating " + recordsToUpdate.length + " changed records");
+
+        if (checkForDataChanges) console.log("Updating " + recordsToUpdate.length + " changed records");
 
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
         const updatedRecords: SmartSuiteRecord[] = [];
