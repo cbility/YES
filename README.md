@@ -103,3 +103,15 @@ For example, on windows, you can use fnm:
         npm run start --prefix packages/RHIScraper
     ```
     You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
+
+5. Bundle Ply code for pasting into code blocks
+
+    Code in the `Ply` package if for use in code blocks in the low-code platform ply.io. Code pasted into these code blocks cannot have any imports or dependencies. Use rollup to package all dependencies into a single file before updating a code block. Other code that is included in the file for testing purposes and should not be included in the Ply code block is highlighted with comment sections.
+
+    Navigate to Ply package, compile and bundle code using rollup
+     ```shell
+        cd packages/Ply
+        tsc -b
+        npx rollup -c  
+    ```
+    Bundled scripts can be found in the Ply/dist/rollup directory.
