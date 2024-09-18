@@ -180,30 +180,35 @@ export default async function main(
 
     //update SmartSuite logins first to avoid overwriting links to new accounts
     if (loginDetails.length > 0) {
+        console.log("Updating " + loginDetails.length + " logins");
         await ss.bulkUpdateRecords(loginsTable.id, loginDetails, true, true, { entireTableRecords: loginRecordsList });
         console.log("Login details updated");
     }
 
     //add new accounts
     if (newAccountDetails.length > 0) {
+        console.log("Creating " + newAccountDetails.length + " new accounts");
         await ss.bulkAddNewRecords(accountsTable.id, newAccountDetails);
         console.log("New account details added");
     }
 
     //update existing accounts
     if (updatedAccountDetails.length > 0) {
+        console.log("Updating " + updatedAccountDetails.length + " existing accounts");
         await ss.bulkUpdateRecords(accountsTable.id, updatedAccountDetails, true, false, { idFieldSlug: accountsTable.fields["Record ID (System Field)"] });
         console.log("Existing account details updated");
     }
 
     //update existing RHIs
     if (updatedRHIDetails.length > 0) {
+        console.log("Updating " + updatedRHIDetails.length + " existing RHIs");
         await ss.bulkUpdateRecords(RHIsTable.id, updatedRHIDetails, true, true, { entireTableRecords: ExistingRHIRecordsList });
         console.log("Existing RHI details updated");
     }
 
     //add new RHIs
     if (newRHIDetails.length > 0) {
+        console.log("Creating " + newRHIDetails.length + " new RHIs");
         await ss.bulkAddNewRecords(RHIsTable.id, newRHIDetails);
         console.log("New RHI details added");
     }
