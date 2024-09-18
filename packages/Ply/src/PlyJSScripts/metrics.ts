@@ -1,4 +1,6 @@
 
+////////////////////IGNORE FOR PLY//////////////////
+
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { projectsTable, metricsTable, opportunitiesTable, tasksTable, supportServicesTable } from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
@@ -87,19 +89,18 @@ await (async () => {
                 (project[projectsTable.structure["Action"].slug] as StatusFieldCell).value === "ready_for_review" // slug for "With YES"
         ).length; //Live Woodsure projects with YES
 
-        metricRecords[index][metricsTable.structure["Live Amendment Projects with YES"].slug] = projects.filter(
+        metricRecords[index][metricsTable.structure["Total Live Amendment Projects"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value === "in_progress" && //slug for "Live"
-                (project[projectsTable.structure["Job Type Code (System Field)"].slug] as string[][])[0]?.[0] === "AMD" &&
-                project[projectsTable.structure["Action"].slug] === "ready_for_review" // slug for "With YES"
-        ).length; //Total live Amendment projects with YES
+                (project[projectsTable.structure["Job Type Code (System Field)"].slug] as string[])[0]?.[0] === "AMD"
+        ).length; //Total live Amendment projects
 
-        metricRecords[index][metricsTable.structure["Total Live Amendment Projects"].slug] = projects.filter(
+        metricRecords[index][metricsTable.structure["Live Amendment Projects with YES"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value === "in_progress" && //slug for "Live"
                 (project[projectsTable.structure["Job Type Code (System Field)"].slug] as string[])[0]?.[0] === "AMD" &&
                 (project[projectsTable.structure["Action"].slug] as StatusFieldCell).value === "ready_for_review"  // slug for "With YES"
-        ).length; //Total live Amendment projects
+        ).length; //Total live Amendment projects with YES
 
         metricRecords[index][metricsTable.structure["Total Live FMS Projects"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
