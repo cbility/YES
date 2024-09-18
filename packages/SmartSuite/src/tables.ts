@@ -1201,10 +1201,6 @@ export const metricsTable = {
             "slug": "title",
             "field_type": "recordtitlefield"
         },
-        "Open Comment Services": {
-            "slug": "saa40377e5",
-            "field_type": "numberfield"
-        },
         "First Created": {
             "slug": "first_created",
             "field_type": "firstcreatedfield"
@@ -1225,7 +1221,7 @@ export const metricsTable = {
             "slug": "autonumber",
             "field_type": "autonumberfield"
         },
-        "Total Opportunties Quoted": {
+        "Total Opportunities Quoted": {
             "slug": "s06830d4c5",
             "field_type": "numberfield"
         },
@@ -1317,16 +1313,34 @@ export const metricsTable = {
             "slug": "swu6kxej",
             "field_type": "numberfield"
         },
-        "Awaiting Submission": {
-            "slug": "s306e05e64",
-            "field_type": "numberfield"
-        },
-        "Data Issues": {
+        "Data Issue Services": {
             "slug": "s5bc1ad486",
             "field_type": "numberfield"
         },
-        "Sites Awaiting Submission": {
+        "Services Awaiting Submission": {
             "slug": "s040d5336e",
+            "field_type": "numberfield"
+        },
+        "Open Comment Services": {
+            "slug": "saa40377e5",
+            "field_type": "numberfield"
+        },
+        "First Created (Including Time)": {
+            "slug": "saf1ce7aa3",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Metrics Junction": {
+            "slug": "s156de04c8",
+            "field_type": "linkedrecordfield"
+        },
+        "Metric Date": {
+            "slug": "sba4d2670a",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "New Tasks (Past Week)": {
+            "slug": "s3c726e3ff",
             "field_type": "numberfield"
         }
     }

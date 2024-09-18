@@ -60,12 +60,12 @@ await (async () => {
 
         metricRecords[index][metricsTable.structure["New Projects (past week)"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
-                new Date((project[projectsTable.structure["Project Created"].slug] as FirstCreatedFieldCell).on).getTime() >= Date.now() - MS_IN_ONE_WEEK
+                new Date((project[projectsTable.structure["Project Created"].slug] as FirstCreatedFieldCell).on).getTime() >= now.getTime() - MS_IN_ONE_WEEK
         ).length; //New projects (past week)
 
         metricRecords[index][metricsTable.structure["Projects Submitted (past week)"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
-                new Date((project[projectsTable.structure["Project Submitted"].slug] as DateFieldCell).date).getTime() >= Date.now() - MS_IN_ONE_WEEK
+                new Date((project[projectsTable.structure["Project Submitted"].slug] as DateFieldCell).date).getTime() >= now.getTime() - MS_IN_ONE_WEEK
         ).length; //Projects Submitted (past week)
 
         metricRecords[index][metricsTable.structure["Total Live Woodsure Projects"].slug] = projects.filter(
@@ -128,7 +128,7 @@ await (async () => {
         ).length; //Total live ASA projects
 
         //quoting
-        metricRecords[index][metricsTable.structure["Total Opportunties Quoted"].slug] = opportunities.filter(
+        metricRecords[index][metricsTable.structure["Total Opportunities Quoted"].slug] = opportunities.filter(
             opp => (opp[opportunitiesTable.structure["Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (opp[opportunitiesTable.structure["Status"].slug] as StatusFieldCell).value !== "backlog" // slug for "Scoping"
         ).length; //Total opportunities quoted
@@ -142,6 +142,11 @@ await (async () => {
         metricRecords[index][metricsTable.structure["Total Live Tasks"].slug] = tasks.filter(
             task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string)
         ).length; //Total live tasks
+
+        metricRecords[index][metricsTable.structure["New Tasks (Past Week)"].slug] = tasks.filter(
+            task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (new Date((task[tasksTable.structure["First Created"].slug] as FirstCreatedFieldCell).on)).getTime() >= now.getTime() - MS_IN_ONE_WEEK
+        ).length; //New Tasks (past week)
 
         metricRecords[index][metricsTable.structure["Total Live Hard Deadlines"].slug] = tasks.filter(
             task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
@@ -163,7 +168,7 @@ await (async () => {
                 service[supportServicesTable.structure["RHI Window Open Within 2 Weeks"].slug] === true
         ).length; //RHI Window Open within 2 weeks
 
-        metricRecords[index][metricsTable.structure["Data Issues"].slug] = supportServices.filter(
+        metricRecords[index][metricsTable.structure["Data Issue Services"].slug] = supportServices.filter(
             service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (service[supportServicesTable.structure["Data Issue Submissions"].slug] as unknown[]).length > 0
         ).length; //Data Issue services
@@ -173,7 +178,7 @@ await (async () => {
                 (service[supportServicesTable.structure["Open Comments"].slug] as number) > 0
         ).length; //Open Comment Services
 
-        metricRecords[index][metricsTable.structure["Sites Awaiting Submission"].slug] = supportServices.filter(
+        metricRecords[index][metricsTable.structure["Services Awaiting Submission"].slug] = supportServices.filter(
             service => (service[supportServicesTable.structure["Manager"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (service[supportServicesTable.structure["Submission Due?"].slug] as string) === "Quarter Due"
         ).length; //Sites awaiting submission
