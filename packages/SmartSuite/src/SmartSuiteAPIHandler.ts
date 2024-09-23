@@ -244,7 +244,12 @@ export default class SmartSuiteAPIHandler {
         const updatedRecords: SmartSuiteRecord[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, recordsToUpdate);
 
+        console.log("split updated records in to " + recordsBatches.length + " batch requests");
+        let batchCount = 0
+
         for (const batch of recordsBatches) {
+            batchCount++;
+            console.log("processing batch " + batchCount);
             const body = { items: batch };
             const response = await this.request(url, {
                 method: "PATCH",
