@@ -8,10 +8,12 @@ import getSubmissionDetails from './getSubmissionDetails.js';
 import askQuestion from './askQuestion.js';
 import getCapacity from './getCapacity.js';
 
-interface MeterInformation { label: string, serial: string, description: string, reading: number };
+interface MeterInformation { label: string, serial: string, description: string, reading: number, previousReading: number };
 
 export interface SubmissionData {
     submissionDate: Date,
+    submissionYear: number | undefined,
+    submissionQuarter: number | undefined,
     submissionStatus: string,
     submissionAction: string,
     meterInformation: MeterInformation[]
@@ -80,14 +82,18 @@ export interface SubmissionData {
             ));
 
             excelData[RHIIndex].sheetData[0] = [RHIs[RHIIndex].RHIName, undefined, undefined, undefined, "Capacity (kWt):", RHIs[RHIIndex].capacity]
-            excelData[RHIIndex].sheetData[1] = [undefined, "Date", "EHO (kWht)", ...meters.map((_) => undefined), "Payment (£)", "Load Factor"]//first row
-            excelData[RHIIndex].sheetData[2] = ["Meter Label", undefined, undefined, ...meters.map(meter => meter.label)];
-            excelData[RHIIndex].sheetData[3] = ["Meter Serial", undefined, undefined, ...meters.map(meter => meter.serial)];
-            excelData[RHIIndex].sheetData[4] = ["Meter Description", undefined, undefined, ...meters.map(meter => meter.description)];
+            excelData[RHIIndex].sheetData[1] = [undefined, undefined, "Date", "EHO (kWht)", ...meters.map((_) => undefined), "Payment (£)", "Load Factor"]//first row
+            excelData[RHIIndex].sheetData[2] = [undefined, "Meter Label", undefined, undefined, ...meters.map(meter => meter.label)];
+            excelData[RHIIndex].sheetData[3] = [undefined, "Meter Serial", undefined, undefined, ...meters.map(meter => meter.serial)];
+            excelData[RHIIndex].sheetData[4] = [undefined, "Meter Description", undefined, undefined, ...meters.map(meter => meter.description)];
+            excelData[RHIIndex].sheetData[5] = ["Year", "Quarter"];
+
+            const numHeaderRows = 6;
 
             for (let submissionIndex = 0; submissionIndex < RHIs[RHIIndex].submissions.length; submissionIndex++) {
                 const submission = RHIs[RHIIndex].submissions[submissionIndex];
-                const sheetRow = RHIs[RHIIndex].submissions.length + 4 - submissionIndex; //write latest dates to bottom of file
+                const nextSubmission: SubmissionData | undefined = RHIs[RHIIndex].submissions[submissionIndex - 1];
+                const sheetRow = RHIs[RHIIndex].submissions.length + numHeaderRows - 1 - submissionIndex; //write latest dates to bottom of file
 
                 let meterReadings: (number | undefined)[] = meters.map((_) => undefined); //initialise meter reading array for insertion into excel sheet
 
@@ -97,21 +103,16 @@ export interface SubmissionData {
                 })
 
                 //add reading row to sheet data
-                excelData[RHIIndex].sheetData[sheetRow] = [undefined,
+                excelData[RHIIndex].sheetData[sheetRow] = [
+                    submission.submissionYear,
+                    submission.submissionQuarter,
                     submission.submissionDate,
-                    (RHIs[RHIIndex].capacity < 1000 ? submission.eho :
-                        submissionIndex % 3 === 1 ? submission.eho :
-                            undefined),
+                    nextSubmission && submission.submissionQuarter != nextSubmission.submissionQuarter ? submission.eho : undefined, //only print eho in last submission in quarter
                     ...meterReadings,
-                    (RHIs[RHIIndex].capacity < 1000 ? submission.payment :
-                        submissionIndex % 3 === 1 ? submission.payment :
-                            undefined),
-                    sheetRow > 5 ?
-                        (
-                            RHIs[RHIIndex].capacity < 1000 ?
-                                `=$C${sheetRow + 1}/($F$1*24*(B${sheetRow + 1}-B${sheetRow}))` //quarterly submission load factor
-                                : `=IF(MOD(ROW(),3)=2, $C${sheetRow + 1}/($F$1*24*(B${sheetRow + 1}-B${sheetRow - 2})), "")` //monthly submission load factor
-                        )
+                    nextSubmission && submission.submissionQuarter != nextSubmission.submissionQuarter ? submission.payment : undefined,  //only print payment in last submission in quarter
+                    sheetRow == numHeaderRows + 1 ?
+                        //load factor formula, uses eho, capacity and difference between current date and prev quarter date
+                        '=IF(ISBLANK(D8), "",D8/((C8-XLOOKUP(1,(B:B<>B8)*(B:B<>"")*(C:C<C8),C:C, "", 0, -1))*24*$F$1))'
                         : undefined];
             }
         }

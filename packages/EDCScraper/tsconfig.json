@@ -1,5 +1,4 @@
 {
-    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "composite": false,
         "target": "ES2015",
@@ -9,6 +8,11 @@
         "rootDir": "./src",
         "declaration": false,
         "declarationMap": false, /* Create sourcemaps for d.ts files. */
+        "strict": true,
+        "alwaysStrict": true,
+        "types": [
+            "node"
+        ],
         "typeRoots": [
             "./node_modules/@types",
             "./types"

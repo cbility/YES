@@ -1,9 +1,17 @@
 # node
 node_modules
+# environment variables
 .env
-sync.sh
+# typescript output
 packages/*/dist
 dist
+**/*.tsbuildinfo
+# editor
 .vscode
 .VSCodeCounter/**/*
-**/*.tsbuildinfo
+# pupeteer browser cache
+**/.cache/**/*
+# rollup output
+packages/Ply/rollup/**/*
+# excecutable
+**/*.exe

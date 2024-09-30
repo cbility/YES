@@ -42,7 +42,10 @@ export default async function getSubmissionDetails(page: Page, RHIName: string):
     periodicSubmissionTable.each((index, element) => {
         const submissionName = $(element).find('td:nth-child(1)').text().trim();
         if (submissionName.length > 0) {
+            const submissionNumbers = submissionName.match(/\d+/g);
             submissionsData.push({
+                submissionYear: submissionNumbers ? +submissionNumbers[0] : undefined,
+                submissionQuarter: submissionNumbers && submissionNumbers[1] ? +submissionNumbers[1] : undefined,
                 submissionDate: getSecondDateInLine(submissionName),
                 submissionStatus: $(element).find('td:nth-child(2)').text().trim(),
                 submissionAction: $(element).find('td:nth-child(3)').text().trim(),
@@ -90,18 +93,29 @@ export default async function getSubmissionDetails(page: Page, RHIName: string):
         //get meter reading info
         const meterReadingTableRows = $('#FullWidthPlaceholder_FullWidthContentPlaceholder_gvMeters > tbody > tr');
         meterReadingTableRows.each((meterIndex, rowElement) => {
-            const reading = $(rowElement).find('input[name^="ctl00$ctl00$FullWidthPlaceholder$FullWidthContentPlaceholder$gvMeters$ctl"]').val();
+            const readingText = $(rowElement).find('input[name^="ctl00$ctl00$FullWidthPlaceholder$FullWidthContentPlaceholder$gvMeters$ctl"]').val() as string | undefined;
+            let reading = parseInt(readingText as string);
             const cells = $(rowElement).find('td');
             if (cells.length > 0) {
                 const label = cells.eq(0).text().trim();
                 const serial = cells.eq(1).text().trim();
                 const description = cells.eq(2).text().trim();
-                const reading = $(rowElement).find('input[name^="ctl00$ctl00$FullWidthPlaceholder$FullWidthContentPlaceholder$gvMeters$ctl"]').val();
+                const previousReading = cells.eq(3).text().trim();
+                //deal with missing readings
+                const nextMeterInformation = submissionsData[submissionIndex - 1].meterInformation.find(meter => meter.label === label);
+                if (nextMeterInformation) { //if meter is present in next submission
+                    if (reading == undefined ||
+                        isNaN(reading)) { //if current meter reading is missing
+                        reading = nextMeterInformation.previousReading;
+                    }
+                }
+                //add reading to output
                 submissionsData[submissionIndex].meterInformation!.push({
                     label,
                     serial,
                     description,
-                    reading: parseInt(reading as string),
+                    reading,
+                    previousReading: parseInt(previousReading),
                 })
             }
         })
