@@ -1,86 +1,83 @@
-export { } //required for compiler
+////////////////////SETUP CODE////////////////////////////////////////////
+
+//export { } //required for compiler
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
-}
-
+} //get env vars for testing
 const input = { // input for testing
-    APIKey: process.env.QUICKFILE_API_KEY as string,
-    quoteID: "32992559",
     termDays: 30,
     clientID: "8028732",
-    quoteName: "Q00303 IRM",
-    hourlyRate: 85,
+    invoiceName: "Q00303 IRM",
     currentDate: "2024-07-30",
     issueDate: null,
-    minimumHours: 2,
     invoiceNumber: "test1",
     paymentTerms: "Items with a set price are subject to an initial charge of 50% of the quoted price, invoiced when you have accepted the quote. We will not begin working on your project until this initial invoice has been issued and paid. The remaining balance will be invoiced on submission of your work. If the net total price does not exceed £200 the initial invoice will be for 100% of the quoted price.<br><br><b>Travel Costs</b><br>Free if journey is one hour or less from our office. Otherwise 45p per mile plus £35 per additional hour of travelling time.<br><br>Please note; we cannot be held responsible for issues where the government's guidance is unclear or where the government changes how they respond over time.<br><br>Our advice cannot be treated as legal advice and should be seen as a guide to current best practice only.,<br><br>Our preferred payment is by BACS transfer to:<br>ENERGY SOURCE LTD<br>Co-operative bank<br>Sort code: 08-92-99<br>Account number: 69 54 73 84",
-    items: [{
-        "id": "66a760901b051078cf0cf85e", "title": "303 | test | IRM : Steam and Complex Systems", "status": { "value": "", "updated_on": null }, "ranking": { "default": "abqqyjpmxg" }, "s8ae4bmj": [], "sceijfhd": [], "szhxcchw": [], "autonumber": 743, "s12ffd1659": [["w06CA"]], "s20b2ac406": "1", "s217809efc": { "date": null, "include_time": false }, "s2761dae0a": [[{ "value": "8gjAo", "updated_on": "2024-07-28T13:29:30.618000Z" }]], "s30f4806c7": "Steam and Complex Systems", "s569b88c93": [[null]], "s5965dc855": [["0.00"]], "s5f064af81": "002", "s5f5d0899c": [], "s5fdf14c9f": "Unsent", "s6c2a26789": "66a760901b051078cf0cf85e", "s6d6f58d02": [[""]], "s6e4a23362": false, "s7a5606e60": true, "s7d2a25ddd": "0.00", "s7f98d6f4e": "https://energysource.quickfile.co.uk/sales/preview?invoiceID=", "s8e2914f3d": `•\tVisit site and carry out an inspection of the meter positions to ensure that they are fitted within manufacturers guidelines
-•\tWrite an independent meter report to confirm meter details and positions, pipe work layout vs. schematic drawing, boiler details and eligible heat uses
-•\tAnswer any queries from Ofgem during the application process
-•\tAn external pipe Heat Loss Assessment (HLA) and schematic are not included within this service
-•\tWhere Energy Source is not applying for the RHI on behalf of the client; the meter report will be sent directly to the client to submit themselves.
-•\tWork with the installer to resolve any issues before finalising the IRMA report.
-`, "s95ff0c392": [[["65cf389293075993f8d09e81"]]], "s9640ecb64": "980.00", "s9db9b7507": [[["64ccfc9ffb0d3586da07490d"]]], "s9f6ab85c5": true, "sa7b19abe9": "303 | test | IRM : Steam and Complex Systems", "sb782c2f07": "", "sbf9458ebe": ["66a647966b88b8d3ff84e90b"], "sc016de3ca": { "date": null, "include_time": false }, "sc647ed2c3": "IRMA", "sc65b92095": "66a647966b88b8d3ff84e90b", "sc6d3c3532": [[["66311c1d106474e99ee190f5"]]], "sc86ea09bb": "980.00", "sc949a50f6": ["65107680cc2aa6919ee5b4c0"], "sca1e1e984": "1", "scca9b3e53": [[true]], "sd4adbca96": "980.00", "sd9c00d85f": "IRM", "sd9c921c76": false, "se3e9eb5fa": { "to_date": { "date": null, "include_time": false }, "from_date": { "date": null, "include_time": false }, "is_overdue": false, "status_updated_on": null, "status_is_completed": false }, "sea2a31ee9": null, "sea2dc71ed": "", "secfbf283a": "303 IRM", "see124bc52": "IRM : Steam and Complex Systems", "sf61adfafa": true, "followed_by": [], "deleted_date": { "date": null }, "last_updated": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-07-29T09:27:44.058000Z" }, "first_created": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-07-29T09:27:44.058000Z" }, "application_id": "650168ce39fcf6ca2940a6fe", "comments_count": 0, "application_slug": "s2wrah3v"
-    }]
+    items: [{ "id": "66f3d62574c7880c44e01228", "title": "000005 24ROE1051S | 000010 |  J & C Wilson", "ranking": { "default": "aaaaaacvzc" }, "autonumber": 5, "s0798c890a": "Renewable Obligation Estimated Data Case - Simple", "s3283e060e": ["66cf585cd60bf65e2387be64"], "s39d86bc60": "75.00", "s3f6f61f8f": [["6571972a81ca1761d3265dc0"]], "s40e168fa8": "Renewable Obligation Estimated Data Case - Simple", "s8237ed3c2": ["655cb6e12f5e40dd41a37fb7"], "s8beba3f09": null, "s8fa8b8c1f": "000005 24ROE1051S | 000010 |  J & C Wilson", "s99c6fcaf3": "000005 24ROE1051S", "s9d5e870b7": false, "s9f81ff287": [["66cf585cd60bf65e2387be64"]], "sa7459b49d": "75.00", "sad48077d4": "90.00", "sc07bde245": "QZi37", "sc136d4fd2": ["6571972a81ca1761d3265dc0"], "sd7e25bbc0": null, "see55dccb4": [["6571972a81ca1761d3265dc0"]], "sf48a9e61b": "75.000000", "sf5556356c": ["64ccfc9ffb0d3586da07490d"], "followed_by": [], "deleted_date": { "date": null }, "last_updated": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-09-25T10:53:21.838000Z" }, "first_created": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-09-25T09:21:41.975000Z" }, "application_id": "6694d6507c3ca20d6ce68d9e", "comments_count": 0, "application_slug": "skx593nz" }, { "id": "66f3f0bd5acb646dca2802c3", "title": "000006 24EDC103 | 000010 |  J & C Wilson", "ranking": { "default": "aaaaaadkts" }, "autonumber": 6, "s0798c890a": "RHI Estimated Data Case", "s3283e060e": ["663101f01b60a7947018aeeb"], "s39d86bc60": "0.00", "s3f6f61f8f": [["6571972a81ca1761d3265cd7"]], "s40e168fa8": "", "s8237ed3c2": ["655cb6e12f5e40dd41a37fb7"], "s8beba3f09": null, "s8fa8b8c1f": "000006 24EDC103 | 000010 |  J & C Wilson", "s99c6fcaf3": "000006 24EDC103", "s9d5e870b7": true, "s9f81ff287": [["663101f01b60a7947018aeeb"]], "sa7459b49d": "0.00", "sad48077d4": "0.00", "sc07bde245": "F1Axo", "sc136d4fd2": ["6571972a81ca1761d3265cd7"], "sd7e25bbc0": "85.00", "see55dccb4": [["6571972a81ca1761d3265cd7"]], "sf48a9e61b": null, "sf5556356c": ["64ccfc9ffb0d3586da07490d"], "followed_by": [], "deleted_date": { "date": null }, "last_updated": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-09-25T11:15:09.420000Z" }, "first_created": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-09-25T11:15:09.420000Z" }, "application_id": "6694d6507c3ca20d6ce68d9e", "comments_count": 0, "application_slug": "skx593nz" }, { "id": "66f3f1f2f370b80e6ea378ac", "title": "000008 24AMD109 | 000010 |  J & C Wilson", "ranking": { "default": "aaaaaaeoiy" }, "autonumber": 8, "s0798c890a": "RHI amendment - Consolidate Meters. Change application from multiple metering to one meter and a heat loss calculation.", "s3283e060e": ["661681607ce9e89eeb100549"], "s39d86bc60": "680.00", "s3f6f61f8f": [["6571972a81ca1761d3265e73"]], "s40e168fa8": "RHI amendment - Consolidate Meters. Change application from multiple metering to one meter and a heat loss calculation.", "s8237ed3c2": ["655cb6e12f5e40dd41a37fb7"], "s8beba3f09": null, "s8fa8b8c1f": "000008 24AMD109 | 000010 |  J & C Wilson", "s99c6fcaf3": "000008 24AMD109", "s9d5e870b7": false, "s9f81ff287": [["661681607ce9e89eeb100549"]], "sa7459b49d": "0.00", "sad48077d4": "816.00", "sc07bde245": "F1Axo", "sc136d4fd2": ["6571972a81ca1761d3265e73"], "sd7e25bbc0": "85.00", "see55dccb4": [["6571972a81ca1761d3265e73"]], "sf48a9e61b": "680", "sf5556356c": ["64ccfc9ffb0d3586da07490d"], "followed_by": [], "deleted_date": { "date": null }, "last_updated": { "by": "65007644ae6c3b9aa4adf467", "on": "2024-09-25T11:20:21.560000Z" }, "first_created": { "by": "64ccfc9ffb0d3586da07490d", "on": "2024-09-25T11:20:18.568000Z" }, "application_id": "6694d6507c3ca20d6ce68d9e", "comments_count": 0, "application_slug": "skx593nz" }],
+    APIKey: process.env.QUICKFILE_API_KEY as string,
 }
 
-//////////////////////////////PLY CODE /////////////////////////
-const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
-let quoteItems = []; // set price items
-let quoteTasks = [] // hourly charged items
+import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
+import { invoicesTable, SDPInvoiceItemsTable as itemsTable } from "../../../SmartSuite/dist/tables.js";
 
-quoteItems = input.items.filter((item: Record<string, any>) => !item.sd9c921c76)?.map((item: Record<string, any>) => ({
+/////////////////////////////////PLY CODE///////////////////////////////
+
+const QF = new QuickFileAPIHandler("6131405563",
+    "84a82f71-d19c-4c5a-b50e-797126e504fb", //Ply Quote Drafter Application ID
+    input.APIKey
+);
+
+const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
+
+// set price items
+const invoiceItems = input.items.filter((item: Record<string, any>) => !item[itemsTable.structure["Charged Hourly?"].slug])?.map((item: Record<string, any>) => ({
     //filter for items not charged hourly
     "ItemID": 0,
-    "ItemName": item.s5f064af81 + " " + item.sd9c00d85f, //sub type autonumber + job type code
-    "ItemDescription": item.s30f4806c7,
+    "ItemName": item[itemsTable.structure["Item Name"].slug],
+    "ItemDescription": item[itemsTable.structure["Item Description"].slug],
     "ItemNominalCode": "4000",
     "Tax1": {
         "TaxName": "VAT",
         "TaxPercentage": 20.00,
     },
-    "UnitCost": item.s9640ecb64,
-    "Qty": item.s20b2ac406
+    "UnitCost": item[itemsTable.structure["Payment (Excluding VAT)"].slug],
+    "Qty": 1
 }));
-
-quoteTasks = input.items.filter((item: Record<string, any>) => item.sd9c921c76)?.map((item: Record<string, any>) => ({
+// hourly charged items
+const invoiceTasks = input.items.filter((item: Record<string, any>) => item[itemsTable.structure["Charged Hourly?"].slug])?.map((item: Record<string, any>) => ({
     //filter for items charged hourly
     "ItemID": 0,
-    "ItemName": item.s5f064af81 + " " + item.sd9c00d85f, //sub type autonumber + job type code
-    "TaskDescription": item.s30f4806c7,
+    "ItemName": item[itemsTable.structure["Item Name"].slug],
+    "TaskDescription": item[itemsTable.structure["Item Description"].slug],
     "ItemNominalCode": "4000",
     "Tax1": {
         "TaxName": "VAT",
         "TaxPercentage": 20.00,
     },
-    "HourlyRate": input.hourlyRate,
-    "Hours": input.minimumHours * item.s20b2ac406, //standard hours times quantity
+    "HourlyRate": item[itemsTable.structure["Hourly Rate"].slug],
+    "Hours": item[itemsTable.structure["Hours"].slug]
 }));
 
 let invoiceLines = {
-    ...(quoteItems.length != 0 ? { // include set price items if not empty
+    ...(invoiceItems.length != 0 ? { // include set price items if not empty
         ItemLines: {
-            ItemLine: quoteItems
+            ItemLine: invoiceItems
         }
     } : {}),
-    ...(quoteTasks.length != 0 ? { // include hourly items if not empty
+    ...(invoiceTasks.length != 0 ? { // include hourly items if not empty
         TaskLines: {
-            TaskLine: quoteTasks
+            TaskLine: invoiceTasks
         }
     } : {}),
 }
 
-const newQuote: InvoiceUpdate = {
+const newQuote: InvoiceCreate = {
     InvoiceData: {
-        InvoiceID: input.quoteID,
-        InvoiceDescription: input.quoteName,
+        InvoiceDescription: input.invoiceName,
         TermDays: input.termDays,
         Terms: input.paymentTerms,
         InvoiceLines: invoiceLines,
-        InvoiceType: "ESTIMATE" as "ESTIMATE",
+        InvoiceType: "INVOICE",
         ClientID: input.clientID,
         Currency: "GBP",
         Language: "en",
@@ -93,11 +90,13 @@ const newQuote: InvoiceUpdate = {
     }
 }
 
-const updateResponse = await request("invoice/create", newQuote) as InvoiceUpdateResponse;
 
-const invoiceGet: InvoiceGet = { InvoiceID: updateResponse.Invoice_Create.Body.InvoiceID };
 
-const quoteDetails = await request("invoice/get", invoiceGet) as InvoiceGetResponse;
+const createResponse = await QF.invoiceCreate(newQuote);
+
+
+const invoiceGet: InvoiceGet = { InvoiceID: createResponse.Invoice_Create.Body.InvoiceID };
+const quoteDetails = await QF.invoiceGet(invoiceGet);
 const expiryDate = new Date(
     new Date(quoteDetails.Invoice_Get.Body.InvoiceDetails.IssueDate).getTime() + input.termDays * MS_IN_A_DAY
 ).toISOString().slice(0, 10); //exclude time
@@ -106,7 +105,7 @@ const result = { ...quoteDetails, expiryDate };
 //return result;
 
 
-//helper functions//////////////////////////////////////////////////////
+//helper functions/////////////////////////////////////////
 
 async function request(endpoint: string, body: RequestBody, method: "POST" = "POST") {  //remove export to use in Ply
     //async function request(endpoint, body, method = "POST") {

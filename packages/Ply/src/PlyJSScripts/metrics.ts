@@ -13,6 +13,7 @@ const input = {
 }
 ////////////////////PLY CODE START //////////////////
 const MS_IN_ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
+const METRIC_JUNCTION_RECORD_ID = "66e9a6d8c19d62365bd0f8ee" //id of metrics junction linked to all records and used for rollups
 
 type MetricsKey = typeof metricsTable.structure[keyof typeof metricsTable.structure]['slug'];
 const now = new Date();
@@ -49,6 +50,8 @@ await (async () => {
     })); // metric records with assignee and date in place
 
     metricRecords.forEach((metricRecord, index) => {
+        metricRecords[index][metricsTable.structure["Metrics Junction"].slug] = METRIC_JUNCTION_RECORD_ID;
+
         metricRecords[index][metricsTable.structure["Total Live Projects"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value === "in_progress" //slug for "Live"

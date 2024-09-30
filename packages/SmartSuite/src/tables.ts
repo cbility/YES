@@ -1,150 +1,3 @@
-export const invoicesTable = {
-    "name": "Invoices & Payments",
-    "id": "64f592e6ad303253e811e6eb",
-    "structure": {
-        "Invoice Title": {
-            "slug": "title",
-            "field_type": "recordtitlefield"
-        },
-        "Followed by": {
-            "slug": "followed_by",
-            "field_type": "userfield"
-        },
-        "Due Date": {
-            "slug": "invoice_date",
-            "field_type": "duedatefield"
-        },
-        "Payment Received": {
-            "slug": "s0149bec4c",
-            "field_type": "formulafield"
-        },
-        "Auto Number": {
-            "slug": "autonumber",
-            "field_type": "autonumberfield"
-        },
-        "First Created": {
-            "slug": "first_created",
-            "field_type": "firstcreatedfield"
-        },
-        "Last Updated": {
-            "slug": "last_updated",
-            "field_type": "lastupdatedfield"
-        },
-        "Open Comments": {
-            "slug": "comments_count",
-            "field_type": "commentscountfield"
-        },
-        "Status (Writeable) (System Field)": {
-            "slug": "scc4967fd8",
-            "field_type": "statusfield"
-        },
-        "Last Chase": {
-            "slug": "sb997b3bee",
-            "field_type": "datefield"
-        },
-        "QuickFile Invoice": {
-            "slug": "s664807954",
-            "field_type": "buttonfield"
-        },
-        "QuickFile Invoice ID": {
-            "slug": "s5a94565b4",
-            "field_type": "textfield"
-        },
-        "SDP Invoice Items": {
-            "slug": "sq3fyg9q",
-            "field_type": "linkedrecordfield"
-        },
-        "Multiple Clients Selected?": {
-            "slug": "scd8fb276f",
-            "field_type": "formulafield"
-        },
-        "Invoice Amount": {
-            "slug": "sa5d29448f",
-            "field_type": "formulafield"
-        },
-        "ISO Invoice Date": {
-            "slug": "s5a31eef7b",
-            "field_type": "formulafield"
-        },
-        "Payment Outstanding": {
-            "slug": "s88d2f2ded",
-            "field_type": "currencyfield"
-        },
-        "Create Invoice": {
-            "slug": "s86a059d2a",
-            "field_type": "buttonfield"
-        },
-        "Record ID": {
-            "slug": "sf2ed8cdda",
-            "field_type": "recordidfield"
-        },
-        "Client": {
-            "slug": "s35f27759c",
-            "field_type": "linkedrecordfield"
-        },
-        "Invoice Type": {
-            "slug": "s266f24a7c",
-            "field_type": "singleselectfield"
-        },
-        "SDP and Recurring Items Selected?": {
-            "slug": "s11c5aa27f",
-            "field_type": "formulafield"
-        },
-        "Status ID (System Field)": {
-            "slug": "sc0d4932b4",
-            "field_type": "formulafield"
-        },
-        "Update Invoice": {
-            "slug": "sfur41as",
-            "field_type": "buttonfield"
-        },
-        "Invoice Dispute Status": {
-            "slug": "s5q77rrl",
-            "field_type": "statusfield"
-        },
-        "Sent": {
-            "slug": "sf29742ed4",
-            "field_type": "datefield"
-        },
-        "Invoice Status": {
-            "slug": "sde1bc3b2d",
-            "field_type": "formulafield"
-        },
-        "QuickFile Invoice Status (System Field)": {
-            "slug": "s842ec563c",
-            "field_type": "singleselectfield"
-        },
-        "Assigned To": {
-            "slug": "s3f9425db1",
-            "field_type": "userfield"
-        },
-        "All Payment Received": {
-            "slug": "sd3b7e33e8",
-            "field_type": "datefield"
-        },
-        "Issue Date": {
-            "slug": "s0afd3d892",
-            "field_type": "datefield"
-        },
-        "Client Selection Mismatch": {
-            "slug": "s981b3b376",
-            "field_type": "formulafield"
-        },
-        "Service Invoice Template": {
-            "slug": "sl2vv0k0",
-            "field_type": "linkedrecordfield"
-        },
-        "Invoice QuickFile Client ID": {
-            "slug": "s6560816b4",
-            "field_type": "textfield"
-        },
-        "QuickFile Client ID": {
-            "slug": "sc4d3ad90a",
-            "field_type": "lookupfield"
-        }
-    }
-} as const;
-
 export const opportunitiesTable = {
     "name": "Opportunities",
     "id": "6500787202fb914f79f202e8",
@@ -1990,6 +1843,279 @@ export const supportServicesTable = {
             "slug": "sb3fc3944e",
             "field_type": "lookupfield",
             "target_field_type": "recordtitlefield"
+        }
+    }
+} as const;
+
+export const invoicesTable = {
+    "name": "Invoices & Payments",
+    "id": "64f592e6ad303253e811e6eb",
+    "structure": {
+        "Invoice Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Due Date": {
+            "slug": "invoice_date",
+            "field_type": "duedatefield"
+        },
+        "Payment Received": {
+            "slug": "s0149bec4c",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Status (Writeable) (System Field)": {
+            "slug": "scc4967fd8",
+            "field_type": "statusfield"
+        },
+        "Last Chase": {
+            "slug": "sb997b3bee",
+            "field_type": "datefield"
+        },
+        "QuickFile Invoice": {
+            "slug": "s664807954",
+            "field_type": "buttonfield"
+        },
+        "QuickFile Invoice ID": {
+            "slug": "s5a94565b4",
+            "field_type": "textfield"
+        },
+        "SDP Invoice Items": {
+            "slug": "sq3fyg9q",
+            "field_type": "linkedrecordfield"
+        },
+        "Multiple Clients Selected?": {
+            "slug": "scd8fb276f",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Invoice Amount": {
+            "slug": "sa5d29448f",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "ISO Invoice Date": {
+            "slug": "s5a31eef7b",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Payment Outstanding": {
+            "slug": "s88d2f2ded",
+            "field_type": "currencyfield"
+        },
+        "Create Invoice": {
+            "slug": "s86a059d2a",
+            "field_type": "buttonfield"
+        },
+        "Record ID": {
+            "slug": "sf2ed8cdda",
+            "field_type": "recordidfield"
+        },
+        "Client": {
+            "slug": "s35f27759c",
+            "field_type": "linkedrecordfield"
+        },
+        "Invoice Type": {
+            "slug": "s266f24a7c",
+            "field_type": "singleselectfield"
+        },
+        "SDP and Recurring Items Selected?": {
+            "slug": "s11c5aa27f",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Status ID (System Field)": {
+            "slug": "sc0d4932b4",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Update Invoice": {
+            "slug": "sfur41as",
+            "field_type": "buttonfield"
+        },
+        "Invoice Dispute Status": {
+            "slug": "s5q77rrl",
+            "field_type": "statusfield"
+        },
+        "Sent": {
+            "slug": "sf29742ed4",
+            "field_type": "datefield"
+        },
+        "Invoice Status": {
+            "slug": "sde1bc3b2d",
+            "field_type": "formulafield",
+            "target_field_type": "statusfield"
+        },
+        "QuickFile Invoice Status (System Field)": {
+            "slug": "s842ec563c",
+            "field_type": "singleselectfield"
+        },
+        "Assigned To": {
+            "slug": "s3f9425db1",
+            "field_type": "userfield"
+        },
+        "All Payment Received": {
+            "slug": "sd3b7e33e8",
+            "field_type": "datefield"
+        },
+        "Issue Date": {
+            "slug": "s0afd3d892",
+            "field_type": "datefield"
+        },
+        "Client Selection Mismatch": {
+            "slug": "s981b3b376",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Service Invoice Template": {
+            "slug": "sl2vv0k0",
+            "field_type": "linkedrecordfield"
+        },
+        "Invoice QuickFile Client ID": {
+            "slug": "s6560816b4",
+            "field_type": "textfield"
+        },
+        "QuickFile Client ID": {
+            "slug": "sacf36cc9b",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        }
+    }
+} as const;
+
+export const SDPInvoiceItemsTable = {
+    "name": "SDP Invoice Items",
+    "id": "6694d6507c3ca20d6ce68d9e",
+    "structure": {
+        "Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "Project": {
+            "slug": "s3283e060e",
+            "field_type": "linkedrecordfield"
+        },
+        "Price": {
+            "slug": "sf48a9e61b",
+            "field_type": "currencyfield"
+        },
+        "Item Description": {
+            "slug": "s40e168fa8",
+            "field_type": "textareafield"
+        },
+        "Item Name": {
+            "slug": "s99c6fcaf3",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Invoice": {
+            "slug": "s8237ed3c2",
+            "field_type": "linkedrecordfield"
+        },
+        "Default Item Description": {
+            "slug": "s0798c890a",
+            "field_type": "formulafield",
+            "target_field_type": "textareafield"
+        },
+        "Assigned To": {
+            "slug": "sf5556356c",
+            "field_type": "userfield"
+        },
+        "Project Client ID": {
+            "slug": "s3f6f61f8f",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Item Type": {
+            "slug": "sc07bde245",
+            "field_type": "singleselectfield"
+        },
+        "Default Item Price": {
+            "slug": "sa7459b49d",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Client": {
+            "slug": "sc136d4fd2",
+            "field_type": "linkedrecordfield"
+        },
+        "Net Payment": {
+            "slug": "sad48077d4",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Client ID": {
+            "slug": "see55dccb4",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Invoice Item Name": {
+            "slug": "s8fa8b8c1f",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Charged Hourly?": {
+            "slug": "s9d5e870b7",
+            "field_type": "formulafield",
+            "target_field_type": "yesnofield"
+        },
+        "Hourly Rate": {
+            "slug": "sd7e25bbc0",
+            "field_type": "numberfield"
+        },
+        "Hours": {
+            "slug": "s8beba3f09",
+            "field_type": "numberfield"
+        },
+        "Payment (Excluding VAT)": {
+            "slug": "s39d86bc60",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Project Lookup": {
+            "slug": "s9f81ff287",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
         }
     }
 } as const;
