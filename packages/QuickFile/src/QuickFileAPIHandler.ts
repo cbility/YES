@@ -27,20 +27,27 @@ export default class QuickFileAPIHandler {
                 Header: header
             }
         }
-        try {
-            const response = await fetch(url, {
-                body: JSON.stringify(requestBody),
-                method,
-            });
-            if (!response.ok) {
-                //console.log(await response.text())
-                throw new Error(response.status + " " + response.statusText);
-            }
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            throw new Error("Error occurred during fetch operation: " + error)
+
+        const response = await fetch(url, {
+            body: JSON.stringify(requestBody),
+            method,
+        });
+        if (!response.ok) {
+            await Promise.race([response.text(),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error(response.status + " " + response.statusText)), 5000)
+            )
+            ]).then(
+                responseText => {
+                    throw new Error(response.status + " " + response.statusText + ' ' + responseText)
+                },
+                rejects => {
+                    throw new Error(response.status + " " + response.statusText)
+                }
+            )
         }
+        const result = await response.json();
+        return result;
     }
 
     //Client methods
@@ -77,6 +84,12 @@ export default class QuickFileAPIHandler {
 
     async system_SearchEvents(body: System_SearchEvents): Promise<System_SearchEventsResponse> {
         return await this.request("system/searchevents", body);
+    }
+
+    //document methods
+
+    async documentUpload(body: DocumentUpload): Promise<DocumentUploadResponse> {
+        return await this.request("/document/upload", body);
     }
 }
 

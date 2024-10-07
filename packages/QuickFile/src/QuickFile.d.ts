@@ -179,9 +179,9 @@ interface InvoiceCreateData {
         ItemLines?: { // Use for products and services priced using the quantity and unit cost model.
             ItemLine: {
                 ItemID: number; // Item ID from inventory. Enter zero to use a one-off item.
-                ItemName?: string; //min length 0 max length 20
+                ItemName: string; //min length 0 max length 20
                 ItemDescription?: string; //max length 20000
-                ItemNominalCode?: string; //min length 2 max length 5
+                ItemNominalCode: string; //min length 2 max length 5
                 Tax1?: { // Optional tax element to be levied on the item.
                     TaxName: string; //Tax name e.g. VAT
                     TaxPercentage: number; //Tax percentage e.g. 20
@@ -192,16 +192,16 @@ interface InvoiceCreateData {
                     TaxPercentage: number; //Tax percentage e.g. 20
                     TaxAmount?: number; //Tax amount in currency
                 }
-                UnitCost?: number;
-                Qty?: number;
+                UnitCost: number;
+                Qty: number;
             }[] //up to 500 items
         }
         TaskLines?: {
             TaskLine: {
                 ItemID: number; // Item ID from inventory. Enter zero to use a one-off item.
-                ItemName?: string; //min length 0 max length 20
+                ItemName: string; //min length 0 max length 20
                 TaskDescription?: string; //max length 20000
-                ItemNominalCode?: string; //min length 2 max length 5
+                ItemNominalCode: string; //min length 2 max length 5
                 Tax1?: { // Optional tax element to be levied on the item.
                     TaxName: string; //Tax name e.g. VAT
                     TaxPercentage: number; //Tax percentage e.g. 20
@@ -212,8 +212,8 @@ interface InvoiceCreateData {
                     TaxPercentage: number; //Tax percentage e.g. 20
                     TaxAmount?: number; //Tax amount in currency
                 }
-                HourlyRate?: number;
-                Hours?: number;
+                HourlyRate: number;
+                Hours: number;
             }[] //up to 500 tasks
         }
     }
@@ -271,21 +271,21 @@ interface InvoiceCreateResponse extends ResponseBody {
 
 interface InvoiceUpdateResponse extends InvoiceCreateResponse { }
 
-interface DocumentType { }
-interface ReceiptType extends DocumentType {
+type QFDocumentType = ReceiptType | SalesAttachmentType | GeneralType
+interface ReceiptType {
     Receipt: {
         PurchaseID?: number; //  If supplied the document will be attached to the supplied purchase ID. When absent the document will appear in the Receipt Hub untagged.
         CaptureDateTime: string; //YYYY-MM-DDTHH:mm:ss
         ReceiptName: string; //max length 35
     }
 }
-interface SalesAttachmentType extends DocumentType {
+interface SalesAttachmentType {
     SalesAttachment: {
         InvoiceId: string; // The associated ID for the sales invoice you would like to attach to.
         Notes?: string //max length 600
     }
 }
-interface GeneralType extends DocumentType {
+interface GeneralType {
     General: {
         CollectionName?: string // The Doc Management folder to which the file will be uploaded
     }
@@ -295,7 +295,7 @@ interface DocumentUpload extends RequestBody {
     DocumentDetails: {
         FileName: string; //include file extension
         EmbeddedFileBinaryObject: string; //base64 encoded file contents
-        Type: DocumentType
+        Type: QFDocumentType
     }[] //up to 10 documents per call
 }
 
@@ -341,6 +341,45 @@ interface System_SearchEventsResponse extends ResponseBody {
                 }[]
             }
         }
+    }
+}
+
+type DocumentType = ReceiptType | SalesAttachmentType | GeneralType
+
+interface ReceiptType {
+    Receipt: {
+        PurchaseID?: number; //  If supplied the document will be attached to the supplied purchase ID. When absent the document will appear in the Receipt Hub untagged.
+        CaptureDateTime: string; //YYYY-MM-DDTHH:mm:ss
+        ReceiptName: string; //max length 35
+    }
+}
+interface SalesAttachmentType {
+    SalesAttachment: {
+        InvoiceId: string; // The associated ID for the sales invoice you would like to attach to.
+        Notes?: string //max length 600
+    }
+}
+interface GeneralType {
+    General: {
+        CollectionName?: string // The Doc Management folder to which the file will be uploaded
+    }
+}
+
+interface DocumentUpload extends RequestBody {
+    DocumentDetails: {
+        FileName: string; //include file extension
+        EmbeddedFileBinaryObject: string; //base64 encoded file contents
+        Type: DocumentType
+    }[] //up to 10 documents per call
+}
+
+interface DocumentUploadResponse extends ResponseBody {
+    UploadTimeStamp: string; //YYYY-MM-DDTHH:mm:ss
+    DocumentData: {
+        Data: {
+            Id: number;
+            Path: string;
+        }[]
     }
 }
 
