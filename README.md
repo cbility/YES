@@ -19,17 +19,18 @@ Here's the structure of this project:
 │ ├── Common # contains code used by all packages
 │ ├── SmartSuite # contains code defining SmartSuite API interactions
 │ ├── QuickFile # contains code defining QuickFile API interactions
-│ └── RHIScraper # contains code automating a browser that retrieves information from the RHI register and updates SmartSuite
+│ ├── RHIScraper # contains code automating a browser that retrieves information from the RHI register and updates SmartSuite
 │ │ ├── package.json # define RHI scraper dependencies
 │ │ ├── tsconfig.json # individual package typescript configuration
 │ │ ├── tsconfig.prod.json # individual package production typescript configuration
 │ │ └── src # source code files
-│ └── Main # contains code that uses several other packages
+│ ├── Main # contains code that uses several other packages
 │ │ ├── tsconfig.json # individual package typescript configuration
 │ │ ├── OfgemCheck # used in an AWS step function that updates the YES RHI database 
 │ │ ├── QuickFileWebhookHandler # handles webhooks from the QuickFile financial platform
 │ │ └── tests # tests for main code
-│ └── Ply # contains code used in code blocks on the low-code platform https://ply.io
+│ ├── Ply # contains code used in code blocks on the low-code platform https://ply.io
+│ └──EDCScraper # code defining a scraper tool for grabbing data for the RHI portal and exporting as a xlsx file
 ├── .eslint.js # defines project linting configuration
 ├── .github 
 │ └── workflows # contains workflow files for automatic cloud deployment of AWS Lambda functions
@@ -80,13 +81,20 @@ For example, on windows, you can use fnm:
     ```
 
 3. Add local environment variables
-    create file named '.env' in project root containing API keys to be used in development
+    if not existing, create file named '.env' in project root containing API keys to be used in development
     ```.env
         TECHNICAL_SMARTSUITE_KEY=Development SmartSuite API Key
         QUICKFILE_API_KEY=QuickFile API key
     ```
 
-4. Run tests locally
+### Run Local tests and tasks
+
+1. Run a test
+
+    Initialise environment variables
+    ```shell
+        .\loadEnv.ps1
+    ```
 
     Compile project for dev environment
     ```shell
@@ -97,14 +105,14 @@ For example, on windows, you can use fnm:
         node 'packages\main\tests\OfgemCheck\checkOutput.test.js'
     ```
 
-    test the RHI scraper:
+2. Test the RHI Scraper
     ```shell
         tsc -b
         npm run start --prefix packages/RHIScraper
     ```
     You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
 
-5. Bundle Ply code for pasting into code blocks
+3. Bundle Ply code for pasting into code blocks
 
     Code in the `Ply` package if for use in code blocks in the low-code platform ply.io. Code pasted into these code blocks cannot have any imports or dependencies. Use rollup to package all dependencies into a single file before updating a code block. Other code that is included in the file for testing purposes and should not be included in the Ply code block is highlighted with comment sections.
 
@@ -114,4 +122,17 @@ For example, on windows, you can use fnm:
         tsc -b
         npx rollup -c  
     ```
-    Bundled scripts can be found in the Ply/dist/rollup directory.
+    Bundled scripts can be found in the Ply/rollup directory.
+
+4. Compile EDC Scraper into .exe file
+
+    In order to update the EDC scraper the program must be recompiled and placed in the correct directory.
+
+    Compile scraper
+     ```shell
+        cd packages/EDCScraper
+        npx puppeteer browsers install
+        tsc 
+        nexe dist/main.js --build --loglevel verbose --output RHIMeterReadingDownload.exe
+    ```
+    The contents of the `packages/EDCScraper` directory should then be placed in the `C:\Dropbox\Energy Source (1) (1)\3) Meter reading service & EDC\RHI Meter Reading Download` directory.
