@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-// Function to recursively get all JavaScript files from the input directory and subdirectories
+// get all JavaScript files from the input directory and subdirectories
 function getAllFiles(dir) {
     let results = [];
     const list = fs.readdirSync(dir);
@@ -22,8 +22,8 @@ function getAllFiles(dir) {
     return results;
 }
 
-// Get all JavaScript files in the 'src' directory
-const inputDir = './dist';  // Specify your source directory here
+// Get all JavaScript files in the 'dist/scripts' directory
+const inputDir = './dist/scripts';
 const inputFiles = getAllFiles(inputDir);
 
 export default inputFiles.map((inputFile) => {
@@ -31,13 +31,13 @@ export default inputFiles.map((inputFile) => {
     const outputFileName = relativePath.replace(/\.js$/, '.bundle.js'); // Transform 'file.js' to 'file.bundle.js'
 
     return {
-        input: inputFile, // Each file is its own input
+        input: inputFile,
         output: {
-            file: path.join('rollup', outputFileName), // Output path to 'dist/' directory
-            format: 'es', // Use 'iife' format
-            name: path.basename(outputFileName, '.js'), // Name for the global variable
+            file: path.join('rollup', outputFileName), // Output path to 'rollup/' directory
+            format: 'es', //allows top level await
+            name: path.basename(outputFileName, '.js'),
             sourcemap: true,
         },
-        plugins: [], // Add any plugins here if needed
+        plugins: [],
     };
 });

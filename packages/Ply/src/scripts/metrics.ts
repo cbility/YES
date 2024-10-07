@@ -1,26 +1,17 @@
-
-////////////////////IGNORE FOR PLY//////////////////
-
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import { projectsTable, metricsTable, opportunitiesTable, tasksTable, supportServicesTable } from "../../../SmartSuite/dist/tables.js"
-import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js"
-if (process.env.NODE_ENV !== "production") {
-    await bootstrapEnvironment();
-}
 
-const input = {
-    APIKey: process.env.TECHNICAL_SMARTSUITE_KEY
-}
-////////////////////PLY CODE START //////////////////
 const MS_IN_ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
-const METRIC_JUNCTION_RECORD_ID = "66e9a6d8c19d62365bd0f8ee" //id of metrics junction linked to all records and used for rollups
 
-type MetricsKey = typeof metricsTable.structure[keyof typeof metricsTable.structure]['slug'];
-const now = new Date();
-const ss = new SmartSuiteAPIHandler("s5ch1upc", input.APIKey as string);
+export default async function metrics(input: { APIKey: string; }) {
 
-//get records
-await (async () => {
+    const METRIC_JUNCTION_RECORD_ID = "66e9a6d8c19d62365bd0f8ee" //id of metrics junction linked to all records and used for rollups
+
+    type MetricsKey = typeof metricsTable.structure[keyof typeof metricsTable.structure]['slug'];
+    const now = new Date();
+    const ss = new SmartSuiteAPIHandler("s5ch1upc", input.APIKey as string);
+
+    //get records
     const projects = await ss.getAllRecords("64f6098f4f57d448c30044ed");
     const opportunities = await ss.getAllRecords("6500787202fb914f79f202e8");
     const tasks = await ss.filterRecords("64f6098f4f57d448c3004519", {
@@ -56,6 +47,12 @@ await (async () => {
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
                 (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value === "in_progress" //slug for "Live"
         ).length; //Total live projects
+
+        metricRecords[index][metricsTable.structure["Total Incomplete Projects"].slug] = projects.filter(
+            project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value !== "complete" && //slug for "Complete" 
+                (project[projectsTable.structure["Status"].slug] as StatusFieldCell).value !== "BwP9n" //slug for "Dead Lead" 
+        ).length; //Total incomplete projects
 
         metricRecords[index][metricsTable.structure["Live Projects With Regulator"].slug] = projects.filter(
             project => (project[projectsTable.structure["Project Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
@@ -191,4 +188,6 @@ await (async () => {
 
     //add records to metrics table
     await ss.bulkAddNewRecords(metricsTable.id, metricRecords);
-})();
+}
+
+//USAGE: return await metrics(input);
