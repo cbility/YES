@@ -96,6 +96,7 @@ type SmartSuiteCustomFieldCell = FullNameFieldCell | AddressFieldCell | PhoneNum
 
 type SmartSuiteCell = null | string | string[]  /*linked records, assignees*/ | number | boolean | SmartSuiteCell[] /* lookups */ | SmartSuiteCustomFieldCell; //TODO: add remaining field types
 
+//TODO: fix the types for SmartSuite
 interface SmartSuiteRecord { id: string, application_id: string, [slug: string]: SmartSuiteCell }
 //used to update cloud
 type SmartSuiteCellUpdate = null | string | string[] /*linked records*/ | number | boolean | Update<SmartSuiteCustomFieldCell>; //TODO: add remaining field types

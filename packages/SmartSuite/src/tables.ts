@@ -1195,6 +1195,15 @@ export const metricsTable = {
         "New Tasks (Past Week)": {
             "slug": "s3c726e3ff",
             "field_type": "numberfield"
+        },
+        "Assignee": {
+            "slug": "scda06d197",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Total Incomplete Projects": {
+            "slug": "s101bbed99",
+            "field_type": "numberfield"
         }
     }
 } as const
