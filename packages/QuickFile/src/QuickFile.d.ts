@@ -143,8 +143,8 @@ interface InvoiceGetResponse extends ResponseBody {
                         "NominalCode": string; //4000 for default
                         "TaxName1": string;
                         "TaxPercentage1": number;
-                        "UnitCost": number; //hourly rate
-                        "Qty": number; // hours
+                        "HourlyRate": number; //hourly rate
+                        "Hours": number; // hours
                         "LineTotal": number;
                     }[]
                 }
