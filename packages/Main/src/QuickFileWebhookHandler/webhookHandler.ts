@@ -209,7 +209,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
     async function upsertNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<SmartSuiteRecord[]> {
         /*
-       Create new recurring invoice template with client ID, discount, QuickFile status, invoice ID, interval, start date and Total Payment amount
+       Create new recurring invoice template with client ID, discount, QuickFile status, invoice ID, invoice Number, interval, start date and Total Payment amount
        Ignore if record already exists
        Assign the record to the Invoicing team
        */
@@ -232,6 +232,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
             const updatedSSTemplate = {
+                [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
                 [invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceID,
                 [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID,
                 [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount,
@@ -254,7 +255,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
     }
     async function updateSSInvoiceTemplates(invoiceIds: number[]): Promise<SmartSuiteRecord[]> {
         /*
-        Update invoice template with client ID, QuickFile Status, Discount, interval, start date and Total Payment amount
+        Update invoice template with client ID, QuickFile Status, Discount, Invoice Number, interval, start date and Total Payment amount
         */
         const updatedSSTemplates: Omit<Update<SmartSuiteRecord>, "id">[] = [];
         for (const invoiceID of invoiceIds) {
@@ -267,6 +268,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
             const updatedSSTemplate = {
                 [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
                 [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
                 [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
                     quickFileStatusValue,
@@ -334,7 +336,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 [invoicesTable.structure["Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
                 [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]: qfInvoiceStatusValue,
                 [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
-                [invoicesTable.structure["Invoice Type"].slug]: "OC8HP" as const //recurring invoice
+                [invoicesTable.structure["Invoice Type"].slug]: "OC8HP" as const, //recurring invoice
+                [invoicesTable.structure["QuickFile Invoice Number"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
             }
             newSSInvoices.push(newSSInvoice);
         }

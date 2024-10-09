@@ -2420,6 +2420,10 @@ export const invoiceTemplatesTable = {
         "Start Date": {
             "slug": "se0e93246f",
             "field_type": "datefield"
+        },
+        "QuickFile Invoice Number": {
+            "slug": "s4a2c197a9",
+            "field_type": "textfield"
         }
     }
 } as const 
