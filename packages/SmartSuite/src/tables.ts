@@ -1914,6 +1914,10 @@ export const invoicesTable = {
                 {
                     "value": "complete",
                     "label": "Invoice Paid"
+                },
+                {
+                    "value": "3eio0",
+                    "label": "Invoice Deleted"
                 }
             ]
         },
@@ -2042,6 +2046,10 @@ export const invoicesTable = {
                 {
                     "value": "RIdw1",
                     "label": "CREDITED"
+                },
+                {
+                    "value": "s8C1P",
+                    "label": "DELETED"
                 }
             ]
         },
@@ -2118,6 +2126,11 @@ export const invoicesTable = {
         "Total Payment": {
             "slug": "sbe0b1624f",
             "field_type": "currencyfield"
+        },
+        "Status Name (System Field)": {
+            "slug": "s08peerl",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
         }
     }
 } as const;
@@ -2368,6 +2381,10 @@ export const invoiceTemplatesTable = {
                 {
                     "value": "TAR3Z",
                     "label": "PAUSED"
+                },
+                {
+                    "value": "K7YCX",
+                    "label": "DELETED"
                 }
             ]
         },

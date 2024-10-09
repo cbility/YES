@@ -7,9 +7,9 @@ const testEvent = {
     "rawQueryString": "",
     "headers": {
         "x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
-        "content-length": "662",
+        "content-length": "277",
         "x-amzn-tls-version": "TLSv1.2",
-        "x-amzn-trace-id": "Root=1-66e162ab-3270185d77e1cb2755b2da95",
+        "x-amzn-trace-id": "Root=1-67063668-2eb7092076c0e0b24054c341",
         "x-forwarded-proto": "https",
         "host": "zzgwpptcirookdzrt7ctu73gs40ouytr.lambda-url.eu-west-2.on.aws",
         "x-forwarded-port": "443",
@@ -29,13 +29,13 @@ const testEvent = {
             "sourceIp": "13.79.122.255",
             "userAgent": "quickfile-webhook-service/1.0"
         },
-        "requestId": "98563df4-b452-490b-bae5-8c0d657a37c7",
+        "requestId": "036ad835-4b5e-46bf-a0bb-a645da8e56f3",
         "routeKey": "$default",
         "stage": "$default",
-        "time": "11/Sep/2024:09:28:11 +0000",
-        "timeEpoch": 1726046891248
+        "time": "09/Oct/2024:07:53:12 +0000",
+        "timeEpoch": 1728460392564
     },
-    "body": "{\"PayLoad\": {\"InvoicesViewed\":[{\"TimeStamp\":\"2024-09-11T09:23:46\",\"Id\":33494543,\"InvoiceType\":\"EST\",\"ClientId\":8195193,\"ClientContactId\":2692501},{\"TimeStamp\":\"2024-09-11T09:23:15\",\"Id\":33494480,\"InvoiceType\":\"EST\",\"ClientId\":8195193,\"ClientContactId\":2692501}],\"EstimatesStatusChange\":[{\"TimeStamp\":\"2024-09-11T09:24:53\",\"Id\":33494480,\"Status\":\"ACCEPTED\",\"ClientId\":8195193,\"ClientContactId\":2692501},{\"TimeStamp\":\"2024-09-11T09:24:30\",\"Id\":33494543,\"Status\":\"ACCEPTED\",\"ClientId\":8195193,\"ClientContactId\":2692501}],\"Timestamp\":\"2024-09-11T09:28:11.0697887+00:00\",\"Signature\":\"1e13f79ad4f356b42e3e47a345f043d9\",\"Hookid\":\"8942d27f-af84-4e49-aba7-d5822bcae8cf\"}}",
+    "body": "{\"PayLoad\": {\"InvoicesDeleted\":[{\"TimeStamp\":\"2024-10-09T07:49:13\",\"Id\":33760600},{\"TimeStamp\":\"2024-10-09T07:48:59\",\"Id\":33722445}],\"Timestamp\":\"2024-10-09T07:53:12.3822178+00:00\",\"Signature\":\"70542fd78070ba1dffa2ff0718ae98a2\",\"Hookid\":\"1aaa4fee-0e8d-4172-8a9e-600edd0bfbf2\"}}",
     "isBase64Encoded": false
 }
 
