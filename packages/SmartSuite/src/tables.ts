@@ -507,7 +507,6 @@ export const quoteItemsTable = {
     }
 } as const;
 
-//TODO: update RHI tables to include field type and target field type
 export const loginsTable = {
     id: "65e37da7f8428f036fd99785", fields: {
         Username: "title",
@@ -1857,7 +1856,7 @@ export const supportServicesTable = {
 } as const;
 
 export const invoicesTable = {
-    "name": "Invoices & Payments",
+    "name": "Invoices",
     "id": "64f592e6ad303253e811e6eb",
     "structure": {
         "Invoice Title": {
@@ -1871,11 +1870,6 @@ export const invoicesTable = {
         "Due Date": {
             "slug": "invoice_date",
             "field_type": "duedatefield"
-        },
-        "Payment Received": {
-            "slug": "s0149bec4c",
-            "field_type": "formulafield",
-            "target_field_type": "numberfield"
         },
         "Auto Number": {
             "slug": "autonumber",
@@ -1895,7 +1889,33 @@ export const invoicesTable = {
         },
         "Status (Writeable) (System Field)": {
             "slug": "scc4967fd8",
-            "field_type": "statusfield"
+            "field_type": "statusfield",
+            "choices": [
+                {
+                    "value": "backlog",
+                    "label": "New Invoice"
+                },
+                {
+                    "value": "L2Krh",
+                    "label": "Invoice Drafted"
+                },
+                {
+                    "value": "in_progress",
+                    "label": "Invoice Sent"
+                },
+                {
+                    "value": "Rt8oS",
+                    "label": "Invoice Partially Paid"
+                },
+                {
+                    "value": "QLLm6",
+                    "label": "Invoice Dispute"
+                },
+                {
+                    "value": "complete",
+                    "label": "Invoice Paid"
+                }
+            ]
         },
         "Last Chase": {
             "slug": "sb997b3bee",
@@ -1918,7 +1938,7 @@ export const invoicesTable = {
             "field_type": "formulafield",
             "target_field_type": "yesnofield"
         },
-        "Invoice Amount": {
+        "Calculated Invoice Amount (Inc. VAT) (£)": {
             "slug": "sa5d29448f",
             "field_type": "formulafield",
             "target_field_type": "numberfield"
@@ -1927,10 +1947,6 @@ export const invoicesTable = {
             "slug": "s5a31eef7b",
             "field_type": "formulafield",
             "target_field_type": "textfield"
-        },
-        "Payment Outstanding": {
-            "slug": "s88d2f2ded",
-            "field_type": "currencyfield"
         },
         "Create Invoice": {
             "slug": "s86a059d2a",
@@ -1946,7 +1962,17 @@ export const invoicesTable = {
         },
         "Invoice Type": {
             "slug": "s266f24a7c",
-            "field_type": "singleselectfield"
+            "field_type": "singleselectfield",
+            "choices": [
+                {
+                    "value": "x01tk",
+                    "label": "Single Invoice"
+                },
+                {
+                    "value": "OC8HP",
+                    "label": "Recurring Invoice"
+                }
+            ]
         },
         "SDP and Recurring Items Selected?": {
             "slug": "s11c5aa27f",
@@ -1964,9 +1990,23 @@ export const invoicesTable = {
         },
         "Invoice Dispute Status": {
             "slug": "s5q77rrl",
-            "field_type": "statusfield"
+            "field_type": "statusfield",
+            "choices": [
+                {
+                    "value": "backlog",
+                    "label": "No Dispute"
+                },
+                {
+                    "value": "QLLm6",
+                    "label": "Invoice Dispute"
+                },
+                {
+                    "value": "TYvKg",
+                    "label": "Dispute Resolved"
+                }
+            ]
         },
-        "Sent": {
+        "Sent Date": {
             "slug": "sf29742ed4",
             "field_type": "datefield"
         },
@@ -1977,7 +2017,33 @@ export const invoicesTable = {
         },
         "QuickFile Invoice Status (System Field)": {
             "slug": "s842ec563c",
-            "field_type": "singleselectfield"
+            "field_type": "singleselectfield",
+            "choices": [
+                {
+                    "value": "TaNwo",
+                    "label": "DRAFT"
+                },
+                {
+                    "value": "VlXCU",
+                    "label": "SENT"
+                },
+                {
+                    "value": "3ky3U",
+                    "label": "PAIDPART"
+                },
+                {
+                    "value": "Jv7UD",
+                    "label": "PAIDFULL"
+                },
+                {
+                    "value": "mhFbY",
+                    "label": "CREDIT NOTE"
+                },
+                {
+                    "value": "RIdw1",
+                    "label": "CREDITED"
+                }
+            ]
         },
         "Assigned To": {
             "slug": "s3f9425db1",
@@ -1985,10 +2051,6 @@ export const invoicesTable = {
         },
         "All Payment Received": {
             "slug": "sd3b7e33e8",
-            "field_type": "datefield"
-        },
-        "Issue Date": {
-            "slug": "s0afd3d892",
             "field_type": "datefield"
         },
         "Client Selection Mismatch": {
@@ -2008,6 +2070,54 @@ export const invoicesTable = {
             "slug": "sacf36cc9b",
             "field_type": "formulafield",
             "target_field_type": "textfield"
+        },
+        "Basic Payment Terms": {
+            "slug": "s6b63e74ec",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Invoice Term Days": {
+            "slug": "sratdiuk",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Invoice Number": {
+            "slug": "s8b2fc84fc",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Invoice Name": {
+            "slug": "sa6aa9c143",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Calculated Invoice Amount (Exc. VAT) (£)": {
+            "slug": "s3x70h5e",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Client Email Search String": {
+            "slug": "sa9be538eb",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Client Emails": {
+            "slug": "s1428d216f",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "Client ID": {
+            "slug": "sd06f3fa61",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "Discount": {
+            "slug": "sfaf9fa800",
+            "field_type": "percentfield"
+        },
+        "Total Payment": {
+            "slug": "sbe0b1624f",
+            "field_type": "currencyfield"
         }
     }
 } as const;
@@ -2077,7 +2187,21 @@ export const SDPInvoiceItemsTable = {
         },
         "Item Type": {
             "slug": "sc07bde245",
-            "field_type": "singleselectfield"
+            "field_type": "singleselectfield",
+            "choices": [
+                {
+                    "value": "QZi37",
+                    "label": "Intial Invoice"
+                },
+                {
+                    "value": "F1Axo",
+                    "label": "Final Invoice"
+                },
+                {
+                    "value": "H455G",
+                    "label": "Travel Invoice"
+                }
+            ]
         },
         "Default Item Price": {
             "slug": "sa7459b49d",
@@ -2116,7 +2240,7 @@ export const SDPInvoiceItemsTable = {
             "slug": "s8beba3f09",
             "field_type": "numberfield"
         },
-        "Payment (Excluding VAT)": {
+        "Payment (Exc. VAT)": {
             "slug": "s39d86bc60",
             "field_type": "formulafield",
             "target_field_type": "numberfield"
@@ -2125,6 +2249,144 @@ export const SDPInvoiceItemsTable = {
             "slug": "s9f81ff287",
             "field_type": "lookupfield",
             "target_field_type": "formulafield"
+        },
+        "Empty Field": {
+            "slug": "s8496dc517",
+            "field_type": "richtextareafield"
+        },
+        "Invoice Client ID": {
+            "slug": "s10a5bf254",
+            "field_type": "lookupfield",
+            "target_field_type": "formulafield"
+        },
+        "QuickFile Invoice ID": {
+            "slug": "s775c5a402",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
         }
     }
 } as const;
+
+export const invoiceTemplatesTable = {
+    "name": "Recurring Invoice Templates",
+    "id": "669632230fbeea09be4b0c2f",
+    "structure": {
+        "Title": {
+            "slug": "title",
+            "field_type": "recordtitlefield"
+        },
+        "First Created": {
+            "slug": "first_created",
+            "field_type": "firstcreatedfield"
+        },
+        "Last Updated": {
+            "slug": "last_updated",
+            "field_type": "lastupdatedfield"
+        },
+        "Followed by": {
+            "slug": "followed_by",
+            "field_type": "userfield"
+        },
+        "Open Comments": {
+            "slug": "comments_count",
+            "field_type": "commentscountfield"
+        },
+        "Auto Number": {
+            "slug": "autonumber",
+            "field_type": "autonumberfield"
+        },
+        "Services": {
+            "slug": "s4188de8ad",
+            "field_type": "linkedrecordfield"
+        },
+        "Total Payment (Inc. VAT) (System Field)": {
+            "slug": "sf48a9e61b",
+            "field_type": "currencyfield"
+        },
+        "Assigned To": {
+            "slug": "sf5556356c",
+            "field_type": "userfield"
+        },
+        "Client": {
+            "slug": "s1423785fb",
+            "field_type": "linkedrecordfield"
+        },
+        "QuickFile Invoice Template ID": {
+            "slug": "s6469d92ca",
+            "field_type": "textfield"
+        },
+        "QuickFile Invoice Template": {
+            "slug": "s219e511fd",
+            "field_type": "buttonfield"
+        },
+        "Invoices": {
+            "slug": "s1sbnqyu",
+            "field_type": "linkedrecordfield"
+        },
+        "Service Price (£)": {
+            "slug": "se730e7a7e",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Payment": {
+            "slug": "sc904aca65",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Payment - Service Price (£)": {
+            "slug": "sc73d546c4",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Net Payment": {
+            "slug": "sd51218ef3",
+            "field_type": "formulafield",
+            "target_field_type": "currencyfield"
+        },
+        "QuickFile Invoice Client ID": {
+            "slug": "s4bd9a2a28",
+            "field_type": "textfield"
+        },
+        "Client QuickFile ID": {
+            "slug": "s4cf20ec3a",
+            "field_type": "lookupfield",
+            "target_field_type": "textfield"
+        },
+        "Service Installation Names": {
+            "slug": "s38627194d",
+            "field_type": "formulafield",
+            "target_field_type": "textfield"
+        },
+        "QuickFile Status (System Field)": {
+            "slug": "sf0c0b86f7",
+            "field_type": "singleselectfield",
+            "choices": [
+                {
+                    "value": "BhBT3",
+                    "label": "ACTIVE"
+                },
+                {
+                    "value": "TAR3Z",
+                    "label": "PAUSED"
+                }
+            ]
+        },
+        "Discount": {
+            "slug": "sd03202a63",
+            "field_type": "percentfield"
+        },
+        "Calculated Invoice Price (£)": {
+            "slug": "s5f0be0d7a",
+            "field_type": "formulafield",
+            "target_field_type": "numberfield"
+        },
+        "Interval": {
+            "slug": "s3e760b99f",
+            "field_type": "textfield"
+        },
+        "Start Date": {
+            "slug": "se0e93246f",
+            "field_type": "datefield"
+        }
+    }
+} as const 

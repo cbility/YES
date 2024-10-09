@@ -1,6 +1,6 @@
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { invoicesTable, opportunitiesTable, quoteItemsTable } from "../../../SmartSuite/dist/tables.js"
+import { invoicesTable, SDPInvoiceItemsTable, invoiceTemplatesTable, opportunitiesTable, quoteItemsTable } from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
 if (process.env.NODE_ENV !== "production") {
@@ -8,7 +8,8 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
-const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/"
+const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
+const INVOICING_TEAM_ID = "6694e97231153a5c57cefb61";
 
 process.on('uncaughtException', function (err) { //handle uncaught exceptions
     console.log(err);
@@ -45,23 +46,22 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
     if (events.InvoicesCreated) { //process invoice creation before other events so updates are managed properly
         console.log(events.InvoicesCreated?.length + " invoices created.")
         for (const newInvoice of events.InvoicesCreated) {
-            //do stuff with new invoice
             switch (newInvoice.InvoiceType) {
                 case "REC": {
                     console.log("New Recurring Invoice ID: " + newInvoice.Id);
                     //upsert new template invoice to SS table
-                    await upsertNewInvoiceTemplate(newInvoice);
+                    await upsertNewInvoiceTemplates([newInvoice.Id]);
                     break;
                 }
                 case "INV": {
                     if (newInvoice.FromRecurring) {
                         console.log("New Invoice from recurring template ID: " + newInvoice.Id, + ", template ID " + newInvoice.RecurringParentId!);
                         //create new recurring invoice
-                        await createNewRecurringInvoice(newInvoice);
+                        await createNewRecurringInvoices([newInvoice]);
                     } else {
                         //create invoice if not existing
                         console.log("New Invoice: " + newInvoice.Id);
-                        await upsertNewSDPInvoice(newInvoice);
+                        await insertNewSDPInvoices([newInvoice]);
                     }
                     break;
                 }
@@ -83,13 +83,13 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     switch (updatedInvoice.InvoiceType) {
                         case "REC": {
                             console.log("Updated Recurring Invoice ID: " + updatedInvoice.Id);
-                            await updateSSInvoiceTemplate(updatedInvoice.Id);
+                            await updateSSInvoiceTemplates([updatedInvoice.Id]);
                             break;
                         }
                         case "INV": {
                             console.log("Updated Invoice ID: " + updatedInvoice.Id);
                             try {
-                                await updateSSInvoice(updatedInvoice.Id);
+                                await updateSSInvoices([updatedInvoice.Id]);
                             } catch (error) {
                                 await logErrorToPly((error as Error).toString());
                             }
@@ -109,10 +109,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 break;
             }
             case "InvoicesPayment": {
-                console.log(events.InvoicesPayment?.length + "new payments recorded.");
-                for (const paidInvoice of events.InvoicesPayment!) {
-                    console.log("Payment recorded for Invoice ID: " + paidInvoice.InvoiceId);
-                    await updateSSInvoice(paidInvoice.InvoiceId);
+                console.log(events.InvoicesPayment?.length + "new payments recorded: " + events.InvoicesPayment?.map(invoice => invoice.InvoiceId).join(","));
+                try {
+                    await updateSSInvoices(events.InvoicesPayment!.map(invoice => invoice.InvoiceId))
+                } catch (error) {
+                    await logErrorToPly((error as Error).toString());
                 }
                 break;
             }
@@ -128,7 +129,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             }
                             case "INV": {
                                 console.log("Sent Invoice ID: " + sentInvoice.Id);
-                                await logInvoiceSend(sentInvoice);
+                                await logInvoicesSend([sentInvoice]);
                                 break;
                             }
                             case "REC": {
@@ -155,10 +156,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 break;
             }
             case "PaymentsCreated": {
-                console.log(events.InvoicesPayment?.length + " new payments created for Invoices.");
-                for (const payment of events.PaymentsCreated!) {
-                    console.log("Payment created for Invoice ID: " + payment.InvoiceId);
-                    //TODO: ss invoice update
+                console.log(events.PaymentsCreated?.length + " new payments created for Invoices: " + events.PaymentsCreated?.map(payment => payment.InvoiceId).join(","));
+                try {
+                    await updateSSInvoices(events.PaymentsCreated!.map(payment => payment.InvoiceId))
+                } catch (error) {
+                    await logErrorToPly((error as Error).toString());
                 }
                 break;
             }
@@ -168,7 +170,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     const deletedInvoice = await QF.invoiceGet({ InvoiceID: deletedInvoiceEvent.Id });
                     switch (deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType) {
                         case "INVOICE": {
-                            //TODO: ss invoice update
+                            try {
+                                await updateSSInvoices([deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID]);
+                            } catch (error) {
+                                await logErrorToPly((error as Error).toString());
+                            }
                             break;
                         }
                         case "ESTIMATE": {
@@ -180,7 +186,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             break;
                         }
                         case "RECURRING": {
-                            //TODO: ss recurring template update
+                            try {
+                                await updateSSInvoiceTemplates([deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID]);
+                            } catch (error) {
+                                await logErrorToPly((error as Error).toString());
+                            }
                             break;
                         }
                     }
@@ -194,20 +204,285 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
     return "success";
 
 
-    async function upsertNewInvoiceTemplate(newInvoice: InvoicesCreated) {
-        //TODO: implement function
+    async function upsertNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<SmartSuiteRecord[]> {
+        /*
+       Create new recurring invoice template with client ID, discount, QuickFile status, invoice ID, interval, start date and Total Payment amount
+       Ignore if record already exists
+       Assign the record to the Invoicing team
+       */
+        const existingTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
+            invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
+            invoiceTemplateIDs
+        )
+        if (existingTemplates.length === invoiceTemplateIDs.length) {
+            console.log("All new invoice templates already exist")
+            return [];
+        }
+        const invoicingTeam = await getTeam(INVOICING_TEAM_ID);
+        const newSSTemplates: Omit<SmartSuiteRecord, "id">[] = [];
+        for (const invoiceTemplateID of invoiceTemplateIDs) {
+            const template = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
+
+            const updatedSSTemplate = {
+                [invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug]: template.Invoice_Get.Body.InvoiceDetails.InvoiceID,
+                [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: template.Invoice_Get.Body.InvoiceDetails.ClientID,
+                [invoiceTemplatesTable.structure["Discount"].slug]: template.Invoice_Get.Body.InvoiceDetails.Discount,
+                [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: template.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+                [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
+                    invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice =>
+                        choice.label === template.Invoice_Get.Body.InvoiceDetails.Status
+                    )!.value as string,
+                [invoiceTemplatesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
+                [invoiceTemplatesTable.structure["Interval"].slug]: template.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
+                [invoiceTemplatesTable.structure["Start Date"].slug]: {
+                    date: template.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
+                    include_time: false,
+                } as DateFieldCell
+            }
+            newSSTemplates.push(updatedSSTemplate);
+        }
+        const createdTemplates = await SS.bulkAddNewRecords(invoiceTemplatesTable.id,
+            newSSTemplates,
+        );
+        return createdTemplates;
     }
-    async function createNewRecurringInvoice(newInvoice: InvoicesCreated) {
-        //TODO: implement function
+    async function createNewRecurringInvoices(newInvoices: RecurringInvoicesCreated[]): Promise<SmartSuiteRecord[]> {
+        /*
+        Create new invoice linked to recurring invoice template
+        Create invoice with link to recurring template, issue and due date, discount, total amount, Client ID, Invoice ID and QuickFile status to match QuickFile
+            Also set Invoice Type, assignee, 
+        Assigns the record to the Invoicing team.
+        */
+        let newSSInvoices: Omit<SmartSuiteRecord, "id">[] = [];
+
+        const SSinvoiceTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
+            invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
+            newInvoices.map(newInvoice => newInvoice.RecurringParentId)
+        )
+
+        for (const newInvoice of newInvoices) {
+
+            let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] === newInvoice.RecurringParentId)
+            if (!SSInvoiceTemplate) {
+                await logErrorToPly("SS Recurring template with ID " + newInvoice.RecurringParentId + " not found on SS. Adding to SS.");
+                SSInvoiceTemplate = (await upsertNewInvoiceTemplates([newInvoice.RecurringParentId]))[0];
+            }
+
+            const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
+            const QFInvoice = await QF.invoiceGet({ InvoiceID: newInvoice.Id });
+
+            const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
+            const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
+            const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
+            const newSSInvoice = {
+                [invoicesTable.structure["Due Date"].slug]: {
+                    from_date: {
+                        date: issueDate,
+                        include_time: false
+                    },
+                    to_date: {
+                        date: expiryDate,
+                        include_time: false
+                    }
+                } as DueDateFieldCell,
+                [invoicesTable.structure["QuickFile Invoice ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID as number,
+                [invoicesTable.structure["Service Invoice Template"].slug]: [SSInvoiceTemplate.id] as string[],
+                [invoicesTable.structure["Discount"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number,
+                [invoicesTable.structure["Total Payment"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
+                [invoicesTable.structure["Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]:
+                    invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice =>
+                        choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
+                    )!.value as string,
+                [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
+                [invoicesTable.structure["Invoice Type"].slug]: "OC8HP" as const //recurring invoice
+            }
+            newSSInvoices.push(newSSInvoice);
+        }
+        if (newSSInvoices.length > 0) {
+            return await SS.bulkAddNewRecords(invoicesTable.id,
+                newSSInvoices,
+            )
+        } else return [];
     }
-    async function upsertNewSDPInvoice(newInvoice: InvoicesCreated) {
-        //TODO: implement function
+    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<SmartSuiteRecord[]> {
+        /*
+        Check if invoices already exist in SS.
+            Takes no action if exists already (invoice has been created from SS)
+        Creates if does not exist
+            Create invoice with issue and due date, discount, total amount, Client ID, Invoice ID and QuickFile status to match QuickFile
+                Also sets invoice type and assigned to
+            Doesn't link SDP items as can't tell what project the invoice is for
+            Assigns the record to the Invoicing team.
+        */
+        const SSInvoices = await SS.getRecordsByFieldValues(
+            invoicesTable.id,
+            invoicesTable.structure["QuickFile Invoice ID"].slug,
+            newInvoices.map(newInvoice => newInvoice.Id));
+
+        let newSSInvoices: Omit<SmartSuiteRecord, "id">[] = [];
+        for (const newInvoice of newInvoices) {
+            if (SSInvoices.map(SSInvoice => SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug]).includes(newInvoice.Id)) {
+                continue; //do nothing if invoice already exists
+            }
+            const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
+            const QFInvoice = await QF.invoiceGet({ InvoiceID: newInvoice.Id });
+
+            const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
+            const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
+            const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
+            const newSSInvoice = {
+                [invoicesTable.structure["QuickFile Invoice ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["Due Date"].slug]: {
+                    from_date: {
+                        date: issueDate,
+                        include_time: false
+                    },
+                    to_date: {
+                        date: expiryDate,
+                        include_time: false
+                    }
+                } as DueDateFieldCell,
+                [invoicesTable.structure["Discount"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number,
+                [invoicesTable.structure["Total Payment"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
+                [invoicesTable.structure["Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]:
+                    invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice =>
+                        choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
+                    )!.value as string,
+                [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
+                [invoicesTable.structure["Invoice Type"].slug]: "x01tk" as const, //single invoice
+            }
+            newSSInvoices.push(newSSInvoice);
+        }
+        if (newSSInvoices.length > 0) {
+            return await SS.bulkAddNewRecords(invoicesTable.id,
+                newSSInvoices,
+            );
+        } else return [];
     }
-    async function updateSSInvoiceTemplate(invoiceId: number) {
-        const template = await QF.invoiceGet({ InvoiceID: invoiceId });
-        //TODO: implement function
+    async function updateSSInvoiceTemplates(invoiceIds: number[]): Promise<SmartSuiteRecord[]> {
+        /*
+        Update invoice template with client ID, QuickFile Status, Discount, interval, start date and Total Payment amount
+        */
+        const updatedSSTemplates: Omit<Update<SmartSuiteRecord>, "id">[] = [];
+        for (const invoiceID of invoiceIds) {
+            const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
+
+            const updatedSSTemplate = {
+                [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
+                [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
+                    invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice =>
+                        choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
+                    )!.value as string,
+                [invoiceTemplatesTable.structure["Interval"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
+                [invoiceTemplatesTable.structure["Start Date"].slug]: {
+                    date: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
+                    include_time: false,
+                } as DateFieldCell,
+                [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount as number,
+            }
+            updatedSSTemplates.push(updatedSSTemplate);
+        }
+        const updatedTemplates = await SS.bulkAddNewRecords(invoiceTemplatesTable.id,
+            updatedSSTemplates,
+        );
+        return updatedTemplates;
     }
-    async function updateSSOpportunity(quoteId: number, QFQuote: InvoiceGetResponse | undefined = undefined) {
+    async function updateSSInvoices(invoiceIds: number[]): Promise<{ updatedInvoices: SmartSuiteRecord[], updatedItems: SmartSuiteRecord[] }> {
+        /*
+       Update SmartSuite Invoice issue and due date, discount, total amount, Client ID, All Payment Received date and QuickFile status to match QuickFile
+       Update SmartSuite Invoice Items price, line item description, hourly rate and hours to match QuickFile
+       */
+        const SSInvoices = await SS.getRecordsByFieldValues(
+            invoicesTable.id,
+            invoicesTable.structure["QuickFile Invoice ID"].slug,
+            invoiceIds);
+        if (SSInvoices.length === 0) throw new Error("No Invoices found for QuickFile Invoice IDs " + invoiceIds.join(", ")); //throw error and break out
+
+        const SSInvoiceItems = await SS.getRecordsByFieldValues(
+            SDPInvoiceItemsTable.id,
+            SDPInvoiceItemsTable.structure["QuickFile Invoice ID"].slug,
+            invoiceIds);
+
+        for (const invoiceId of invoiceIds) {
+            try {
+                //set updated invoice values
+                const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == invoiceId);
+                if (!SSInvoice) throw new Error("No SmartSuite Invoice found for QuickFile Invoice ID " + invoiceId + ". The Webhook handler attempted to update this invoice.");
+                const QFInvoice = await QF.invoiceGet({ InvoiceID: invoiceId });
+                if (QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType !== "INVOICE") throw new Error("Handler expected an invoice of type INVOICE but received type + " +
+                    QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType + " when processing invoice ID " + QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID)
+
+                //set invoice values
+                const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
+                const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
+                const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
+                SSInvoice[invoicesTable.structure["Due Date"].slug] = {
+                    from_date: { date: issueDate, include_time: false },
+                    to_date: { date: expiryDate, include_time: false }
+                } as DueDateFieldCell;
+                SSInvoice[invoicesTable.structure["Discount"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number;
+
+                SSInvoice[invoicesTable.structure["Total Payment"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number;
+
+                SSInvoice[invoicesTable.structure["Client ID"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number;
+
+                (SSInvoice[invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug] as string) =
+                    invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice =>
+                        choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
+                    )!.value; //single select fields are set by value instead of label
+
+                (SSInvoice[invoicesTable.structure["All Payment Received"].slug] as DateFieldCell | null) =
+                    QFInvoice.Invoice_Get.Body.InvoiceDetails.PaidDate ?
+                        {
+                            date: QFInvoice.Invoice_Get.Body.InvoiceDetails.PaidDate,
+                            include_time: false
+                        } : null;
+
+                //set updated invoice item values
+                for (const QFitem of QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? []) {
+                    const SSItem = SSInvoiceItems.find(_SSItem => (_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] === QFitem.ItemName));
+                    try {
+                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName + ". The webhook handler tried to update invoice " + invoiceId)
+                        //set values
+                        SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
+                        SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
+                    } catch (error) {
+                        await logErrorToPly((error as Error).toString());
+                    }
+                }
+                //set updated invoice task values (hourly charged jobs)
+                for (const QFTask of QFInvoice.Invoice_Get.Body.InvoiceDetails.TaskLines?.Task ?? []) {
+                    const SSItem = SSInvoiceItems.find(_SSItem => (_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] === QFTask.ItemName));
+                    try {
+                        if (!SSItem) throw new Error("No SS item found for QF invoice task " + QFTask.ItemName + ". The webhook handler tried to update invoice " + invoiceId)
+                        //set values
+                        SSItem[SDPInvoiceItemsTable.structure["Hours"].slug] = QFTask.Qty;
+                        SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
+                        SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFTask.ItemDescription;
+                    } catch (error) {
+                        await logErrorToPly((error as Error).toString());
+                    }
+                }
+            } catch (error) {
+                await logErrorToPly((error as Error).toString());
+            }
+        }
+        //update SS invoices
+        const updatedInvoices = await SS.bulkUpdateRecords(invoicesTable.id,
+            SSInvoices,
+            false
+        );
+        //update invoice items
+        const updatedItems = await SS.bulkUpdateRecords(SDPInvoiceItemsTable.id,
+            SSInvoiceItems,
+            false
+        );
+        return { updatedInvoices, updatedItems }
+    }
+    async function updateSSOpportunity(quoteId: number, QFQuote: GeneralInvoiceGetResponse | undefined = undefined) {
         /*
         Update SmartSuite Opportunity issue and expiry, discount, total amount and QuickFile status to match QuickFile
         Update SmartSuite Quote Items price, line item description and quantity/hours  to match QuickFile
@@ -254,6 +529,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     return; //ignore item if not found on SS
                 }
                 const updatedItem = {
+                    application_id: quoteItemsTable.id,
                     id: SSitem.id as string,
                     [quoteItemsTable.structure["Quantity"].slug]: item.Qty,
                     [quoteItemsTable.structure["Line Item Description"].slug]: item.ItemDescription,
@@ -275,6 +551,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     return; //ignore task if not found on SS
                 }
                 const updatedTask = {
+                    application_id: quoteItemsTable.id,
                     id: SStask.id as string,
                     [quoteItemsTable.structure["Quantity"].slug]: task.Qty / (opportunity[opportunitiesTable.structure["Minimum Hours"].slug] as number), //Qty is actually hours on a Task: adjust hours to quantity 
                     [quoteItemsTable.structure["Line Item Description"].slug]: task.ItemDescription,
@@ -290,10 +567,17 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunitiesTable.structure["Term Days (System Field)"].slug] as number);
 
         const opportunityUpdate = [{
+            application_id: opportunitiesTable.id,
             id: SSOpportunities[0].id,
             [opportunitiesTable.structure["Quote Issue and Expiry"].slug]: {
-                from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
-                to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
+                from_date: {
+                    date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
+                    include_time: false
+                },
+                to_date: {
+                    date: new Date(issueDate.getTime() + termDaysInMs).toISOString(),
+                    include_time: false
+                },
             },
             [opportunitiesTable.structure["Discount"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Discount,
             [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
@@ -302,20 +586,66 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
         }];
 
-        const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as {
-            id: string;
-            [slug: string]: string | number;
-        }[];
+        const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as Update<SmartSuiteRecord>[];
 
         await SS.bulkUpdateRecords(opportunitiesTable.id, opportunityUpdate, false);
         if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItemsTable.id, quoteItemsUpdate, false);
     }
-    async function updateSSInvoice(invoiceId: number) {
-        const invoice = await QF.invoiceGet({ InvoiceID: invoiceId });
-        //TODO: implement function
-    }
-    async function logInvoiceSend(sentInvoice: InvoicesSent) {
-        //TODO: implement function
+
+    async function logInvoicesSend(sentInvoices: InvoicesSent[]) {
+        /*
+        Update invoice sent date, quickfile status, issue date, and expiry date
+        */
+        const invoiceIDs = sentInvoices.map((invoice => invoice.Id));
+        const SSInvoices = await SS.getRecordsByFieldValues(
+            invoicesTable.id,
+            invoicesTable.structure["QuickFile Invoice ID"].slug,
+            invoiceIDs);
+
+        if (SSInvoices.length === 0) {
+            await logErrorToPly("No SS Invoices found for sent QF Invoices with IDs " + invoiceIDs.join(", "));
+            return [];
+        }
+
+        for (const sentInvoice of sentInvoices) {
+            try {
+                const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] === sentInvoice.Id);
+                if (!SSInvoice) throw new Error("No SS Invoice found for invoice ID " + sentInvoice.Id + ". The webhook handler tried to mark this invoice as sent");
+                const QFInvoice = await QF.invoiceGet({ InvoiceID: sentInvoice.Id });
+                SSInvoice[invoicesTable.structure["Sent Date"].slug] = {
+                    date: sentInvoice.TimeStamp,
+                    include_time: true,
+                };
+                SSInvoice[invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug] = invoiceTemplatesTable.structure[
+                    "QuickFile Status (System Field)"
+                ].choices.find(choice =>
+                    choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
+                )!.value as string; //single select field must be set using field value, not label
+                const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
+                const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
+                const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
+
+                SSInvoice[invoicesTable.structure["Due Date"].slug] = {
+                    from_date: {
+                        date: issueDate,
+                        include_time: false
+                    },
+                    to_date: {
+                        date: expiryDate,
+                        include_time: false
+                    }
+                }
+                QFInvoice.Invoice_Get.Body.InvoiceDetails.Status;
+
+            } catch (error) {
+                logErrorToPly((error as Error).toString())
+            }
+        }
+        return await SS.bulkUpdateRecords(
+            invoicesTable.id,
+            SSInvoices,
+            false
+        )
     }
     async function logQuoteSend(sentQuote: InvoicesSent) {
         const SSOpportunities = await SS.getRecordsByFieldValues(
@@ -339,9 +669,15 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 [opportunitiesTable.structure["Quote Last Sent"].slug]: sentQuote.TimeStamp,
                 [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
                 [opportunitiesTable.structure["Quote Issue and Expiry"].slug]: {
-                    from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
-                    to_date: new Date(issueDate.getTime() + termDaysInMs).toISOString()
-                },
+                    from_date: {
+                        date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate,
+                        include_time: false
+                    },
+                    to_date: {
+                        date: new Date(issueDate.getTime() + termDaysInMs).toISOString(),
+                        include_time: false
+                    }
+                } as DueDateFieldCell,
                 [opportunitiesTable.structure["Customer Quote Link"].slug]:
                     QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
             }
@@ -383,8 +719,18 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return errorMessage;
     }
+    let cachedTeams: Team[] = [];
+    async function getTeam(teamID: string): Promise<Team> {
+        //if team is cached return cached value, else request and cache it
+        const cachedTeam = cachedTeams.find(team => team.id === teamID)
+        if (cachedTeam) {
+            return cachedTeam;
+        }
+        const teams = await SS.listTeams();
+        const team = teams.find(team => team.id === teamID);
+        if (!team) throw new Error(`Team with ID ${teamID} not found`);
+        cachedTeams.push(team);
+        return team;
 
+    }
 }
-
-
-

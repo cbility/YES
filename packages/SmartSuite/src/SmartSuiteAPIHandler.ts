@@ -25,7 +25,7 @@ class LimitedList<T> {
 }
 
 export default class SmartSuiteAPIHandler {
-    private requestHeaders: RequestHeaders;
+    private requestHeaders: HeadersInit;
     private maxBulkRequestSize: number = 25; //Smartsuite allow a max of 25 records per bulk update request
 
     private maxRequestsPerSecond: number = 2; //2 is the secondary limit, effective once the monthly request volume limit is reached in a given month. 
@@ -126,7 +126,7 @@ export default class SmartSuiteAPIHandler {
 
     async updateRecord(tableID: string,
         recordID: string,
-        record: Omit<SmartSuiteRecord, "id">): Promise<SmartSuiteRecord> {
+        record: Omit<Update<SmartSuiteRecord>, "id">): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
@@ -196,7 +196,7 @@ export default class SmartSuiteAPIHandler {
     }
     async bulkUpdateRecords(
         tableID: string,
-        records: SmartSuiteRecord[],
+        records: Update<SmartSuiteRecord>[],
         checkForDataChanges: true,
         useEntireTable: false,
         additionalInfo: { idFieldSlug: string }
@@ -204,7 +204,7 @@ export default class SmartSuiteAPIHandler {
 
     async bulkUpdateRecords(
         tableID: string,
-        records: SmartSuiteRecord[],
+        records: Update<SmartSuiteRecord>[],
         checkForDataChanges: true,
         useEntireTable: true,
         additionalInfo?: { entireTableRecords: SmartSuiteRecord[] }
@@ -212,17 +212,16 @@ export default class SmartSuiteAPIHandler {
 
     async bulkUpdateRecords(
         tableID: string,
-        records: SmartSuiteRecord[],
+        records: Update<SmartSuiteRecord>[],
         checkForDataChanges: false
     ): Promise<SmartSuiteRecord[]>
 
     async bulkUpdateRecords(
         tableID: string,
-        records: SmartSuiteRecord[],
+        records: Update<SmartSuiteRecord>[],
         checkForDataChanges: boolean = records.length > 2 * this.maxBulkRequestSize,  //if true checks for data changes before
         // including records in update request. Helps avoid exceeding max bulk request size but uses an extra request
-        useEntireTable: boolean = false, //setting to true uses the entire table for the data change check, but
-        // does not require an ID field slug
+        useEntireTable: boolean = false, //setting to true uses the entire table for the data change check, but does not require an ID field slug
         additionalInfo?: { idFieldSlug?: string /*slug of field containing Record ID*/; entireTableRecords?: SmartSuiteRecord[] /*list of entire table contents. Only use if already retrieved*/ }
     ): Promise<SmartSuiteRecord[]> {
 
@@ -261,7 +260,7 @@ export default class SmartSuiteAPIHandler {
         return updatedRecords;
     }
 
-    async bulkAddNewRecords(tableID: string, records: Omit<SmartSuiteRecord, "id">[]): Promise<SmartSuiteRecord[]> {
+    async bulkAddNewRecords(tableID: string, records: Omit<Update<SmartSuiteRecord>, "id">[]): Promise<SmartSuiteRecord[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
         const newRecords: SmartSuiteRecord[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
@@ -278,7 +277,7 @@ export default class SmartSuiteAPIHandler {
         return newRecords;
     }
 
-    async addNewRecord(tableID: string, record: Omit<SmartSuiteRecord, "id">): Promise<SmartSuiteRecord> {
+    async addNewRecord(tableID: string, record: Omit<Update<SmartSuiteRecord>, "id">): Promise<SmartSuiteRecord> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
         const response = await this.request(url, {
@@ -328,6 +327,13 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
+    async listTeams(): Promise<Team[]> {
+        const url = "https://app.smartsuite.com/api/v1/teams/list/";
+        const response = await this.request(url);
+        const result = await response.json();
+        return result;
+    }
+
 }
 
 ///////////////////Helper functions //////////////////
@@ -339,25 +345,6 @@ function splitIntoSubArrays<T>(subArrayLength: number, array: T[]): T[][] {
     return result;
 }
 
-function deepEqual(obj1: any, obj2: any): boolean {
-    // If both are strictly equal (covers primitives)
-    if (obj1 === obj2) return true;
-    // If either is not an object, they are not equal (handles nulls, functions, etc.)
-    if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
-        return false;
-    }
-    // Compare the length of their keys (to ensure no extra fields)
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-    if (keys1.length !== keys2.length) return false;
-    // Check each key recursively
-    for (const key of keys1) {
-        if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
-            return false;
-        }
-    }
-    return true;
-}
 
 function checkObjectEquivalence(source: any, reference: any): boolean {
     //returns false if any field value in the source differs from that field value in the reference, else returns true

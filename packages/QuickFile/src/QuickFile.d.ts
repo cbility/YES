@@ -78,6 +78,95 @@ interface ClientInsertContacts extends RequestBody {
 interface InvoiceGet extends RequestBody {
     InvoiceID: number;
 }
+interface InvoiceItemLine {
+    "ItemLineID": number;
+    "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS;
+    "ItemID": number;
+    "ItemName": null | string;
+    "ItemDescription": string;
+    "NominalCode": string; //4000 for default
+    "TaxName1": string;
+    "TaxPercentage1": number;
+    "UnitCost": number;
+    "Qty": number;
+    "LineTotal": number;
+}
+interface InvoiceTaskLine {
+    "ItemLineID": number;
+    "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS
+    "ItemID": number;
+    "ItemName": null | string;
+    "ItemDescription": string;
+    "NominalCode": string; //4000 for default
+    "TaxName1": string;
+    "TaxPercentage1": number;
+    "UnitCost": number; //teh docs call this hourly rate
+    "Qty": number; // the docs call this hours
+    "LineTotal": number;
+}
+interface RecurringProfileSettings {
+    Interval: '1YEAR'; //TODO: add other options here
+    Frequency: string; //number as string, function unclear
+    StartDate: string; //YYYY-MM-DDTHH:MM:SS
+    LastSentDate: string; //YYYY-MM-DDTHH:MM:SS
+    NextDueDate: string; //YYYY-MM-DDTHH:MM:SS
+    NumberSent: number;
+    Status: 'PAUSED' | "ACTIVE";
+    AutoBillByDD: boolean;
+    InitiateAfterDays: null;
+}
+interface InvoiceDetails extends GeneralInvoiceDetails {
+    "InvoiceType": "INVOICE";
+    "PaidDate": string; //YYYY-MM-DDTHH:MM:SS
+    "Status": "DRAFT" | "SENT" | "PAIDPART" | "PAIDFULL" | "CREDIT NOTE" | "CREDITED" | "DELETED";
+}
+interface RecurringTemplateDetails extends GeneralInvoiceDetails {
+    "InvoiceType": "RECURRING";
+    "Status": "ACTIVE" | "PAUSED" | "DELETED";
+    "RecurringProfileSettings": RecurringProfileSettings;
+}
+interface EstimateDetails extends GeneralInvoiceDetails {
+    "InvoiceType": "ESTIMATE";
+    "Status": "AGREED" | "CONVERTED" | "DRAFT" | "SENT" | "DELETED";
+}
+
+interface GeneralInvoiceDetails {
+    "InvoiceID": number;
+    "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS
+    "InvoiceNumber": string;
+    "PurchaseReference": null | string;
+    "Description": string;
+    "IssueDate": string; //YYYY-MM-DDTHH:MM:SS
+    "ClientID": number;
+    "ClientCompanyName": string;
+    "ClientContactName": null | string;
+    "ClientContactEmail": null | string;
+    "ClientAddress": null | string;
+    "ClientCountryISO": string;
+    "ClientVatNumber": [
+        {
+            "#text": string;
+        }
+    ];
+    "PayeeCompanyName": string;
+    "PayeeAddress": string;
+    "PayeeVatNumber": string;
+    "Currency": string;
+    "TotalAmount": number;
+    "Discount": number;
+    "Notes": null | string;
+    "Viewed": boolean;
+    "TermDays": number;
+    "TermNotes": null | string;
+    "Language": string;
+    "ItemLines"?: {
+        "Item": InvoiceItemLine[];
+    };
+    "TaskLines"?: {
+        "Task": InvoiceTaskLine[];
+    };
+    DirectPreviewUri?: string; // client side view URL, present after invoice is sent
+}
 interface InvoiceGetResponse extends ResponseBody {
     "Invoice_Get": {
         "Header": {
@@ -85,74 +174,33 @@ interface InvoiceGetResponse extends ResponseBody {
             "SubmissionNumber": string;
         },
         "Body": {
-            "InvoiceDetails": {
-                "InvoiceID": number;
-                "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS
-                "InvoiceType": "INVOICE" | "ESTIMATE" | "RECURRING";
-                "InvoiceNumber": string;
-                "PurchaseReference": null | string;
-                "Description": string;
-                "IssueDate": string; //YYYY-MM-DDTHH:MM:SS
-                "PaidDate": null | string; //YYYY-MM-DDTHH:MM:SS
-                "ClientID": number;
-                "ClientCompanyName": string;
-                "ClientContactName": null | string;
-                "ClientContactEmail": null | string;
-                "ClientAddress": null | string;
-                "ClientCountryISO": string;
-                "ClientVatNumber": [
-                    {
-                        "#text": string
-                    }
-                ],
-                "PayeeCompanyName": string;
-                "PayeeAddress": string;
-                "PayeeVatNumber": string;
-                "Currency": string;
-                "TotalAmount": number;
-                "Discount": number;
-                "Notes": null | string;
-                "Viewed": boolean;
-                "TermDays": number;
-                "TermNotes": null | string;
-                "Language": string;
-                "Status": "ACTIVE" | "PAUSED" | "AGREED" | "CONVERTED" | "DRAFT" | "SENT" | "PAIDPART" | "PAIDFULL" | "CREDIT NOTE" | "CREDITED"
-                "RecurringProfileSettings": null | {}; //TODO: fill this out
-                "ItemLines"?: {
-                    "Item": {
-                        "ItemLineID": number;
-                        "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS;
-                        "ItemID": number;
-                        "ItemName": null | string;
-                        "ItemDescription": string;
-                        "NominalCode": string; //4000 for default
-                        "TaxName1": string;
-                        "TaxPercentage1": number;
-                        "UnitCost": number;
-                        "Qty": number;
-                        "LineTotal": number;
-                    }[];
-                };
-                "TaskLines"?: {
-                    "Task": {
-                        "ItemLineID": number;
-                        "CreatedDate": string; //YYYY-MM-DDTHH:MM:SS
-                        "ItemID": number;
-                        "ItemName": null | string;
-                        "ItemDescription": string;
-                        "NominalCode": string; //4000 for default
-                        "TaxName1": string;
-                        "TaxPercentage1": number;
-                        "HourlyRate": number; //hourly rate
-                        "Hours": number; // hours
-                        "LineTotal": number;
-                    }[]
-                }
-                DirectPreviewUri?: string; // client side view URL
-            }
+            "InvoiceDetails": InvoiceDetails
         }
     }
 }
+interface RecurringTemplateGetResponse extends ResponseBody {
+    "Invoice_Get": {
+        "Header": {
+            "MessageType": string;
+            "SubmissionNumber": string;
+        },
+        "Body": {
+            "InvoiceDetails": RecurringTemplateDetails
+        }
+    }
+}
+interface EstimateGetResponse extends ResponseBody {
+    "Invoice_Get": {
+        "Header": {
+            "MessageType": string;
+            "SubmissionNumber": string;
+        },
+        "Body": {
+            "InvoiceDetails": EstimateDetails
+        }
+    }
+}
+type GeneralInvoiceGetResponse = InvoiceGetResponse | EstimateGetResponse | RecurringTemplateGetResponse
 
 interface InvoiceCreateData {
     InvoiceType: "INVOICE" | "ESTIMATE" | "RECURRING";
@@ -389,24 +437,32 @@ interface DocumentUploadResponse extends ResponseBody {
 interface WebhookEvent { }
 
 interface InvoiceEvent extends WebhookEvent {
-    TimeStamp: string; //Date and time the event occured
+    TimeStamp: string; //Date and time the event occurred
     Id: number; //Unique invoice/estimate ID
 }
 interface ClientEvent extends WebhookEvent {
-    TimeStamp: string; //Date and time the event occured
+    TimeStamp: string; //Date and time the event occurred
     Id: number; //Unique client ID
 }
 interface SupplierEvent extends WebhookEvent {
-    TimeStamp: string; //Date and time the event occured
+    TimeStamp: string; //Date and time the event occurred
     Id: number; //Unique supplier ID
 }
 
 //invoice functions
-interface InvoicesCreated extends InvoiceEvent {
+type InvoicesCreated = NonRecurringInvoicesCreated | RecurringInvoicesCreated
+interface NonRecurringInvoicesCreated {
+    Id: number;
     InvoiceType: "INV" | "EST" | "REC";
-    FromRecurring: boolean;
-    RecurringParentId?: number;
+    FromRecurring: false;
 }
+interface RecurringInvoicesCreated {
+    Id: number;
+    InvoiceType: "INV";
+    FromRecurring: true;
+    RecurringParentId: number;
+}
+
 interface InvoicesUpdated extends InvoiceEvent {
     InvoiceType: "INV" | "EST" | "REC";
 }

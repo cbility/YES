@@ -28,6 +28,7 @@ async function updateTables() {
                     slug: field.slug,
                     field_type: field.field_type,
                     target_field_type: field?.["params"]?.["target_field_structure"]?.["field_type"],
+                    choices: field?.params?.choices?.map((choice: { value: string; label: string; }) => ({ value: choice.value, label: choice.label }))
                 };
             });
 

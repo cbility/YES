@@ -70,7 +70,7 @@ export default class QuickFileAPIHandler {
 
     //Invoice methods
 
-    async invoiceGet(body: InvoiceGet): Promise<InvoiceGetResponse> {
+    async invoiceGet(body: InvoiceGet): Promise<GeneralInvoiceGetResponse> {
         return await this.request("invoice/get", body);
     }
 
