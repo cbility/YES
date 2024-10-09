@@ -2050,6 +2050,10 @@ export const invoicesTable = {
                 {
                     "value": "s8C1P",
                     "label": "DELETED"
+                },
+                {
+                    "value": "lxa9p",
+                    "label": "REFUND"
                 }
             ]
         },
@@ -2089,7 +2093,7 @@ export const invoicesTable = {
             "field_type": "formulafield",
             "target_field_type": "numberfield"
         },
-        "Invoice Number": {
+        "Calculated Invoice Number": {
             "slug": "s8b2fc84fc",
             "field_type": "formulafield",
             "target_field_type": "textfield"
@@ -2123,7 +2127,7 @@ export const invoicesTable = {
             "slug": "sfaf9fa800",
             "field_type": "percentfield"
         },
-        "Total Payment": {
+        "Total Gross Payment": {
             "slug": "sbe0b1624f",
             "field_type": "currencyfield"
         },
@@ -2131,6 +2135,18 @@ export const invoicesTable = {
             "slug": "s08peerl",
             "field_type": "formulafield",
             "target_field_type": "textfield"
+        },
+        "QuickFile Invoice Number": {
+            "slug": "s32a2cf521",
+            "field_type": "textfield"
+        },
+        "Internal Invoice Description": {
+            "slug": "sd9ab9d484",
+            "field_type": "textfield"
+        },
+        "Legacy Invoice": {
+            "slug": "s4d7d8752e",
+            "field_type": "yesnofield"
         }
     }
 } as const;
