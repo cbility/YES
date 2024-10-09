@@ -227,7 +227,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
 
             const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
-            )!.value as string;
+            )?.value as string;
             if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
                 invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
@@ -262,7 +262,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
 
             const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
-            )!.value as string;
+            )?.value as string;
             if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
                 invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
@@ -302,7 +302,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         for (const newInvoice of newInvoices) {
 
-            let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] === newInvoice.RecurringParentId)
+            let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == newInvoice.RecurringParentId)
             if (!SSInvoiceTemplate) {
                 await logErrorToPly("SS Recurring template with ID " + newInvoice.RecurringParentId + " not found on SS. Adding to SS.");
                 SSInvoiceTemplate = (await upsertNewInvoiceTemplates([newInvoice.RecurringParentId]))[0];
@@ -315,7 +315,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
             const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
             const qfInvoiceStatusValue = invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice => choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
-            )!.value as string;
+            )?.value as string;
             if (!qfInvoiceStatusValue) throw new Error("QF Invoice Status '" + QFInvoice.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
                 invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.map(choice => choice.label).join(", "));
             const newSSInvoice = {
@@ -374,7 +374,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
             const expiryDate = new Date(new Date(issueDate).getTime() + termDaysInMs).toISOString();
             const qfInvoiceStatusValue = invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice => choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
-            )!.value as string;
+            )?.value as string;
             if (!qfInvoiceStatusValue) throw new Error("QF Invoice Status '" + QFInvoice.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
                 invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.map(choice => choice.label).join(", "));;
             const newSSInvoice = {
@@ -519,23 +519,23 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         for (const sentInvoice of sentInvoices) {
             try {
-                const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] === sentInvoice.Id);
+                const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == sentInvoice.Id);
                 if (!SSInvoice) throw new Error("No SS Invoice found for invoice ID " + sentInvoice.Id + ". The webhook handler tried to mark this invoice as sent");
                 const QFInvoice = await QF.invoiceGet({ InvoiceID: sentInvoice.Id });
                 SSInvoice[invoicesTable.structure["Sent Date"].slug] = {
                     date: sentInvoice.TimeStamp,
                     include_time: true,
                 };
-                const quickFileStatusValue = invoiceTemplatesTable.structure[
-                    "QuickFile Status (System Field)"
+                const quickFileStatusValue = invoicesTable.structure[
+                    "QuickFile Invoice Status (System Field)"
                 ].choices.find(choice =>
                     choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
-                )!.value as string; //single select field must be set using field value, not label
+                )?.value as string; //single select field must be set using field value, not label
 
                 if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFInvoice.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
-                    invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
+                    invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
-                SSInvoice[invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug] = quickFileStatusValue;
+                SSInvoice[invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug] = quickFileStatusValue;
 
                 const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
                 const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
