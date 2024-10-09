@@ -3,7 +3,7 @@
     "scripts": {
         "build": "tsc -build packages/Main/",
         "build-ofgem-check": "tsc -build packages/Main/tsconfig.OfgemCheck.prod.json",
-        "build-qf-webhookHandler": "tsc -build packages/Main/tsconfig.QuickFileWebhookHandler.prod.json"
+        "build-qf-webhookHandler": "tsc -build packages/Main"
     },
     "dependencies": {
         "@types/node": "^22.5.4",

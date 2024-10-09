@@ -6,6 +6,8 @@
     },
     "include": [
         "src/OfgemCheck/**/*",
+        "../QuickFile/src/QuickFile.d.ts",
+        "../SmartSuite/src/SmartSuite.d.ts"
     ],
     "exclude": [
         "node_modules",
