@@ -144,6 +144,7 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
 
         const opportunityUpdate = [{
             id: opportunity.id,
+            application_id: opportunitiesTable.id,
             // [opportunities.structure["Quote Issue and Expiry"].slug]: {
             //   from_date: QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate.slice(0, 10), //remove timestamp from date
             // to_date: (new Date(issueDate.getTime() + termDaysInMs).toISOString()).slice(0, 10), //remove timestamp from date
@@ -152,7 +153,7 @@ const SS = new SmartSuiteAPIHandler("s5ch1upc",
             [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             [opportunitiesTable.structure["Total QuickFile Quote Price"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.TotalAmount,
             [opportunitiesTable.structure["Customer Quote Link"].slug]:
-                QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri,
+                QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri ?? null,
             //[opportunities.structure["Response Received"].slug]: acceptanceDate,
         }];
 

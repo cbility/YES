@@ -3,7 +3,7 @@ import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler"
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 interface Input { APIKey: string; items: any[]; hourlyRate: number; minimumHours: number; quoteID: string; quoteName: string; termDays: number; paymentTerms: string; clientID: string; issueDate: string; currentDate: string; invoiceNumber: string; }
 
-export default async function updateQFQuote(input: Input): Promise<InvoiceGetResponse & { expiryDate: string }> {
+export default async function updateQFQuote(input: Input): Promise<GeneralInvoiceGetResponse & { expiryDate: string }> {
 
     const QF = new QuickFileAPIHandler("6131405563",
         "84a82f71-d19c-4c5a-b50e-797126e504fb", //Ply Quote Drafter Application ID

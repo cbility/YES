@@ -15,7 +15,7 @@ interface Input {
     invoiceID?: string;
 }
 
-export default async function createOrUpdateQFInvoice(input: Input): Promise<InvoiceGetResponse & { expiryDate: string }> {
+export default async function createOrUpdateQFInvoice(input: Input): Promise<GeneralInvoiceGetResponse & { expiryDate: string }> {
 
     //amend issue date to not include time
     input.issueDate = input.issueDate ? input.issueDate.slice(0, 10) : input.issueDate;
@@ -39,7 +39,7 @@ export default async function createOrUpdateQFInvoice(input: Input): Promise<Inv
                 "TaxName": "VAT",
                 "TaxPercentage": 20.00,
             },
-            "UnitCost": item[itemsTable.structure["Payment (Excluding VAT)"].slug],
+            "UnitCost": item[itemsTable.structure["Payment (Exc. VAT)"].slug],
             "Qty": 1
         }));
         // hourly charged items

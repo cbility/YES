@@ -53,7 +53,7 @@ export default async function getAccountDetails(
             .text().replace("\n", "").trim(),
         last_name: $("#accordion-default-content-6 > dl:nth-child(5) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim(),
-    };
+    } as FullNameFieldCell;
 
     accountRecord[accountsTable.fields["AS Email"]] =
         [$("#accordion-default-content-6 > dl:nth-child(13) > div > dd.govuk-summary-list__value")
