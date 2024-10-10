@@ -425,7 +425,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             try {
                 //set updated invoice values
                 const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == invoiceId);
-                if (!SSInvoice) throw new Error("No SmartSuite Invoice found for QuickFile Invoice ID " + invoiceId + ". The Webhook handler attempted to update this invoice.");
+                if (!SSInvoice) throw new Error("No SmartSuite Invoice found for QuickFile Invoice ID " + invoiceId + ". The Webhook handler tried to update this invoice.");
                 const QFInvoice = await QF.invoiceGet({ InvoiceID: invoiceId });
                 if (QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType !== "INVOICE") throw new Error("Handler expected an invoice of type INVOICE but received type + " +
                     QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType + " when processing invoice ID " + QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID)
