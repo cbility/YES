@@ -392,7 +392,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 } as DueDateFieldCell,
                 [invoicesTable.structure["Discount"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number,
                 [invoicesTable.structure["Total Gross Payment"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
-                [invoicesTable.structure["Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["QuickFile Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
                 [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]: qfInvoiceStatusValue,
                 [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
                 [invoicesTable.structure["QuickFile Invoice Number"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
