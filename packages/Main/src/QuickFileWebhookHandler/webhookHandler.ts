@@ -379,7 +379,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             if (!qfInvoiceStatusValue) throw new Error("QF Invoice Status '" + QFInvoice.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
                 invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.map(choice => choice.label).join(", "));;
             const newSSInvoice = {
-                [invoicesTable.structure["QuickFile Invoice ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["QuickFile Invoice ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID as number,
                 [invoicesTable.structure["Due Date"].slug]: {
                     from_date: {
                         date: issueDate,
