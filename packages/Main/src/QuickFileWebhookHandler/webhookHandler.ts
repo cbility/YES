@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== "production") {
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
 const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
 const INVOICING_TEAM_ID = "6694e97231153a5c57cefb61";
+let cachedTeams: Team[] = []; //cache for teams used through function i.e. invoicing team
 
 process.on('uncaughtException', function (err) { //handle uncaught exceptions
     console.log(err);
@@ -55,7 +56,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 case "INV": {
                     if (newInvoice.FromRecurring) {
-                        console.log("New Invoice from recurring template ID: " + newInvoice.Id, + ", template ID " + newInvoice.RecurringParentId!);
+                        console.log("New Invoice from recurring template ID: " + newInvoice.Id, + ", template ID " + newInvoice.RecurringParentId);
                         //create new recurring invoice
                         await createNewRecurringInvoices([newInvoice]);
                     } else {
@@ -744,7 +745,6 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return errorMessage;
     }
-    let cachedTeams: Team[] = [];
     async function getTeam(teamID: string): Promise<Team> {
         //if team is cached return cached value, else request and cache it
         const cachedTeam = cachedTeams.find(team => team.id === teamID)
