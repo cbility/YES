@@ -334,7 +334,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 [invoicesTable.structure["Service Invoice Template"].slug]: [SSInvoiceTemplate.id] as string[],
                 [invoicesTable.structure["Discount"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number,
                 [invoicesTable.structure["Total Gross Payment"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
-                [invoicesTable.structure["Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["Invoice QuickFile Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
                 [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]: qfInvoiceStatusValue,
                 [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
                 [invoicesTable.structure["Invoice Type"].slug]: "OC8HP" as const, //recurring invoice
@@ -392,7 +392,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 } as DueDateFieldCell,
                 [invoicesTable.structure["Discount"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number,
                 [invoicesTable.structure["Total Gross Payment"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
-                [invoicesTable.structure["QuickFile Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
+                [invoicesTable.structure["Invoice QuickFile Client ID"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number,
                 [invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug]: qfInvoiceStatusValue,
                 [invoicesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
                 [invoicesTable.structure["QuickFile Invoice Number"].slug]: QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
@@ -445,7 +445,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
                 SSInvoice[invoicesTable.structure["Total Gross Payment"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number;
 
-                SSInvoice[invoicesTable.structure["Client ID"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number;
+                SSInvoice[invoicesTable.structure["Invoice QuickFile Client ID"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number;
 
                 const qfInvoiceStatusValue = invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice =>
                     choice.label === QFInvoice.Invoice_Get.Body.InvoiceDetails.Status
