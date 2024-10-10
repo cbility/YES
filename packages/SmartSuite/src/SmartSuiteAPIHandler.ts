@@ -329,11 +329,15 @@ export default class SmartSuiteAPIHandler {
 
     async listTeams(): Promise<Team[]> {
         const url = "https://app.smartsuite.com/api/v1/teams/list/";
-        const response = await this.request(url);
+        const response = await this.request(url, {
+            method: "POST", body: JSON.stringify({
+                "sort": [],
+                "filter": {}
+            })
+        });
         const result = await response.json();
-        return result;
+        return result.items;
     }
-
 }
 
 ///////////////////Helper functions //////////////////
