@@ -414,7 +414,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             invoicesTable.id,
             invoicesTable.structure["QuickFile Invoice ID"].slug,
             invoiceIds);
-        if (SSInvoices.length === 0) throw new Error("No Invoices found for QuickFile Invoice IDs " + invoiceIds.join(", ")); //throw error and break out
+        if (SSInvoices.length === 0) throw new Error("No Invoices found for QuickFile Invoice ID(s) " + invoiceIds.join(", ") + ". The webhook handler tried to update these invoices."); //throw error and break out
 
         const SSInvoiceItems = await SS.getRecordsByFieldValues(
             SDPInvoiceItemsTable.id,
