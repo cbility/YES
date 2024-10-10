@@ -7,9 +7,9 @@ const testEvent = {
     "rawQueryString": "",
     "headers": {
         "x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
-        "content-length": "425",
+        "content-length": "527",
         "x-amzn-tls-version": "TLSv1.2",
-        "x-amzn-trace-id": "Root=1-6707aeec-7e8e3116659d22265891aba9",
+        "x-amzn-trace-id": "Root=1-6707c409-322768052da63fee5627b3de",
         "x-forwarded-proto": "https",
         "host": "zzgwpptcirookdzrt7ctu73gs40ouytr.lambda-url.eu-west-2.on.aws",
         "x-forwarded-port": "443",
@@ -29,13 +29,13 @@ const testEvent = {
             "sourceIp": "13.79.122.255",
             "userAgent": "quickfile-webhook-service/1.0"
         },
-        "requestId": "a1876069-9865-400a-ae23-178f26db3d81",
+        "requestId": "3fedea1c-421d-40b3-b1ab-3f7bd20e59f1",
         "routeKey": "$default",
         "stage": "$default",
-        "time": "10/Oct/2024:10:39:40 +0000",
-        "timeEpoch": 1728556780996
+        "time": "10/Oct/2024:12:09:45 +0000",
+        "timeEpoch": 1728562185224
     },
-    "body": "{\"PayLoad\": {\"InvoicesCreated\":[{\"TimeStamp\":\"2024-10-10T10:38:05\",\"Id\":33831297,\"InvoiceType\":\"INV\",\"FromRecurring\":false,\"RecurringParentId\":0}],\"InvoicesViewed\":[{\"TimeStamp\":\"2024-10-10T10:36:29\",\"Id\":33711414,\"InvoiceType\":\"INV\",\"ClientId\":3436826,\"ClientContactId\":1187350}],\"Timestamp\":\"2024-10-10T10:39:40.7222584+00:00\",\"Signature\":\"a318a7216fa39f5f8232113cb44e9164\",\"Hookid\":\"4181d83b-4966-4ebc-b283-c7dd089a246f\"}}",
+    "body": "{\"PayLoad\": {\"InvoicesUpdated\":[{\"TimeStamp\":\"2024-10-10T12:09:27\",\"Id\":33832875,\"InvoiceType\":\"INV\"},{\"TimeStamp\":\"2024-10-10T12:09:07\",\"Id\":33832862,\"InvoiceType\":\"INV\"},{\"TimeStamp\":\"2024-10-10T12:08:31\",\"Id\":33831810,\"InvoiceType\":\"INV\"},{\"TimeStamp\":\"2024-10-10T12:08:11\",\"Id\":33831297,\"InvoiceType\":\"INV\"},{\"TimeStamp\":\"2024-10-10T12:07:54\",\"Id\":33830904,\"InvoiceType\":\"INV\"}],\"Timestamp\":\"2024-10-10T12:09:45.0187938+00:00\",\"Signature\":\"5115fbd4fd453dd68bba3265bc5902a6\",\"Hookid\":\"c0eff58d-1314-4ebd-9e1c-6d0aaf8d178d\"}}",
     "isBase64Encoded": false
 }
 
