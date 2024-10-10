@@ -440,11 +440,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     to_date: { date: expiryDate, include_time: false }
                 } as DueDateFieldCell;
                 SSInvoice[invoicesTable.structure["Discount"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.Discount as number;
-
                 SSInvoice[invoicesTable.structure["QuickFile Invoice Number"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string;
-
                 SSInvoice[invoicesTable.structure["Total Gross Payment"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.TotalAmount as number;
-
                 SSInvoice[invoicesTable.structure["Invoice QuickFile Client ID"].slug] = QFInvoice.Invoice_Get.Body.InvoiceDetails.ClientID as number;
 
                 const qfInvoiceStatusValue = invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.find(choice =>
@@ -454,7 +451,6 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     invoicesTable.structure["QuickFile Invoice Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
                 (SSInvoice[invoicesTable.structure["QuickFile Invoice Status (System Field)"].slug] as string) = qfInvoiceStatusValue;
-
                 (SSInvoice[invoicesTable.structure["All Payment Received"].slug] as DateFieldCell | null) =
                     QFInvoice.Invoice_Get.Body.InvoiceDetails.PaidDate ?
                         {
@@ -497,11 +493,14 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             false
         );
         //update invoice items
-        const updatedItems = await SS.bulkUpdateRecords(SDPInvoiceItemsTable.id,
-            SSInvoiceItems,
-            false
-        );
-        return { updatedInvoices, updatedItems }
+        if (SSInvoiceItems.length > 0) {
+            const updatedItems = await SS.bulkUpdateRecords(SDPInvoiceItemsTable.id,
+                SSInvoiceItems,
+                false
+            );
+            return { updatedInvoices, updatedItems };
+        }
+        return { updatedInvoices, updatedItems: [] };
     }
     async function logInvoicesSend(sentInvoices: InvoicesSent[]) {
         /*
