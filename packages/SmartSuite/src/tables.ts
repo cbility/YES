@@ -1921,7 +1921,7 @@ export const invoicesTable = {
                 }
             ]
         },
-        "Last Chase": {
+        "First Chase": {
             "slug": "sb997b3bee",
             "field_type": "datefield"
         },
@@ -2147,6 +2147,14 @@ export const invoicesTable = {
         "Legacy Invoice": {
             "slug": "s4d7d8752e",
             "field_type": "yesnofield"
+        },
+        "Second Chase": {
+            "slug": "s286f96219",
+            "field_type": "datefield"
+        },
+        "Final Chase": {
+            "slug": "s7d398a0e6",
+            "field_type": "datefield"
         }
     }
 } as const;
