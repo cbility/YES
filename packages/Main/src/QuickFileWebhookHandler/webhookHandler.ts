@@ -487,6 +487,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             include_time: false
                         } : null;
 
+                let itemErrors: string[] = [];
+
                 //set updated invoice item values
                 for (const QFitem of QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? []) {
                     const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFitem.ItemName?.slice(0, 7)));
@@ -496,7 +498,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                         SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
                         SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
                     } catch (error) {
-                        await logErrorToPly((error as Error).toString());
+                        itemErrors.push((error as Error).toString());
                     }
                 }
                 //set updated invoice task values (hourly charged jobs)
@@ -509,9 +511,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                         SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
                         SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFTask.ItemDescription;
                     } catch (error) {
-                        await logErrorToPly((error as Error).toString());
+                        itemErrors.push((error as Error).toString());
                     }
                 }
+
+                if (itemErrors.length > 0) await logErrorToPly(itemErrors.join(" | ")); //log all item error with one message
             } catch (error) {
                 await logErrorToPly((error as Error).toString());
             }
