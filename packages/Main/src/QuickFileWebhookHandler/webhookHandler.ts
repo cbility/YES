@@ -130,7 +130,32 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             }
                             case "INV": {
                                 console.log("Sent Invoice ID: " + sentInvoice.Id);
-                                await logInvoicesSend([sentInvoice]);
+                                //check if invoice or reminder was sent
+                                const recentEvents = await QF.system_SearchEvents({
+                                    SearchParameters: {
+                                        ReturnCount: 200, //max
+                                        FromDateTime: sentInvoice.TimeStamp.slice(0, 10), //on day of event
+                                        SearchType: {
+                                            SearchType: "Invoice",
+                                            RefID: String(sentInvoice.Id),
+                                        }
+                                    }
+                                });
+                                const sendEvent = recentEvents.System_SearchEvents.Body.Events?.Event.find(event => event.EventTime === sentInvoice.TimeStamp);
+                                if (!sendEvent) await logErrorToPly("No invoice send events found for sent invoice, id " + sentInvoice.Id);
+                                if (sendEvent?.Note.includes("Reminder")) {
+                                    if (sendEvent?.Note.includes("First Overdue Reminder")) {
+                                        await logInvoiceReminder([{ sentInvoice, reminderNumber: 1 }]);
+                                    }
+                                    if (sendEvent?.Note.includes("Second Overdue Reminder")) {
+                                        await logInvoiceReminder([{ sentInvoice, reminderNumber: 2 }]);
+                                    }
+                                    if (sendEvent?.Note.includes("Third Overdue Reminder")) {
+                                        await logInvoiceReminder([{ sentInvoice, reminderNumber: 3 }]);
+                                    }
+                                } else { //if invoice is not a reminder or no event log is found
+                                    await logInvoicesSend([sentInvoice]);
+                                }
                                 break;
                             }
                             case "REC": {
@@ -462,7 +487,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 for (const QFitem of QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? []) {
                     const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFitem.ItemName?.slice(0, 7)));
                     try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName + ". The webhook handler tried to update invoice " + invoiceId)
+                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)
                         //set values
                         SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
                         SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
@@ -474,7 +499,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 for (const QFTask of QFInvoice.Invoice_Get.Body.InvoiceDetails.TaskLines?.Task ?? []) {
                     const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFTask.ItemName?.slice(0, 7)));
                     try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice task " + QFTask.ItemName + ". The webhook handler tried to update invoice " + invoiceId)
+                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFTask.ItemName + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)
                         //set values
                         SSItem[SDPInvoiceItemsTable.structure["Hours"].slug] = QFTask.Qty;
                         SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
@@ -502,7 +527,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         }
         return { updatedInvoices, updatedItems: [] };
     }
-    async function logInvoicesSend(sentInvoices: InvoicesSent[]) {
+    async function logInvoicesSend(sentInvoices: InvoicesSent[]): Promise<SmartSuiteRecord[]> {
         /*
         Update invoice sent date, quickfile status, issue date, and expiry date
         */
@@ -563,6 +588,39 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             false
         )
     }
+
+    async function logInvoiceReminder(invoiceReminders: { sentInvoice: InvoicesSent, reminderNumber: 1 | 2 | 3 }[]): Promise<SmartSuiteRecord[]> {
+        const SSRemindedInvoices = await SS.getRecordsByFieldValues(invoicesTable.id,
+            invoicesTable.structure["QuickFile Invoice ID"].slug,
+            invoiceReminders.map(reminder => reminder.sentInvoice.Id),
+        );
+
+        for (const remindedSSInvoice of SSRemindedInvoices) {
+            try {
+                const QFInvoiceReminder = invoiceReminders.find(
+                    invoice => invoice.sentInvoice.Id === remindedSSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug]
+                );
+                if (!QFInvoiceReminder) throw new Error("Invoice that Reminder was sent for not found in returned invoices. SS record ID " + remindedSSInvoice.id);
+                switch (QFInvoiceReminder.reminderNumber) {
+                    case 1: remindedSSInvoice[invoicesTable.structure["First Chase"].slug] = { date: QFInvoiceReminder.sentInvoice.TimeStamp, include_time: true };
+                        break;
+                    case 2: remindedSSInvoice[invoicesTable.structure["Second Chase"].slug] = { date: QFInvoiceReminder.sentInvoice.TimeStamp, include_time: true };
+                        break;
+                    case 3: remindedSSInvoice[invoicesTable.structure["Final Chase"].slug] = { date: QFInvoiceReminder.sentInvoice.TimeStamp, include_time: true };
+                        break;
+                    default:
+                        const exhaustiveCheck: never = QFInvoiceReminder.reminderNumber;
+                        throw new Error(`Unhandled invoice reminder number: ${exhaustiveCheck}`);
+                }
+            } catch (error) {
+                await logErrorToPly((error as Error).toString());
+            }
+        }
+        return await SS.bulkUpdateRecords(invoicesTable.id,
+            SSRemindedInvoices,
+            false);
+    }
+
     async function updateSSOpportunity(quoteId: number, QFQuote: GeneralInvoiceGetResponse | undefined = undefined) {
         /*
         Update SmartSuite Opportunity issue and expiry, discount, total amount and QuickFile status to match QuickFile
