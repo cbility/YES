@@ -12,9 +12,9 @@ const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR
 const INVOICING_TEAM_ID = "6694e97231153a5c57cefb61";
 let cachedTeams: Team[] = []; //cache for teams used through function i.e. invoicing team
 
-process.on('uncaughtException', function (err) { //handle uncaught exceptions
+process.on('uncaughtException', async function (err) { //handle uncaught exceptions
     console.log(err);
-    fetch(
+    await fetch(
         PLY_ERROR_LOG_URL,
         {
             method: 'POST',
