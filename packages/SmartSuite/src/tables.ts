@@ -2399,6 +2399,10 @@ export const invoiceTemplatesTable = {
             "field_type": "singleselectfield",
             "choices": [
                 {
+                    "value": "0eu0v",
+                    "label": "DRAFT"
+                },
+                {
                     "value": "BhBT3",
                     "label": "ACTIVE"
                 },
