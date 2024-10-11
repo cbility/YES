@@ -250,29 +250,33 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         const invoicingTeam = await getTeam(INVOICING_TEAM_ID);
         const newSSTemplates: Omit<SmartSuiteRecord, "id">[] = [];
         for (const invoiceTemplateID of invoiceTemplateIDs) {
-            const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
+            try {
+                const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
 
-            const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
-            )?.value as string;
-            if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
-                invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
+                const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
+                )?.value as string;
+                if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
+                    invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
-            const updatedSSTemplate = {
-                [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
-                [invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceID,
-                [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: String(QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID) as string,
-                [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount,
-                [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount,
-                [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
-                    quickFileStatusValue,
-                [invoiceTemplatesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
-                [invoiceTemplatesTable.structure["Interval"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
-                [invoiceTemplatesTable.structure["Start Date"].slug]: {
-                    date: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
-                    include_time: false,
-                } as DateFieldCell
+                const updatedSSTemplate = {
+                    [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
+                    [invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceID,
+                    [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: String(QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID) as string,
+                    [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount,
+                    [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount,
+                    [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
+                        quickFileStatusValue,
+                    [invoiceTemplatesTable.structure["Assigned To"].slug]: invoicingTeam.members as string[],
+                    [invoiceTemplatesTable.structure["Interval"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
+                    [invoiceTemplatesTable.structure["Start Date"].slug]: {
+                        date: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
+                        include_time: false,
+                    } as DateFieldCell
+                }
+                newSSTemplates.push(updatedSSTemplate);
+            } catch (error) {
+                await logErrorToPly((error as Error).toString());
             }
-            newSSTemplates.push(updatedSSTemplate);
         }
         const createdTemplates = await SS.bulkAddNewRecords(invoiceTemplatesTable.id,
             newSSTemplates,
