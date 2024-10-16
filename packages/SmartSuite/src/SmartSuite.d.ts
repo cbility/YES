@@ -5,9 +5,19 @@ const notWriteable = Symbol('NotWriteable');
 type NotWriteable<T> = T & { [notWriteable]: true }; //may be used to remove types if including them in an update request cases an error
 //TODO: check if there are any of the above types
 
-type Update<T> = {
-    [K in keyof T]: T[K] extends Readonly<any> ? T[K] | undefined : T[K]; //extends NotWriteable<any> ? never : T[K];
-}; //makes all readonly properties optional and removes all NotWriteable properties
+
+type test = string | {}
+type test1 = Extract<test, SmartSuiteCustomFieldCell>
+
+type Update<Record> = Partial<{
+    [Slug in keyof Record]: Record[Slug] extends SmartSuiteCustomFieldCell ? {
+        [Key in keyof Record[Slug]]: Record[Slug][Key] extends Readonly<any>
+        ? Record[Slug][Key] | undefined
+        : Record[Slug][Key];
+    } : Record[Slug]
+}> & { id: string };  //makes all readonly custom field properties optional and makes all fields optional except the id field
+
+type Inner<Object extends {}> = Object[keyof Object]; // helper for returning inner values of an object type
 
 //FIELD CELLS
 
@@ -85,8 +95,8 @@ interface PhoneNumberFieldCell extends null {
     FAX = 5
     MAIN = 6
     OTHER = 8 */
-    readonly sys_root: string | ReadOnly; //Unformatted phone number (read only)
-    readonly sys_title: string | ReadOnly; //Formatted phone number (read only)
+    readonly sys_root: string; //Unformatted phone number (read only)
+    readonly sys_title: string; //Formatted phone number (read only)
     phone_extension?: string; //should contain alphanumeric characters only and no spaces. Note that it will be displayed by the field with an “x” prefix
 }[]
 
@@ -131,7 +141,7 @@ interface DateRangeFieldCell extends null {
 }
 interface DueDateFieldCell extends null {
     from_date?: DateFieldCell;
-    to_date: DateFieldCel;
+    to_date: DateFieldCell;
     readonly is_overdue: boolean; //True if overdue (read-only)
     readonly status_is_completed: boolean; //True if complete (read-only)
     readonly status_updated_on: boolean; //Date that the due date's linked status field was last updated (read-only)
@@ -243,8 +253,107 @@ interface Team {
     "members": string[]; //user IDs;
 }
 
-//RECORD CELLS
-interface SmartSuiteRecord { id: string, application_id: string, [slug: string]: SmartSuiteCell }
+//TABLES
+type SelectFieldType =
+    | 'singleselectfield'
+    | 'multipleselectfield'
+    | 'statusfield'
+    | "fullnamefield";
+
+type ReferenceFieldType =
+    | 'formulafield'
+    | 'lookupfield';
+type ReadOnlyFieldType =
+    | 'recordidfield'
+    | 'firstcreatedfield'
+    | 'lastupdatedfield'
+    | 'autonumberfield';
+
+type GeneralFieldType =
+    | 'tagsfield'
+    | 'textfield'
+    | 'addressfield'
+    | 'datefield'
+    | 'daterangefield'
+    | 'duedatefield'
+    | 'durationfield'
+    | 'timefield'
+    | 'timetrackingfield'
+    | 'checklistfield'
+    | 'colorpickerfield'
+    | 'emailfield'
+    | 'ipaddressfield'
+    | 'linkfield'
+    | 'phonefield'
+    | 'recordtitlefield'
+    | 'richtextareafield'
+    | 'socialnetworkfield'
+    | 'textareafield'
+    | 'currencyfield'
+    | 'numberfield'
+    | 'numbersliderfield'
+    | 'percentcompletefield'
+    | 'percentfield'
+    | 'ratingfield'
+    | 'votefield'
+    | 'countfield'
+    | 'filefield'
+    | 'signaturefield'
+    | 'rollupfield'
+    | 'subitemsfield'
+    | 'commentscountfield'
+    | 'buttonfield'
+    | 'linkedrecordfield'
+    | 'userfield'
+    | "yesnofield";
+
+type FieldType = SelectFieldType | ReferenceFieldType | ReadOnlyFieldType | GeneralFieldType
+
+type SelectField = {
+    readonly slug: string;
+    readonly field_type: SelectFieldType;
+    readonly choices: readonly Readonly<{
+        value: string;
+        label: string;
+    }[]>
+};
+type ReferenceField = {
+    readonly slug: string;
+    readonly field_type: ReferenceFieldType;
+    readonly target_field_type?: FieldType;
+};
+type ReadOnlyField = {
+    readonly slug: string;
+    readonly field_type: ReadOnlyFieldType;
+}
+type GeneralField = {
+    readonly slug: string;
+    readonly field_type: GeneralFieldType;
+}
+type Field = SelectField | ReferenceField | ReadOnlyField | GeneralField;
+interface SmartSuiteTable {
+    readonly structure: {
+        readonly [label: string]: Field
+    };
+    readonly id: string;
+    readonly name: string;
+};
+
+//RECORDS
+type SmartSuiteTableRecord<Table extends SmartSuiteTable> = {
+    [slug in Inner<Table["structure"]>["slug"]]: SmartSuiteCell
+} &
+{ readonly application_id: readonly Table["id"] } &
+{ readonly id: readonly string };
+
+
+
+interface SmartSuiteBaseRecord {
+    id: string;
+    application_id: string;
+    [slug: string]: SmartSuiteCell;
+}
+
 
 //API FUNCTIONS
 interface FilterElement {
@@ -282,7 +391,7 @@ type FilterComparison = StringFilterComparison | NumberFilterComparison | Single
 
 ///////RECORD TYPES///////////////
 
-interface RHIAccountRecordUpdate extends SmartSuiteRecord {
+interface RHIAccountRecordUpdate extends SmartSuiteBaseRecord {
     title: string;
     s27463de03: string[]; //AS email
     se00b833bd: string[]; //Remittance Email
@@ -293,13 +402,13 @@ interface RHIAccountRecordUpdate extends SmartSuiteRecord {
     s906ceac06: Update<AddressFieldCell> //Account Address
 }
 
-interface RHILoginRecord extends SmartSuiteRecord {
+interface RHILoginRecord extends SmartSuiteBaseRecord {
     id: string;
     s362676897: "eRuOB"/*authorised signatory*/ | "fIKh7" /*additional user*/ | "FrLDR" /*undetermined*/;
     //title: string;
     //sb4e5173b6: string;
 }
 
-interface RHIRecord extends SmartSuiteRecord {
+interface oldRHIRecord extends SmartSuiteBaseRecord {
     //TODO: add fields
 }

@@ -1,4 +1,21 @@
 import HTTPError from "../../Common/dist/HTTPError.js";
+import allTables from "./tables.js";
+
+//returns a table type given a table ID string
+type TableFromID<T extends TableID> = T extends Table["id"] ? Extract<Table, { id: T }> : never;
+
+type Table = Inner<Inner<typeof allTables>>; //union of all tables in tables.ts
+export type WorkspaceID = keyof typeof allTables; // union of all workspaces in tables.ts
+type TableID = Table["id"]; // union of all table IDs in tables.ts
+
+type WorkspaceTable<W extends WorkspaceID> = typeof allTables[WorkspaceID]; //union of all tables in a specific workspace
+type WorkspaceTableID<W extends WorkspaceID> = Inner<WorkspaceTable<W>>["id"]; // union of all table IDs in a specific workspace
+
+export type RecordFromTableID<T extends TableID> = SmartSuiteTableRecord<TableFromID<T>>; // record from a specific table
+type WorkspaceRecordFromTableID<W extends WorkspaceID, TableID extends WorkspaceTableID<W>> = RecordFromTableID<TableID>; //record from a specific table in a specific workspace
+
+//any record from any table in tables.ts
+type SSRecord = { [T in TableID]: RecordFromTableID<T> }[TableID]
 
 class LimitedList<T> {
     private maxLength: number;
@@ -25,7 +42,9 @@ class LimitedList<T> {
 }
 
 export default class SmartSuiteAPIHandler {
+
     private requestHeaders: HeadersInit;
+    private accountID: WorkspaceID;
     private maxBulkRequestSize: number = 25; //Smartsuite allow a max of 25 records per bulk update request
 
     private maxRequestsPerSecond: number = 2; //2 is the secondary limit, effective once the monthly request volume limit is reached in a given month. 
@@ -33,7 +52,8 @@ export default class SmartSuiteAPIHandler {
     //details here: https://help.smartsuite.com/en/articles/4856710-api-limits
     private recentRequestTimestamps = new LimitedList<number>(this.maxRequestsPerSecond); //used in caching proxy limiting requests per second
 
-    constructor(accountID: string, APIToken: string) {
+    constructor(accountID: WorkspaceID, APIToken: string) {
+        this.accountID = accountID;
         this.requestHeaders = {
             "Authorization": `Token ${APIToken}`,
             "Account-Id": accountID,
@@ -80,20 +100,30 @@ export default class SmartSuiteAPIHandler {
         );
     }
 
-    async filterForDataChanges(tableID: string,
-        updatedRecords: SmartSuiteRecord[],
+    async filterForDataChanges<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        accountID: WorkspaceID,
+        tableID: TableID,
+        updatedRecords: Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[],
         useEntireTable: true,
-        additionalInfo?: { entireTableRecords: SmartSuiteRecord[] }): Promise<SmartSuiteRecord[]>;
+        additionalInfo?: { entireTableRecords: WorkspaceRecordFromTableID<typeof accountID, typeof tableID>[] }):
+        Promise<Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[]>;
 
-    async filterForDataChanges(tableID: string,
-        updatedRecords: SmartSuiteRecord[],
+    async filterForDataChanges<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        accountID: WorkspaceID,
+        tableID: TableID,
+        updatedRecords: Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[],
         useEntireTable: false,
-        additionalInfo: { idFieldSlug: string }): Promise<SmartSuiteRecord[]>;
+        additionalInfo: { idFieldSlug: string }): Promise<Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[]>;
 
-    async filterForDataChanges(tableID: string,
-        updatedRecords: SmartSuiteRecord[],
+    async filterForDataChanges<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        accountID: WorkspaceID,
+        tableID: TableID,
+        updatedRecords: Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[],
         useEntireTable: boolean,
-        additionalInfo?: { idFieldSlug?: string; entireTableRecords?: SmartSuiteRecord[] }): Promise<SmartSuiteRecord[]> {
+        additionalInfo?: {
+            idFieldSlug?: string;
+            entireTableRecords?: WorkspaceRecordFromTableID<typeof accountID, typeof tableID>[]
+        }): Promise<Update<WorkspaceRecordFromTableID<typeof accountID, typeof tableID>>[]> {
         /*helper function to remove records which are identical to their cloud hosted copy from an update request
         Can be configured to just check records which are listed, but needs the field slug of an ID field.
         Can also be configured to check records against the entire table, but more computationally expensive. Entire table can be supplier or is requested
@@ -118,15 +148,17 @@ export default class SmartSuiteAPIHandler {
 
 
         //helper function
-        function checkRecordEquivalence(source: Partial<SmartSuiteRecord>, reference: SmartSuiteRecord): boolean {
+        function checkRecordEquivalence<R extends SmartSuiteBaseRecord>(source: Update<R>, reference: R): boolean {
             //returns false if any field value in the source differs from that field value in the reference, else returns true
-            return Object.keys(source).every(key => checkObjectEquivalence(source[key], reference[key]));
+            return Object.keys(source).every(key => checkObjectEquivalence((source as Record<string, any>)[key], (reference as Record<string, any>)[key]));
         }
     }
 
-    async updateRecord(tableID: string,
+    async updateRecord<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
         recordID: string,
-        record: Omit<Update<SmartSuiteRecord>, "id">): Promise<SmartSuiteRecord> {
+        record: Omit<Update<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>>, "id">):
+        Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/${recordID}/`;
 
         const body = record;
@@ -138,11 +170,11 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async filterRecords(
-        tableID: string,
+    async filterRecords<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
         fieldsToFilter: FilterElement | FilterElement[],
         operator: "and" | "or" = "and"
-    ): Promise<SmartSuiteRecord[]> {
+    ): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
         const fields: FilterElement[] = Array.isArray(fieldsToFilter) ? fieldsToFilter : [fieldsToFilter];
         const body: FilterBody = {
@@ -159,9 +191,10 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async getRecordsByFieldValues(tableID: string,
+    async getRecordsByFieldValues<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
         fieldSlug: string,
-        fieldValues: unknown[]): Promise<SmartSuiteRecord[]> {
+        fieldValues: unknown[]): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
         //gets any record where the specified field has any of the given list of values
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
         const body = {
@@ -178,11 +211,12 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: SmartSuiteRecord[] } = await response.json();
+        const result: { items: RecordFromTableID<typeof tableID>[] } = await response.json();
         return result.items;
     }
 
-    async getAllRecords(tableID: string): Promise<SmartSuiteRecord[]> {
+    async getAllRecords<TableID extends WorkspaceTableID<typeof this.accountID>>(tableID: TableID):
+        Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {};
@@ -191,39 +225,40 @@ export default class SmartSuiteAPIHandler {
             method: "POST",
             body: JSON.stringify(body)
         });
-        const result: { items: SmartSuiteRecord[] } = await response.json();
+        const result: { items: RecordFromTableID<typeof tableID>[] } = await response.json();
         return result.items;
     }
-    async bulkUpdateRecords(
-        tableID: string,
-        records: Update<SmartSuiteRecord>[],
+    async bulkUpdateRecords<TableID extends WorkspaceTableID<typeof this.accountID>, AccountID extends typeof this.accountID>(
+        tableID: TableID,
+        records: Update<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>>[],
         checkForDataChanges: true,
         useEntireTable: false,
         additionalInfo: { idFieldSlug: string }
-    ): Promise<SmartSuiteRecord[]>
+    ): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]>
 
-    async bulkUpdateRecords(
-        tableID: string,
-        records: Update<SmartSuiteRecord>[],
+    async bulkUpdateRecords<TableID extends WorkspaceTableID<typeof this.accountID>, AccountID extends typeof this.accountID>(
+        tableID: TableID,
+        records: Update<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>>[],
         checkForDataChanges: true,
         useEntireTable: true,
-        additionalInfo?: { entireTableRecords: SmartSuiteRecord[] }
-    ): Promise<SmartSuiteRecord[]>
+        additionalInfo?: { entireTableRecords: WorkspaceRecordFromTableID<AccountID, typeof tableID>[] }
+    ): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]>
 
-    async bulkUpdateRecords(
-        tableID: string,
-        records: Update<SmartSuiteRecord>[],
+    async bulkUpdateRecords<TableID extends WorkspaceTableID<typeof this.accountID>, AccountID extends typeof this.accountID>(
+        tableID: TableID,
+        records: Update<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>>[],
         checkForDataChanges: false
-    ): Promise<SmartSuiteRecord[]>
+    ): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]>
 
-    async bulkUpdateRecords(
-        tableID: string,
-        records: Update<SmartSuiteRecord>[],
+    async bulkUpdateRecords<TableID extends WorkspaceTableID<typeof this.accountID>, AccountID extends typeof this.accountID>(
+        tableID: TableID,
+        records: Update<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>>[],
         checkForDataChanges: boolean = records.length > 2 * this.maxBulkRequestSize,  //if true checks for data changes before
         // including records in update request. Helps avoid exceeding max bulk request size but uses an extra request
         useEntireTable: boolean = false, //setting to true uses the entire table for the data change check, but does not require an ID field slug
-        additionalInfo?: { idFieldSlug?: string /*slug of field containing Record ID*/; entireTableRecords?: SmartSuiteRecord[] /*list of entire table contents. Only use if already retrieved*/ }
-    ): Promise<SmartSuiteRecord[]> {
+        additionalInfo?: { idFieldSlug?: string /*slug of field containing Record ID*/; entireTableRecords?: WorkspaceRecordFromTableID<AccountID, typeof tableID>[] /*list of entire table contents. Only use if already retrieved*/ }
+    ): Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
+        const accountID = this.accountID;
 
         if (records.length <= 2 * this.maxBulkRequestSize && additionalInfo?.entireTableRecords === undefined) checkForDataChanges = false; //don't check for data changes when it won't save on the total number of requests
 
@@ -232,15 +267,15 @@ export default class SmartSuiteAPIHandler {
 
         //remove unchanged records if instructed    
         const recordsToUpdate = checkForDataChanges ? (useEntireTable ?
-            await this.filterForDataChanges(tableID, records, true, additionalInfo as { entireTableRecords: SmartSuiteRecord[] } | undefined) :
-            await this.filterForDataChanges(tableID, records, false, additionalInfo as { idFieldSlug: string })
+            await this.filterForDataChanges(this.accountID, tableID, records, true, additionalInfo as { entireTableRecords: WorkspaceRecordFromTableID<AccountID, typeof tableID>[] } | undefined) :
+            await this.filterForDataChanges(this.accountID, tableID, records, false, additionalInfo as { idFieldSlug: string })
         ) : records
         if (recordsToUpdate.length === 0) return []; // skip request if no records to update
 
         if (checkForDataChanges) console.log("Updating " + recordsToUpdate.length + " changed records");
 
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const updatedRecords: SmartSuiteRecord[] = [];
+        const updatedRecords: WorkspaceRecordFromTableID<AccountID, typeof tableID>[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, recordsToUpdate);
 
         console.log("split updated records in to " + recordsBatches.length + " batch requests");
@@ -260,9 +295,12 @@ export default class SmartSuiteAPIHandler {
         return updatedRecords;
     }
 
-    async bulkAddNewRecords(tableID: string, records: Omit<Update<SmartSuiteRecord>, "id">[]): Promise<SmartSuiteRecord[]> {
+    async bulkAddNewRecords<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
+        records: Omit<Update<WorkspaceRecordFromTableID<typeof this.accountID, TableID>>, "id">[]):
+        Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/bulk/`;
-        const newRecords: SmartSuiteRecord[] = [];
+        const newRecords: WorkspaceRecordFromTableID<typeof this.accountID, TableID>[] = [];
         const recordsBatches = splitIntoSubArrays(this.maxBulkRequestSize, records);
 
         for (const batch of recordsBatches) {
@@ -277,7 +315,10 @@ export default class SmartSuiteAPIHandler {
         return newRecords;
     }
 
-    async addNewRecord(tableID: string, record: Omit<Update<SmartSuiteRecord>, "id">): Promise<SmartSuiteRecord> {
+    async addNewRecord<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
+        record: Omit<Update<WorkspaceRecordFromTableID<typeof this.accountID, TableID>>, "id">):
+        Promise<WorkspaceRecordFromTableID<typeof this.accountID, typeof tableID>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/`;
 
         const response = await this.request(url, {
@@ -288,7 +329,10 @@ export default class SmartSuiteAPIHandler {
         return result;
     }
 
-    async getRecordsByTitle(tableID: string, titles: string[]): Promise<SmartSuiteRecord[]> {
+    async getRecordsByTitle<TableID extends WorkspaceTableID<typeof this.accountID>>(
+        tableID: TableID,
+        titles: string[]):
+        Promise<RecordFromTableID<TableID>[]> {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/records/list/`;
 
         const body = {
@@ -313,7 +357,7 @@ export default class SmartSuiteAPIHandler {
         return result.items;
     }
 
-    async getTable(tableID: string) {
+    async getTable<TableID extends WorkspaceTableID<typeof this.accountID>>(tableID: TableID) {
         const url = `https://app.smartsuite.com/api/v1/applications/${tableID}/`;
         const response = await this.request(url);
         const result = await response.json();

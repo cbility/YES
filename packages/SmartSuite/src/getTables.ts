@@ -6,12 +6,14 @@ import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+import type { WorkspaceID } from "./SmartSuiteAPIHandler.js"
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const accountID: string = process.argv[2];
+const accountID = process.argv[2];
 const APIKey: string = process.argv[3];
-const ss = new SmartSuite(accountID, APIKey);
+const ss = new SmartSuite(accountID as WorkspaceID, APIKey);
 
 let relativePath = 'tables.json';
 
