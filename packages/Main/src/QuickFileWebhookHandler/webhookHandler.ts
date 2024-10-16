@@ -1,7 +1,10 @@
 import QuickFileAPIHandler from "../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { invoicesTable, SDPInvoiceItemsTable, invoiceTemplatesTable, opportunitiesTable, quoteItemsTable } from "../../../SmartSuite/dist/tables.js"
+import tables from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
+import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
+
+const { invoicesTable, SDPInvoiceItemsTable, invoiceTemplatesTable, opportunitiesTable, quoteItemsTable } = tables.s5ch1upc;
 
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
@@ -92,7 +95,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             try {
                                 await updateSDPInvoices([updatedInvoice.Id]);
                             } catch (error) {
-                                await logErrorToPly((error as Error).toString());
+                                await logErrorToPly(error as Error);
                             }
                             break;
                         }
@@ -101,7 +104,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             try {
                                 await updateSSOpportunity(updatedInvoice.Id);
                             } catch (error) {
-                                await logErrorToPly((error as Error).toString());
+                                await logErrorToPly(error as Error);
                             }
                             break;
                         }
@@ -114,7 +117,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 try {
                     await updateSDPInvoices(events.InvoicesPayment!.map(invoice => invoice.InvoiceId))
                 } catch (error) {
-                    await logErrorToPly((error as Error).toString());
+                    await logErrorToPly(error as Error);
                 }
                 break;
             }
@@ -130,6 +133,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                             }
                             case "INV": {
                                 console.log("Sent Invoice ID: " + sentInvoice.Id);
+                                /*  TODO: wait for QuickFile to implement webhooks for sent reminder emails, then finish this block
                                 //check if invoice or reminder was sent
                                 const recentEvents = await QF.system_SearchEvents({
                                     SearchParameters: {
@@ -142,7 +146,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                                     }
                                 });
                                 const sendEvent = recentEvents.System_SearchEvents.Body.Events?.Event.find(event => event.EventTime === sentInvoice.TimeStamp);
-                                if (!sendEvent) await logErrorToPly("No invoice send events found for sent invoice, id " + sentInvoice.Id);
+                                if (!sendEvent) await logErrorToPly(new Error("No invoice send events found for sent invoice, id " + sentInvoice.Id));
                                 if (sendEvent?.Note.includes("Reminder")) {
                                     if (sendEvent?.Note.includes("First Overdue Reminder")) {
                                         await logInvoiceReminder([{ sentInvoice, reminderNumber: 1 }]);
@@ -154,17 +158,18 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                                         await logInvoiceReminder([{ sentInvoice, reminderNumber: 3 }]);
                                     }
                                 } else { //if invoice is not a reminder or no event log is found
-                                    await logInvoicesSend([sentInvoice]);
-                                }
+                                 */
+                                await logInvoicesSend([sentInvoice]);
+                                // }
                                 break;
                             }
                             case "REC": {
-                                await logErrorToPly("Recurring Invoice template logged as sent, id " + sentInvoice.Id);
+                                await logErrorToPly(new Error("Recurring Invoice template logged as sent, id " + sentInvoice.Id));
                                 break;
                             }
                         }
                     } catch (error) {
-                        await logErrorToPly((error as Error).toString());
+                        await logErrorToPly(error as Error);
                     }
                 }
                 break;
@@ -176,7 +181,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                         console.log("Estimate ID " + updatedEstimate.Id + " updated to status " + updatedEstimate.Status);
                         await logOpportunityStatusChange(updatedEstimate);
                     } catch (error) {
-                        await logErrorToPly((error as Error).toString());
+                        await logErrorToPly(error as Error);
                     }
                 }
                 break;
@@ -186,7 +191,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 try {
                     await updateSDPInvoices(events.PaymentsCreated!.map(payment => payment.InvoiceId))
                 } catch (error) {
-                    await logErrorToPly((error as Error).toString());
+                    await logErrorToPly(error as Error);
                 }
                 break;
             }
@@ -200,7 +205,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                                 console.log("Invoice with ID " + deletedInvoiceEvent.Id + " deleted. Updating Invoice record...");
                                 await updateSDPInvoices([deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID]);
                             } catch (error) {
-                                await logErrorToPly((error as Error).toString());
+                                await logErrorToPly(error as Error);
                             }
                             break;
                         }
@@ -209,7 +214,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                                 console.log("Estimate with ID " + deletedInvoiceEvent.Id + " deleted. Updating Opportunity record...");
                                 await updateSSOpportunity(deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID, deletedInvoice);
                             } catch (error) {
-                                await logErrorToPly((error as Error).toString());
+                                await logErrorToPly(error as Error);
                             }
                             break;
                         }
@@ -218,7 +223,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                                 console.log("Reurring Template with ID " + deletedInvoiceEvent.Id + " deleted. Updating Template record...");
                                 await updateSSInvoiceTemplates([deletedInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID]);
                             } catch (error) {
-                                await logErrorToPly((error as Error).toString());
+                                await logErrorToPly(error as Error);
                             }
                             break;
                         }
@@ -233,7 +238,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
     return "success";
 
 
-    async function upsertNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<SmartSuiteRecord[]> {
+    async function upsertNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
         /*
        Create new recurring invoice template with client ID, discount, QuickFile status, invoice ID, invoice Number, interval, start date and Total Payment amount
        Ignore if record already exists
@@ -248,7 +253,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             return [];
         }
         const invoicingTeam = await getTeam(INVOICING_TEAM_ID);
-        const newSSTemplates: Omit<SmartSuiteRecord, "id">[] = [];
+        const newSSTemplates: Omit<Update<RecordFromTableID<typeof invoiceTemplatesTable.id>>, "id">[] = [];
         for (const invoiceTemplateID of invoiceTemplateIDs) {
             try {
                 const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
@@ -275,7 +280,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 newSSTemplates.push(updatedSSTemplate);
             } catch (error) {
-                await logErrorToPly((error as Error).toString());
+                await logErrorToPly((error as Error));
             }
         }
         const createdTemplates = await SS.bulkAddNewRecords(invoiceTemplatesTable.id,
@@ -283,11 +288,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return createdTemplates;
     }
-    async function updateSSInvoiceTemplates(invoiceIds: number[]): Promise<SmartSuiteRecord[]> {
+    async function updateSSInvoiceTemplates(invoiceIds: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
         /*
         Update invoice template with client ID, QuickFile Status, Discount, Invoice Number, interval, start date and Total Payment amount
         */
-        const updatedSSTemplates: Omit<Update<SmartSuiteRecord>, "id">[] = [];
+        const updatedSSTemplates: Omit<Update<RecordFromTableID<typeof invoiceTemplatesTable.id>>, "id">[] = [];
         for (const invoiceID of invoiceIds) {
             const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
 
@@ -316,14 +321,14 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return updatedTemplates;
     }
-    async function createNewRecurringInvoices(newInvoices: RecurringInvoicesCreated[]): Promise<SmartSuiteRecord[]> {
+    async function createNewRecurringInvoices(newInvoices: RecurringInvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
         /*
         Create new invoice linked to recurring invoice template
         Create invoice with link to recurring template, issue and due date, discount, total amount, Client ID, Invoice ID and QuickFile status to match QuickFile
             Also set Invoice Type, assignee, 
         Assigns the record to the Invoicing team.
         */
-        let newSSInvoices: Omit<SmartSuiteRecord, "id">[] = [];
+        let newSSInvoices: Omit<Update<RecordFromTableID<typeof invoicesTable.id>>, "id">[] = [];
 
         const SSinvoiceTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
             invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
@@ -334,7 +339,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
             let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == newInvoice.RecurringParentId)
             if (!SSInvoiceTemplate) {
-                await logErrorToPly("SS Recurring template with ID " + newInvoice.RecurringParentId + " not found on SS. Adding to SS.");
+                await logErrorToPly(new Error("SS Recurring template with ID " + newInvoice.RecurringParentId + " not found on SS. Adding to SS."));
                 SSInvoiceTemplate = (await upsertNewInvoiceTemplates([newInvoice.RecurringParentId]))[0];
             }
 
@@ -377,7 +382,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             )
         } else return [];
     }
-    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<SmartSuiteRecord[]> {
+    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
         /*
         Check if invoices already exist in SS.
             Takes no action if exists already (invoice has been created from SS)
@@ -392,7 +397,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             invoicesTable.structure["QuickFile Invoice ID"].slug,
             newInvoices.map(newInvoice => newInvoice.Id));
 
-        let newSSInvoices: Omit<SmartSuiteRecord, "id">[] = [];
+        let newSSInvoices: Omit<Update<RecordFromTableID<typeof invoicesTable.id>>, "id">[] = [];
         for (const newInvoice of newInvoices) {
             if (SSInvoices.map(SSInvoice => SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug]).includes(newInvoice.Id)) {
                 continue; //do nothing if invoice already exists
@@ -435,7 +440,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             );
         } else return [];
     }
-    async function updateSDPInvoices(invoiceIds: number[]): Promise<{ updatedInvoices: SmartSuiteRecord[], updatedItems: SmartSuiteRecord[] }> {
+    async function updateSDPInvoices(invoiceIds: number[]): Promise<{ updatedInvoices: RecordFromTableID<typeof invoicesTable.id>[], updatedItems: RecordFromTableID<typeof SDPInvoiceItemsTable.id>[] }> {
         /*
        Update SmartSuite Invoice issue and due date, discount, total amount, Client ID, All Payment Received date, Invoice number and QuickFile status to match QuickFile
        Update SmartSuite Invoice Items price, line item description, hourly rate and hours to match QuickFile
@@ -515,9 +520,9 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     }
                 }
 
-                if (itemErrors.length > 0) await logErrorToPly(itemErrors.join(" | ")); //log all item error with one message
+                if (itemErrors.length > 0) await logErrorToPly(new Error(itemErrors.join(" | "))); //log all item error with one message
             } catch (error) {
-                await logErrorToPly((error as Error).toString());
+                await logErrorToPly(error as Error);
             }
         }
         //update SS invoices
@@ -535,7 +540,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         }
         return { updatedInvoices, updatedItems: [] };
     }
-    async function logInvoicesSend(sentInvoices: InvoicesSent[]): Promise<SmartSuiteRecord[]> {
+    async function logInvoicesSend(sentInvoices: InvoicesSent[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
         /*
         Update invoice sent date, quickfile status, issue date, and expiry date
         */
@@ -546,7 +551,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             invoiceIDs);
 
         if (SSInvoices.length === 0) {
-            await logErrorToPly("No SS Invoices found for sent QF Invoices with IDs " + invoiceIDs.join(", "));
+            await logErrorToPly(new Error("No SS Invoices found for sent QF Invoices with IDs " + invoiceIDs.join(", ")));
             return [];
         }
 
@@ -587,7 +592,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 QFInvoice.Invoice_Get.Body.InvoiceDetails.Status;
 
             } catch (error) {
-                logErrorToPly((error as Error).toString())
+                logErrorToPly(error as Error)
             }
         }
         return await SS.bulkUpdateRecords(
@@ -597,7 +602,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         )
     }
 
-    async function logInvoiceReminder(invoiceReminders: { sentInvoice: InvoicesSent, reminderNumber: 1 | 2 | 3 }[]): Promise<SmartSuiteRecord[]> {
+    async function logInvoiceReminder(invoiceReminders: { sentInvoice: InvoicesSent, reminderNumber: 1 | 2 | 3 }[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
         const SSRemindedInvoices = await SS.getRecordsByFieldValues(invoicesTable.id,
             invoicesTable.structure["QuickFile Invoice ID"].slug,
             invoiceReminders.map(reminder => reminder.sentInvoice.Id),
@@ -621,7 +626,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                         throw new Error(`Unhandled invoice reminder number: ${exhaustiveCheck}`);
                 }
             } catch (error) {
-                await logErrorToPly((error as Error).toString());
+                await logErrorToPly(error as Error);
             }
         }
         return await SS.bulkUpdateRecords(invoicesTable.id,
@@ -643,8 +648,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for QuickFile quote ID " + quoteId); //throw error and break out
         if (SSOpportunities.length > 1) {
-            await logErrorToPly(SSOpportunities.length + " Opportunities found for QuickFile quote ID " + quoteId + ". All IDs: " +
-                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id);
+            await logErrorToPly(new Error(SSOpportunities.length + " Opportunities found for QuickFile quote ID " + quoteId + ". All IDs: " +
+                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id));
         }
 
         const opportunity = SSOpportunities[0]; //update first opportunity if there is more than one
@@ -708,7 +713,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             }).filter(updatedTask => !!updatedTask)  //remove ignored items
             : [];
 
-        if (missingItemErrors.length > 0) await logErrorToPly(missingItemErrors.join("; ")); //log missing items as error
+        if (missingItemErrors.length > 0) await logErrorToPly(new Error(missingItemErrors.join("; "))); //log missing items as error
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
         const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunitiesTable.structure["Term Days (System Field)"].slug] as number);
@@ -733,7 +738,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 QFQuote.Invoice_Get.Body.InvoiceDetails.DirectPreviewUri as string,
         }];
 
-        const quoteItemsUpdate = [...SSUpdatedItems, ...SSUpdatedTasks] as Update<SmartSuiteRecord>[];
+        const quoteItemsUpdate: Update<RecordFromTableID<typeof quoteItemsTable.id>>[] = [...SSUpdatedItems, ...SSUpdatedTasks] as Update<RecordFromTableID<typeof quoteItemsTable.id>>[];
 
         await SS.bulkUpdateRecords(opportunitiesTable.id, opportunityUpdate, false);
         if (quoteItemsUpdate.length > 0) await SS.bulkUpdateRecords(quoteItemsTable.id, quoteItemsUpdate, false);
@@ -746,8 +751,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for sent QuickFile quote with ID " + sentQuote.Id); //throw error and break out
         if (SSOpportunities.length > 1) {
-            logErrorToPly(SSOpportunities.length + " Opportunities found for sent QuickFile quote with ID " + sentQuote.Id + ". All IDs: " +
-                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id);
+            logErrorToPly(new Error(SSOpportunities.length + " Opportunities found for sent QuickFile quote with ID " + sentQuote.Id + ". All IDs: " +
+                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id));
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
 
@@ -782,8 +787,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id); //throw error and break out
         if (SSOpportunities.length > 1) {
-            logErrorToPly(SSOpportunities.length + " Opportunities found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id + ". All IDs: " +
-                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id);
+            logErrorToPly(new Error(SSOpportunities.length + " Opportunities found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id + ". All IDs: " +
+                SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id));
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: estimateStatusChange.Id });
 
@@ -796,8 +801,11 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             }
         )
     }
-    async function logErrorToPly(errorMessage: string) { //emails error messages to technical@yourenergysource using Ply automation, and logs to console
+    async function logErrorToPly(error: Error) { //emails error messages to technical@yourenergysource using Ply automation, and logs to console
+        const errorMessage = error.toString();
+        const stack = error.stack;
         console.log(errorMessage);
+        console.log(stack);
         fetch(
             PLY_ERROR_LOG_URL,
             {
@@ -805,7 +813,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: "timestamp: " + events.Timestamp + " | " + errorMessage })
+                body: JSON.stringify({ message: "timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack })
             }
         );
         return errorMessage;
