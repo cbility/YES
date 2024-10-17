@@ -1,5 +1,7 @@
 import SmartSuiteAPIHandler from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { projectsTable, metricsTable, opportunitiesTable, tasksTable, supportServicesTable } from "../../../SmartSuite/dist/tables.js"
+import tables from "../../../SmartSuite/dist/tables.js"
+
+const { projectsTable, metricsTable, opportunitiesTable, tasksTable, supportServicesTable } = tables.s5ch1upc;
 
 const MS_IN_ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
@@ -14,11 +16,18 @@ export default async function metrics(input: { APIKey: string; }) {
     //get records
     const projects = await ss.getAllRecords("64f6098f4f57d448c30044ed");
     const opportunities = await ss.getAllRecords("6500787202fb914f79f202e8");
-    const tasks = await ss.filterRecords("64f6098f4f57d448c3004519", {
+    const tasks = await ss.filterRecords("64f6098f4f57d448c3004519", [{
         field: tasksTable.structure["Status"].slug,
         comparison: "is_not",
         value: "Complete"
-    });
+    },
+    {
+        field: tasksTable.structure["First Created"].slug,
+        comparison: "is_on_or_after",
+        value: new Date(now.getTime() - MS_IN_ONE_WEEK).toISOString()
+    }],
+        "or");
+
     const supportServices = await ss.filterRecords(supportServicesTable.id, {
         field: supportServicesTable.structure["Status"].slug,
         comparison: "is_not",
@@ -141,8 +150,8 @@ export default async function metrics(input: { APIKey: string; }) {
 
         //tasks
         metricRecords[index][metricsTable.structure["Total Live Tasks"].slug] = tasks.filter(
-            task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string)
-        ).length; //Total live tasks
+            task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
+                (task[tasksTable.structure["Status"].slug] as StatusFieldCell).value !== "complete").length; //total live tasks
 
         metricRecords[index][metricsTable.structure["New Tasks (Past Week)"].slug] = tasks.filter(
             task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
@@ -151,8 +160,8 @@ export default async function metrics(input: { APIKey: string; }) {
 
         metricRecords[index][metricsTable.structure["Total Live Hard Deadlines"].slug] = tasks.filter(
             task => (task[tasksTable.structure["Task Lead"].slug] as string[]).includes(metricRecord[metricsTable.structure["Assigned To"].slug] as string) &&
-                (task[tasksTable.structure["Hard Due Date"].slug] as DueDateFieldCell).to_date.date != null
-        ).length; //Total live hard deadlines
+                (task[tasksTable.structure["Hard Due Date"].slug] as DueDateFieldCell).to_date.date != null &&
+                (task[tasksTable.structure["Status"].slug] as StatusFieldCell).value !== "complete").length; //Total live hard deadlines
 
         //support service
         metricRecords[index][metricsTable.structure["Total RHI Support Services"].slug] = supportServices.filter(

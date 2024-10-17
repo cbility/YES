@@ -2,8 +2,10 @@ import puppeteer from "puppeteer";
 import main from "../main/main.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { loginsTable } from "../../../SmartSuite/dist/tables.js";
+import tables from "../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
+
+const { RHILoginsTable } = tables.s5ch1upc;
 
 await bootstrapEnvironment();
 
@@ -56,7 +58,7 @@ const browserArgs = {
         }
 
         const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
-        const allLoginRecords: SmartSuiteRecord[] = await ss.getAllRecords(loginsTable.id);
+        const allLoginRecords = await ss.getAllRecords(RHILoginsTable.id);
 
         const inputs: { loginID: string }[] = allLoginRecords.map((record) => ({
             loginID: record.id,

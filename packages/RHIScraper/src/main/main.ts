@@ -1,8 +1,4 @@
-import {
-    accountsTable,
-    RHIsTable,
-    loginsTable,
-} from "../../../SmartSuite/dist/tables.js";
+import tables from "../../../SmartSuite/dist/tables.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
 import getLoginDetails from "./RHI/getLoginDetails.js";
 import getAccountDetails from "./RHI/getAccountDetails.js";
@@ -11,6 +7,13 @@ import validateLogin from "./RHI/validateLogin.js";
 import getRHIDetails from "./RHI/getRHIDetails.js";
 import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
+import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
+
+const {
+    RHIAccountsTable,
+    RHIsTable,
+    RHILoginsTable,
+} = tables.s5ch1upc;
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
     await bootstrapEnvironment();
@@ -30,14 +33,16 @@ export default async function main(
 
     const inputIDs = inputs.map(input => input.loginID)
     //get login records from login table
-    const loginRecordsList: RHILoginRecord[] = await ss.getRecordsByFieldValues(
-        loginsTable.id,
-        loginsTable.fields["Record ID (System Field)"],
+    const loginRecordsList = await ss.getRecordsByFieldValues(
+        RHILoginsTable.id,
+        RHILoginsTable.structure["Record ID (System Field)"].slug,
         inputs.map(input => input.loginID)
-    ) as RHILoginRecord[];
+    );
+
+
 
     //parse login records as dictionary with record IDs as keys
-    const loginRecords: Record<string, RHILoginRecord> = {};
+    const loginRecords: Record<string, RecordFromTableID<typeof RHILoginsTable.id>> = {};
     for (const loginRecord of loginRecordsList) {
         loginRecords[loginRecord.id as string] = loginRecord;
     }
@@ -45,77 +50,77 @@ export default async function main(
     //get Existing RHI Records and Accounts from RHI Table and save as dictionary for fast lookup of record IDs from RHI numbers
     const ExistingRHIRecords: Record<string, string> = {};
     const ExistingRHIAccounts: Record<string, string> = {};
-    const ExistingRHIRecordsList: RHIRecord[] = await ss.getAllRecords(RHIsTable.id);
+    const ExistingRHIRecordsList: RecordFromTableID<typeof RHIsTable.id>[] = await ss.getAllRecords(RHIsTable.id);
     (await ss.getAllRecords(RHIsTable.id)).forEach((RHIRecord) => {
         ExistingRHIRecords[RHIRecord.title as string] = RHIRecord.id;
-        ExistingRHIAccounts[RHIRecord.title as string] = RHIRecord[RHIsTable.fields["RHI Account"]] as string;
+        ExistingRHIAccounts[RHIRecord.title as string] = RHIRecord[RHIsTable.structure["RHI Account"].slug] as string;
     });
     const browser = await puppeteer.launch(browserArgs);
 
     const loginIDs = inputs.map(
         (inputLogin) => inputLogin.loginID
     );
-    const loginDetails: RHILoginRecord[] = [];
-    const accountDetails: (RHIAccountRecordUpdate)[] = [];
-    const updatedRHIDetails: RHIRecord[] = [];
-    const newRHIDetails: Omit<RHIRecord, "id">[] = [];
+    const loginDetails: Update<RecordFromTableID<typeof RHILoginsTable.id>>[] = [];
+    const accountDetails: Update<RecordFromTableID<typeof RHIAccountsTable.id>>[] = [];
+    const updatedRHIDetails: Update<RecordFromTableID<typeof RHIsTable.id>>[] = [];
+    const newRHIDetails: Omit<Update<RecordFromTableID<typeof RHIsTable.id>>, "id">[] = [];
     const page = await browser.newPage();
 
     for (const loginRecordID of loginIDs) {
-        const loginRecordToUpdate: RHILoginRecord =
+        const loginRecordToUpdate: RecordFromTableID<typeof RHILoginsTable.id> =
             loginRecords[loginRecordID];
         // set the account via updating the account record, not the login record itself
         const accountID =
-            (loginRecordToUpdate[loginsTable.fields["Account"]] as string[])[0];
-        //delete loginRecordToUpdate[loginsTable.fields['Account']];
+            (loginRecordToUpdate[RHILoginsTable.structure["Account"].slug] as string[])[0];
+        //delete loginRecordToUpdate[loginsTable.structure['Account']];
 
-        if (!loginRecordToUpdate[loginsTable.fields["Password Correct"]])
+        if (!loginRecordToUpdate[RHILoginsTable.structure["Password Correct"].slug])
             continue;
 
         await logInUser(loginRecordToUpdate, page);
 
         if (!(await validateLogin(page))) {
             ss.updateRecord(
-                loginsTable.id,
+                RHILoginsTable.id,
                 loginRecordID,
-                { [loginsTable.fields["Password Correct"]]: false }
+                { [RHILoginsTable.structure["Password Correct"].slug]: false }
             );
             console.log(
-                `Log in failed for ${loginRecordToUpdate[loginsTable.fields["Username"]]
+                `Log in failed for ${loginRecordToUpdate[RHILoginsTable.structure["Username"].slug]
                 }`
             );
             continue;
         }
         console.log(
-            `Log in success for ${loginRecordToUpdate[loginsTable.fields["Username"]]
+            `Log in success for ${loginRecordToUpdate[RHILoginsTable.structure["Username"].slug]
             }`
         );
 
-        const updatedLoginRecord: RHILoginRecord = await getLoginDetails(
+        const updatedLoginRecord: Update<RecordFromTableID<typeof RHILoginsTable.id>> = await getLoginDetails(
             loginRecordToUpdate,
             page
         );
 
         // Account information not available on AU logins
         if (
-            updatedLoginRecord[loginsTable.fields["Login Type"]] ===
+            updatedLoginRecord[RHILoginsTable.structure["Login Type"].slug] ===
             "fIKh7" //additional user
         ) {
             const RHIDetails = await getRHIDetails(accountID, page, shallow);
             if (!RHIDetails[0]) continue;
 
-            updatedLoginRecord[loginsTable.fields["Account"]] =
+            updatedLoginRecord[RHILoginsTable.structure["Account"].slug] =
                 ExistingRHIAccounts[
                 RHIDetails[0].title as string
                 ]; // Set account using linked RHIs
 
             RHIDetails.forEach((RHI) => {
-                delete RHI[RHIsTable.fields["RHI Account"]];
+                RHI[RHIsTable.structure["RHI Account"].slug] = null;
 
                 if (!(RHI.title as string in ExistingRHIRecords)) {
                     return; //don't add RHIs that we don't have an AS password for
                 }
-                RHI.id = ExistingRHIRecords[RHI.title as string];
+                (RHI as { id: string }).id = ExistingRHIRecords[RHI.title as string];
                 updatedRHIDetails.push(RHI); //update everything but account
             });
 
@@ -123,11 +128,11 @@ export default async function main(
             continue;
         }
 
-        const accountRecordToUpdate: RHIAccountRecordUpdate | Omit<RHIAccountRecordUpdate, "id"> = accountID ?
+        const accountRecordToUpdate: Update<RecordFromTableID<typeof RHIAccountsTable.id>> | Omit<Update<RecordFromTableID<typeof RHIAccountsTable.id>>, "id"> = accountID ?
             { id: accountID, } : {
                 //only update the linked login if account is brand new,
                 // i.e. corresponds to a new AS login
-                [accountsTable.fields["Logins"]]: [loginRecordToUpdate.id],
+                [RHIAccountsTable.structure["Logins"].slug]: [loginRecordToUpdate.id],
             };
         /*AU logins have to be linked to pre-existing accounts on SS. That's because the account details
                   aren't available from AU logins, so the account has to be identified via the RHIs.
@@ -140,8 +145,8 @@ export default async function main(
                   updating an account record can not update the linked logins.
                   This avoids overwriting information.*/
 
-        const updatedAccountRecord: RHIAccountRecordUpdate = await getAccountDetails(
-            accountRecordToUpdate as RHIAccountRecordUpdate,
+        const updatedAccountRecord: Update<RecordFromTableID<typeof RHIAccountsTable.id>> = await getAccountDetails(
+            accountRecordToUpdate as Update<RecordFromTableID<typeof RHIAccountsTable.id>>,
             page
         );
 
@@ -170,32 +175,32 @@ export default async function main(
         return;
     }
 
-    const newAccountDetails: Omit<RHIAccountRecordUpdate, "id">[] = accountDetails
+    const newAccountDetails: Omit<Update<RecordFromTableID<typeof RHIAccountsTable.id>>, "id">[] = accountDetails
         .filter((account) => !account.id)
         .map(({ id, ...rest }) => rest);
 
-    const updatedAccountDetails: RHIAccountRecordUpdate[] = accountDetails.filter(
+    const updatedAccountDetails: Update<RecordFromTableID<typeof RHIAccountsTable.id>>[] = accountDetails.filter(
         (account) => !!account.id
     );
 
     //update SmartSuite logins first to avoid overwriting links to new accounts
     if (loginDetails.length > 0) {
         console.log("Updating " + loginDetails.length + " logins");
-        await ss.bulkUpdateRecords(loginsTable.id, loginDetails, true, true, { entireTableRecords: loginRecordsList });
+        await ss.bulkUpdateRecords(RHILoginsTable.id, loginDetails, true, true, { entireTableRecords: loginRecordsList });
         console.log("Login details updated");
     }
 
     //add new accounts
     if (newAccountDetails.length > 0) {
         console.log("Creating " + newAccountDetails.length + " new accounts");
-        await ss.bulkAddNewRecords(accountsTable.id, newAccountDetails);
+        await ss.bulkAddNewRecords(RHIAccountsTable.id, newAccountDetails);
         console.log("New account details added");
     }
 
     //update existing accounts
     if (updatedAccountDetails.length > 0) {
         console.log("Updating " + updatedAccountDetails.length + " existing accounts");
-        await ss.bulkUpdateRecords(accountsTable.id, updatedAccountDetails, true, false, { idFieldSlug: accountsTable.fields["Record ID (System Field)"] });
+        await ss.bulkUpdateRecords(RHIAccountsTable.id, updatedAccountDetails, true, false, { idFieldSlug: RHIAccountsTable.structure["Record ID (System Field)"].slug });
         console.log("Existing account details updated");
     }
 

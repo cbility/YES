@@ -1,4 +1,7 @@
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
+import tables from "../../../SmartSuite/dist/tables.js"
+
+const { configurationsTable, updatesTable, RHIAccountsTable, RHILoginsTable } = tables.s5ch1upc;
 
 interface LoginID { loginID: string };
 
@@ -6,27 +9,7 @@ const batchSize = 60;
 
 const lambdaEndpoint = "https://tudk2x9z7h.execute-api.eu-west-2.amazonaws.com/default/YES_Scraper";
 const loginsTable = { id: "65e37da7f8428f036fd99785" };
-const accountsTable = {
-    id: "64d155a9c71c81dc0b41d527",
-    fields: {
-        "Active Project Count": "s5f94ecc3e",
-        "Login ID": "s987febca5",
-        "Active Service Count": "sd64357468",
-    }
-}
-const updatesTable = {
-    id: "663d3d23a1a0542114b1ac24",
-    fields: {
-        "Updated Logins": "sb70b9b91a",
-        "Date": "sed70935b7",
-    }
-}
-const configurationsTable = {
-    id: "663d2313b4e7828a33b1ac07",
-    fields: {
-        "Last Run": "s3d2ee46fa"
-    }
-}
+
 const completeUpdateConfigID = "663d4044175c1b3c979a9afd";
 const projectUpdateConfigID = "665f350a343198c25eda5fe6";
 const serviceUpdateConfigID = "665f353ba173734d1df2211a";
@@ -48,7 +31,7 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
     if (nextCompleteUpdate <= now) {
         console.log("Updating all logins")
 
-        const allLogins = await ss.getAllRecords(loginsTable.id);
+        const allLogins = await ss.getAllRecords(RHILoginsTable.id);
         const allLoginIDs: LoginID[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
         await batchUpdateLogins(allLoginIDs);
         console.log(`Updated ${allLoginIDs.length} logins`);
@@ -58,14 +41,14 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
 
         //update configuration record with run date
         ss.updateRecord(configurationsTable.id, completeUpdateConfigID, {
-            [configurationsTable.fields["Last Run"]]: now.toISOString()
+            [configurationsTable.structure["Last Run"].slug]: now.toISOString()
         })
     } else {
 
         if (nextProjectUpdate <= now) {
             console.log("Updating project logins")
 
-            const projectLoginIDs = [{ loginID: "65e37da7f8428f036fd99798" }]; //await getRelevantLoginIds(accountsTable.fields["Active Project Count"]);
+            const projectLoginIDs = [{ loginID: "65e37da7f8428f036fd99798" }]; //await getRelevantLoginIds(accountsTable.structure["Active Project Count"]);
             const updateSuccess = await batchUpdateLogins(projectLoginIDs);
 
             if (updateSuccess) {
@@ -76,7 +59,7 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
 
                 //update configuration record with run date
                 ss.updateRecord(configurationsTable.id, projectUpdateConfigID, {
-                    [configurationsTable.fields["Last Run"]]: now.toISOString()
+                    [configurationsTable.structure["Last Run"].slug]: now.toISOString()
                 })
 
             } else {
@@ -87,7 +70,7 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
         if (nextServiceUpdate <= now) {
             console.log("Updating service logins")
 
-            const serviceLoginIDs = await getRelevantLoginIds(accountsTable.fields["Active Service Count"]);
+            const serviceLoginIDs = await getRelevantLoginIds(RHIAccountsTable.structure["Active Service Count"].slug);
             //remove previously checked logins
             const serviceLoginIDsToUpdate = serviceLoginIDs.filter(login => !updatedLogins.includes(login));
             //update service logins
@@ -101,7 +84,7 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
 
                 //update configuration record with run date
                 ss.updateRecord(configurationsTable.id, serviceUpdateConfigID, {
-                    [configurationsTable.fields["Last Run"]]: now.toISOString()
+                    [configurationsTable.structure["Last Run"].slug]: now.toISOString()
                 })
 
             } else {
@@ -118,8 +101,8 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
     //create update record for updated logins
     const updatedLoginIDs = updatedLogins.map((login) => login.loginID);
     const newUpdate: Record<string, string | string[]> = {
-        [updatesTable.fields["Updated Logins"]]: updatedLoginIDs,
-        [updatesTable.fields["Date"]]: now.toISOString().slice(0, 10), //remove time from date
+        [updatesTable.structure["Updated Logins"].slug]: updatedLoginIDs,
+        [updatesTable.structure["Date"].slug]: now.toISOString().slice(0, 10), //remove time from date
     }
     //add record to SS
     ss.addNewRecord(updatesTable.id, newUpdate);
@@ -128,14 +111,14 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
 
 
 async function getRelevantLoginIds(DeliverableCountSlug: string) {
-    const accountsToUpdate = await ss.filterRecords(accountsTable.id, {
+    const accountsToUpdate = await ss.filterRecords(RHIAccountsTable.id, {
         field: DeliverableCountSlug,
         comparison: "is_greater_than",
         value: 0,
     });
 
     let loginIDs: LoginID[] = accountsToUpdate.map((accountRecord: Record<string, any>) => (
-        { loginID: accountRecord[accountsTable.fields["Login ID"]] }
+        { loginID: accountRecord[RHIAccountsTable.structure["Login ID"].slug] }
     ));
 
     return loginIDs;

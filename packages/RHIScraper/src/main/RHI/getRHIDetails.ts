@@ -2,17 +2,21 @@ import { Page } from "puppeteer-core";
 import * as cheerio from "cheerio";
 import PostcodesIO from "postcodesio-client";
 const postcodes = new PostcodesIO("https://api.postcodes.io");
-import { RHIsTable } from "../../../../SmartSuite/dist/tables.js";
+import tables from "../../../../SmartSuite/dist/tables.js";
+import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
+
+const { RHIsTable } = tables.s5ch1upc;
+
 export default async function getRHIDetails(
     accountID: string,
     page: Page,
     shallow: boolean = false
-): Promise<RHIRecord[]> {
+): Promise<Update<RecordFromTableID<typeof RHIsTable.id>>[]> {
 
     //go to accreditation
     await page.goto("https://rhi.ofgem.gov.uk/Accreditation/ApplyAccreditation.aspx?mode=13");
 
-    const RHIRecords: RHIRecord[] = [];
+    const RHIRecords: RecordFromTableID<typeof RHIsTable.id>[] = [];
 
     //get accreditation information and push to RHIRecords
     const accreditationSummaryHTML = await page.content();
@@ -21,7 +25,7 @@ export default async function getRHIDetails(
         "#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList > tbody > tr").length - 1;
 
     for (let tableRow = 2; tableRow <= numRows + 1; tableRow++) {
-        const RHI: RHIRecord = await getRHIAccreditationDetails(tableRow, accountID, page, summary$, shallow);
+        const RHI: RecordFromTableID<typeof RHIsTable.id> = await getRHIAccreditationDetails(tableRow, accountID, page, summary$, shallow);
         RHIRecords.push(RHI);
         await page.goto("https://rhi.ofgem.gov.uk/Accreditation/ApplyAccreditation.aspx?mode=13");
     }
@@ -40,19 +44,19 @@ export default async function getRHIDetails(
 
     //get periodic data information and update RHIRecords
     for (const RHI of RHIRecords) {
-        if (RHI[RHIsTable.fields["Accreditation Status"]] == "Terminated"
-            || RHI[RHIsTable.fields["Accreditation Status"]] == "Withdrawn") continue;
+        if (RHI[RHIsTable.structure["Accreditation Status"].slug] == "Terminated"
+            || RHI[RHIsTable.structure["Accreditation Status"].slug] == "Withdrawn") continue;
 
         await page.select("#FullWidthPlaceholder_FullWidthContentPlaceholder_ddlInstallation",
-            RHIOptions[RHI.title + " | " + RHI[RHIsTable.fields["RHI Installation Name"]]]);
+            RHIOptions[RHI.title + " | " + RHI[RHIsTable.structure["RHI Installation Name"].slug]]);
 
         await page.waitForNavigation();
 
         const PeriodicDataSubmissionHTML = await page.content();
         const { firstDateOnAccount, RHIStart, lastDate } = getSubmissionDates(PeriodicDataSubmissionHTML);
-        RHI[RHIsTable.fields["Latest Submitted PDS"]] = lastDate?.toISOString().split("T")[0] ?? null;
-        RHI[RHIsTable.fields["RHI Start"]] = RHIStart?.toISOString().split("T")[0] ?? null;
-        RHI[RHIsTable.fields["First Reading on Account"]] = firstDateOnAccount?.toISOString().split("T")[0] ?? null;
+        RHI[RHIsTable.structure["Latest Submitted PDS"].slug] = lastDate?.toISOString().split("T")[0] ?? null;
+        RHI[RHIsTable.structure["RHI Start"].slug] = RHIStart?.toISOString().split("T")[0] ?? null;
+        RHI[RHIsTable.structure["First PDS Start"].slug] = firstDateOnAccount?.toISOString().split("T")[0] ?? null;
         await page.goto("https://rhi.ofgem.gov.uk/PeriodicData/SubmitPeriodicData.aspx");
     }
     return RHIRecords;
@@ -65,9 +69,9 @@ async function getRHIAccreditationDetails(
     summary$: cheerio.CheerioAPI,
     shallow: boolean = false) {
 
-    const RHI: Partial<RHIRecord> = {
+    const RHI: Partial<RecordFromTableID<typeof RHIsTable.id>> = {
         //id: "",
-        [RHIsTable.fields["RHI Account"]]: [accountID],
+        [RHIsTable.structure["RHI Account"].slug]: [accountID],
         "sb5c903c06": undefined //initialize location
     };
 
@@ -85,27 +89,27 @@ async function getRHIAccreditationDetails(
         getExpandedAccreditationDetail(accreditationDetailsHTML, RHI);
         await getPostcodeLocation(RHI);
     }
-    return RHI as RHIRecord;
+    return RHI as RecordFromTableID<typeof RHIsTable.id>;
 }
 
-async function getPostcodeLocation(RHI: Partial<RHIRecord>) {
-    const postcode = (RHI[RHIsTable.fields["Location"]] as { location_zip: string })?.location_zip;
+async function getPostcodeLocation(RHI: Partial<RecordFromTableID<typeof RHIsTable.id>>) {
+    const postcode = (RHI[RHIsTable.structure["Location"].slug] as { location_zip: string })?.location_zip;
     if (postcode) {
         const postcodeData = await postcodes.lookup(postcode);
         if (postcodeData) {
             (
-                RHI[RHIsTable.fields["Location"]] as { location_latitude: string }
+                RHI[RHIsTable.structure["Location"].slug] as { location_latitude: string }
 
             ).location_latitude = String(postcodeData.latitude);
             (
-                RHI[RHIsTable.fields["Location"]] as { location_longitude: string }
+                RHI[RHIsTable.structure["Location"].slug] as { location_longitude: string }
 
             ).location_longitude = String(postcodeData.longitude);
         }
     }
 }
 
-function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: Partial<RHIRecord>) {
+function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: Partial<RecordFromTableID<typeof RHIsTable.id>>) {
     const $ = cheerio.load(accreditationDetailsHTML);
 
     const accreditationSummaryTableRows = $(
@@ -116,68 +120,68 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
 
         switch (rowID.text().trim()) {
             case "HC110": {
-                RHI[RHIsTable.fields["Commissioning Date"]] = convertToISODateString(
+                RHI[RHIsTable.structure["Commissioning Date"].slug] = convertToISODateString(
                     $(element).find("td:nth-child(3)").text());
                 break;
             }
             case "HA120": {
-                RHI[RHIsTable.fields["Thermal Capacity"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Thermal Capacity"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HH120": {
-                RHI[RHIsTable.fields["HH120"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["HH120"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HA110": {
-                RHI[RHIsTable.fields["Technology"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Technology"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HH123-3": {
-                RHI[RHIsTable.fields["QHLF (kWh)"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["QHLF (kWh)"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HA150": {
-                RHI[RHIsTable.fields["Name Plate Efficiency"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Name Plate Efficiency/COP"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HA160": {
-                RHI[RHIsTable.fields["Sustainability Reporting"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Sustainability Reporting"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HG122a-1": {
-                RHI[RHIsTable.fields["Boiler Manufacturer"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Boiler Manufacturer"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HG123a-1": {
-                RHI[RHIsTable.fields["Boiler Model"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Boiler Model"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HH110": {
-                RHI[RHIsTable.fields["HH110"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["HH110"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HG121": {
-                RHI[RHIsTable.fields["Number of boilers"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Number of boilers"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HI100-1": {
-                RHI[RHIsTable.fields["Hot Water Meters"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Hot Water Meters"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HI100-2": {
-                RHI[RHIsTable.fields["Steam Meters"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Steam Meters"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HK120": {
-                RHI[RHIsTable.fields["HK120"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["HK120"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HF130": {
-                RHI[RHIsTable.fields["Seasonal Performance Factor (SPF)"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Seasonal Performance Factor (SPF)"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HF120": {
-                RHI[RHIsTable.fields["Coefficient of Performance (COP)"]] = $(element).find("td:nth-child(3)").text();
+                RHI[RHIsTable.structure["Coefficient of Performance (COP)"].slug] = $(element).find("td:nth-child(3)").text();
                 break;
             }
             case "HC130": {
@@ -244,37 +248,37 @@ function getExpandedAccreditationDetail(accreditationDetailsHTML: string, RHI: P
                 for (key in address) {
                     if (address[key] === undefined) throw new Error(`${key} not found in address for RHI ${RHI.title}`)
                 }
-                RHI[RHIsTable.fields["Location"]] = address as AddressFieldCell;
+                RHI[RHIsTable.structure["Location"].slug] = address as AddressFieldCell;
                 break;
             }
         }
     });
 }
 
-function getBasicAccreditationDetail(RHI: Partial<RHIRecord>, tableRow: number, $: cheerio.CheerioAPI) {
+function getBasicAccreditationDetail(RHI: Partial<RecordFromTableID<typeof RHIsTable.id>>, tableRow: number, $: cheerio.CheerioAPI) {
     RHI.title = $(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList > 
             tbody > tr:nth-child(${tableRow}) > td:nth-child(2)`)
         .text().trim();
-    RHI[RHIsTable.fields["RHI Installation Name"]] = $(
+    RHI[RHIsTable.structure["RHI Installation Name"].slug] = $(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList >
              tbody > tr:nth-child(${tableRow}) > td:nth-child(3)`)
         .text().trim();
-    //RHI[RHIsTable.fields['Application Submitted']] = {};
-    RHI[RHIsTable.fields["Application Submitted"]] = convertToISODateString($(
+    //RHI[RHIsTable.structure['Application Submitted']] = {};
+    RHI[RHIsTable.structure["Application Submitted"].slug] = convertToISODateString($(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList >
                  tbody > tr:nth-child(${tableRow}) > td:nth-child(4)`)
         .text().trim());
-    //RHI[RHIsTable.fields['Accreditation date']] = {};
-    RHI[RHIsTable.fields["Accreditation Date"]] = convertToISODateString($(
+    //RHI[RHIsTable.structure['Accreditation date']] = {};
+    RHI[RHIsTable.structure["Accreditation Date"].slug] = convertToISODateString($(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList >
                      tbody > tr:nth-child(${tableRow}) > td:nth-child(5)`)
         .text().trim());
-    RHI[RHIsTable.fields["Application Status"]] = $(
+    RHI[RHIsTable.structure["Application Status"].slug] = $(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList >
                  tbody > tr:nth-child(${tableRow}) > td:nth-child(6)`)
         .text().trim();
-    RHI[RHIsTable.fields["Accreditation Status"]] = $(
+    RHI[RHIsTable.structure["Accreditation Status"].slug] = $(
         `#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList >
                      tbody > tr:nth-child(${tableRow}) > td:nth-child(7)`)
         .text().trim();

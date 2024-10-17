@@ -305,35 +305,42 @@ type GeneralFieldType =
     | 'buttonfield'
     | 'linkedrecordfield'
     | 'userfield'
-    | "yesnofield";
+    | "yesnofield"
+    | "dependencyfield";
 
-type FieldType = SelectFieldType | ReferenceFieldType | ReadOnlyFieldType | GeneralFieldType
+type SpecialFieldType = "availabilitystatusfield";
 
-type SelectField = {
+type FieldType = SelectFieldType | ReferenceFieldType | ReadOnlyFieldType | GeneralFieldType | SpecialFieldType;
+
+interface BaseField {
     readonly slug: string;
-    readonly field_type: SelectFieldType;
+    readonly field_type: FieldType;
+    readonly label?: string;
+}
+interface SelectField extends BaseField {
+    readonly field_type: SelectFieldType
     readonly choices: readonly Readonly<{
         value: string;
         label: string;
     }[]>
 };
-type ReferenceField = {
-    readonly slug: string;
+interface ReferenceField extends BaseField {
     readonly field_type: ReferenceFieldType;
     readonly target_field_type?: FieldType;
 };
-type ReadOnlyField = {
-    readonly slug: string;
+interface ReadOnlyField extends BaseField {
     readonly field_type: ReadOnlyFieldType;
 }
-type GeneralField = {
-    readonly slug: string;
+interface GeneralField extends BaseField {
     readonly field_type: GeneralFieldType;
 }
-type Field = SelectField | ReferenceField | ReadOnlyField | GeneralField;
+interface SpecialField extends BaseField {
+    readonly field_type: SpecialFieldType;
+}
+type SmartSuiteField = Readonly<SelectField | ReferenceField | ReadOnlyField | GeneralField | SpecialField>;
 interface SmartSuiteTable {
     readonly structure: {
-        readonly [label: string]: Field
+        readonly [label: string]: Readonly<SmartSuiteField>
     };
     readonly id: string;
     readonly name: string;

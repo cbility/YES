@@ -1,11 +1,14 @@
-import { accountsTable } from "../../../../SmartSuite/dist/tables.js";
+import tables from "../../../../SmartSuite/dist/tables.js";
 import { ElementHandle, Page } from "puppeteer-core";
 import extractPostcodeFromAddress from "../extractPostcodeFromAddress.js";
 import * as cheerio from "cheerio";
+import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
+
+const { RHIAccountsTable } = tables.s5ch1upc;
 
 export default async function getAccountDetails(
-    accountRecord: RHIAccountRecordUpdate,
-    page: Page): Promise<RHIAccountRecordUpdate> {
+    accountRecord: Update<RecordFromTableID<typeof RHIAccountsTable.id>>,
+    page: Page): Promise<Update<RecordFromTableID<typeof RHIAccountsTable.id>>> {
 
     let viewAccountButton: ElementHandle<Element> | null = null;
     while (viewAccountButton === null) {
@@ -29,24 +32,25 @@ export default async function getAccountDetails(
             .text().trim())
     };
 
-    accountRecord[accountsTable.fields["Account Address"]] = {
+    accountRecord[RHIAccountsTable.structure["Account Address"].slug] = {
         location_address: addressData.modifiedAddress,
         location_country: "UK",
         location_zip: addressData.postcode?.trim()
     } as AddressFieldCell;
 
-    accountRecord[accountsTable.fields["Company Phone"]] =
+    accountRecord[RHIAccountsTable.structure["Company Phone"].slug] =
         {
+            phone_country: "UK",
             phone_number: formatPhoneNumber(
                 $("#accordion-default-content-3 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
                     .text().replace("\n", "").trim())
-        } as Update<PhoneNumberFieldCell>;
+        } as PhoneNumberFieldCell;
 
-    accountRecord[accountsTable.fields["Company Number"]] =
+    accountRecord[RHIAccountsTable.structure["Company Number"].slug] =
         [$("#accordion-default-content-5 > dl > div.govuk-summary-list__row > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim()];
 
-    accountRecord[accountsTable.fields["AS Name"]] = {
+    accountRecord[RHIAccountsTable.structure["AS Name"].slug] = {
         first_name: $("#accordion-default-content-6 > dl:nth-child(3) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim(),
         middle_name: $("#accordion-default-content-6 > dl:nth-child(7) > div > dd.govuk-summary-list__value")
@@ -55,15 +59,15 @@ export default async function getAccountDetails(
             .text().replace("\n", "").trim(),
     } as FullNameFieldCell;
 
-    accountRecord[accountsTable.fields["AS Email"]] =
+    accountRecord[RHIAccountsTable.structure["AS Email"].slug] =
         [$("#accordion-default-content-6 > dl:nth-child(13) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim()];
 
-    accountRecord[accountsTable.fields["AS Job Title"]] =
+    accountRecord[RHIAccountsTable.structure["AS Job Title"].slug] =
         $("#accordion-default-content-6 > dl:nth-child(11) > div > dd.govuk-summary-list__value")
             .text().replace("\n", "").trim();
 
-    accountRecord[accountsTable.fields["Remittance Email"]] =
+    accountRecord[RHIAccountsTable.structure["Remittance Email"].slug] =
         [$(`#mainPlaceHolder_ContentPlaceHolder_UserAccountManage_liRemittanceEmailReadonly >
              dd.govuk-summary-list__value`).text().replace("\n", "").trim()];
 

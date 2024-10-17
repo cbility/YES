@@ -1,6 +1,6 @@
 import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.js";
-import { invoicesTable, SDPInvoiceItemsTable as itemsTable } from "../../../../SmartSuite/dist/tables.js";
-
+import tables from "../../../../SmartSuite/dist/tables.js";
+const { invoicesTable, SDPInvoiceItemsTable: itemsTable } = tables.s5ch1upc;
 interface Input {
     APIKey: string;
     items: any[];

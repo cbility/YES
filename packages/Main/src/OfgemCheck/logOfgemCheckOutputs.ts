@@ -1,19 +1,13 @@
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
+import tables from "../../../SmartSuite/src/tables.js";
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
 }
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
-const updatesTable = {
-    id: "663d3d23a1a0542114b1ac24",
-    fields: {
-        "Updated Logins": "sb70b9b91a",
-        "Date": "sed70935b7",
-        "Run success": "sda0be9742",
-    }
-}
+const { updatesTable } = tables.s5ch1upc;
 
 const now = new Date();
 
@@ -42,9 +36,9 @@ export async function handler(batches: ScraperBatch[]) {
     //Create successes record
     if (successes.length > 0) {
         const successRecord: Record<string, string | string[]> = {
-            [updatesTable.fields["Updated Logins"]]: successes,
-            [updatesTable.fields["Date"]]: now.toISOString(),
-            [updatesTable.fields["Run success"]]: "Success",
+            [updatesTable.structure["Updated Logins"].slug]: successes,
+            [updatesTable.structure["Date"].slug]: now.toISOString(),
+            [updatesTable.structure["Run success"].slug]: "Success",
         }
         //add record to SS
         await ss.addNewRecord(updatesTable.id, successRecord);
@@ -55,9 +49,9 @@ export async function handler(batches: ScraperBatch[]) {
     if (fails.length > 0) {
 
         const failRecord: Record<string, string | string[]> = {
-            [updatesTable.fields["Updated Logins"]]: fails,
-            [updatesTable.fields["Date"]]: now.toISOString(),
-            [updatesTable.fields["Run success"]]: "Fail",
+            [updatesTable.structure["Updated Logins"].slug]: fails,
+            [updatesTable.structure["Date"].slug]: now.toISOString(),
+            [updatesTable.structure["Run success"].slug]: "Fail",
         }
         //add record to SS
         await ss.addNewRecord(updatesTable.id, failRecord);

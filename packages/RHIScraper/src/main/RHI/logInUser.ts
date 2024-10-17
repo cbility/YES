@@ -1,9 +1,12 @@
-import { loginsTable } from "../../../../SmartSuite/dist/tables.js";
+import tables from "../../../../SmartSuite/dist/tables.js";
+import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
 
-export default async function logInUser(loginRecord: RHILoginRecord, page: any): Promise<void> {
+const { RHILoginsTable } = tables.s5ch1upc;
 
-    const username = loginRecord[loginsTable.fields.Username];
-    const password = loginRecord[loginsTable.fields.Password];
+export default async function logInUser(loginRecord: RecordFromTableID<typeof RHILoginsTable.id>, page: any): Promise<void> {
+
+    const username = loginRecord[RHILoginsTable.structure.Username.slug];
+    const password = loginRecord[RHILoginsTable.structure.Password.slug];
 
     await page.goto('https://rhi.ofgem.gov.uk/')
     const usernameField = await page.$('#SecondaryPlaceHolder_RightColumnContentPlaceHolder_txtUserName');

@@ -2,8 +2,10 @@
 
 import QuickFileAPIHandler from "../../../../QuickFile/dist/QuickFileAPIHandler.js";
 import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import { opportunitiesTable, quoteItemsTable } from "../../../../SmartSuite/dist/tables.js";
+import tables from "../../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../../Common/dist/bootstrapEnvironment.js";
+
+const { opportunitiesTable, quoteItemsTable } = tables.s5ch1upc;
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
 }
