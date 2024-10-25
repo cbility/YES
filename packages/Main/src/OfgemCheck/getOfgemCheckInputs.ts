@@ -4,7 +4,7 @@
 // - compiles login records into input for step function
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
-import tables from "../../../SmartSuite/src/tables.js";
+import tables from "../../../SmartSuite/dist/tables.js";
 
 if (process.env.NODE_ENV !== 'production') { //use local environment variables if environment is not lambda
     await bootstrapEnvironment();

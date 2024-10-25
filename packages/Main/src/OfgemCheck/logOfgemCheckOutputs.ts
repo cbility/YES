@@ -1,6 +1,6 @@
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
-import tables from "../../../SmartSuite/src/tables.js";
+import tables from "../../../SmartSuite/dist/tables.js";
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
 }
