@@ -2,7 +2,7 @@ import tables from "../../../../SmartSuite/dist/tables.js";
 import { Page } from "puppeteer-core";
 import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
 
-const { RHILoginsTable } = tables.s5ch1upc;
+const { RHILoginsTable } = tables;
 
 export default async function getLoginDetails(originalLoginRecord: RecordFromTableID<typeof RHILoginsTable.id>, page: Page): Promise<Update<RecordFromTableID<typeof RHILoginsTable.id>>> {
 

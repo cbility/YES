@@ -14,7 +14,7 @@ const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as st
 
 const batchSize = 40; //max size of batch of logins for scraper. Cannot take more than 15 minutes to process.
 
-const { RHILoginsTable, RHIAccountsTable, configurationsTable } = tables.s5ch1upc;
+const { RHILoginsTable, RHIAccountsTable, configurationsTable } = tables;
 
 //Record IDs for scraper config records in Configuration table
 const completeUpdateConfigID = "663d4044175c1b3c979a9afd";

@@ -4,7 +4,7 @@ import extractPostcodeFromAddress from "../extractPostcodeFromAddress.js";
 import * as cheerio from "cheerio";
 import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
 
-const { RHIAccountsTable } = tables.s5ch1upc;
+const { RHIAccountsTable } = tables;
 
 export default async function getAccountDetails(
     accountRecord: Update<RecordFromTableID<typeof RHIAccountsTable.id>>,

@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
-const { updatesTable } = tables.s5ch1upc;
+const { updatesTable } = tables;
 
 const now = new Date();
 

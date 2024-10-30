@@ -1,6 +1,7 @@
 //stores the existing SmartSuite structure at ./tables.json
 //store condensed structure at ./condensedTables.json
 //store database structure ts file at ../src/tablesTest.ts
+// usage: node packages\smartSuite\dist\getTables.js {account ID} {API Key} {ID of table to add (1)} {ID of table to add (2)}...
 
 import SmartSuite from "./SmartSuiteAPIHandler.js";
 import { default as cachedTables } from "./tables.js";
@@ -9,14 +10,11 @@ import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import type { WorkspaceID } from "./SmartSuiteAPIHandler.js"
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const accountID = process.argv[2];
-const APIKey: string = process.argv[3];
-const ss = new SmartSuite(accountID as WorkspaceID, APIKey);
+const [_1, _2, accountID, APIKey, ...tableIDsToAdd] = process.argv;
+const ss = new SmartSuite(accountID as string, APIKey);
 
 await updateTables();
 
@@ -41,13 +39,14 @@ async function updateTables() {
                 structure: structure
             }
         });
-        const workspaceTables = cachedTables[accountID as WorkspaceID];
+        const workspaceTables = cachedTables;
         for (const existingTableLabel in filteredExistingTables) {
             const existingTable = filteredExistingTables[existingTableLabel];
             const [_, cachedExistingTable] = Object.entries(workspaceTables).find(([_, _cachedTable]) => _cachedTable.id === existingTable.id) ?? [];
-            if (!cachedExistingTable) { //table is not cached
+            // add new tables
+            if (!cachedExistingTable && tableIDsToAdd.includes(existingTable.id)) { //table is not cached and is scheduled to be added
                 //check for naming conflicts
-                const workspaceTables = cachedTables[accountID as WorkspaceID];
+                const workspaceTables = cachedTables;
                 let tableLabel: keyof typeof workspaceTables = existingTable.name as keyof typeof workspaceTables;
                 const namingConflict: SmartSuiteTable | undefined = workspaceTables[tableLabel];
                 if (namingConflict) {
@@ -56,7 +55,7 @@ async function updateTables() {
                 }
                 console.log(`Adding new table ${existingTable.name}, id: ${existingTable.id} to workspace under label ${tableLabel}`);
                 //add table to workspace
-                (cachedTables as { [workspaceID: string]: { [tableLabel: string]: SmartSuiteTable } })[accountID as WorkspaceID][tableLabel] = existingTable;
+                (cachedTables as { [tableLabel: string]: SmartSuiteTable })[tableLabel] = existingTable;
             }
         }
         for (const tableLabel in workspaceTables) {
@@ -87,27 +86,42 @@ async function updateTables() {
                          slug ${nameConflictField.slug}. New field with label ${existingField.label}, 
                          slug ${existingField.slug} assigned name ${newFieldName}`);
                     cachedTable.structure[newFieldName] = existingField;  // add new field with modified name
+                    console.log(`New field on table ${tableLabel} with label ${existingField.label} and slug ${existingField.slug} added under name ${newFieldName}`)
                 } else {  // new uncached field with no naming conflict
                     // add new field 
                     cachedTable.structure[existingField.label as keyof typeof cachedTable.structure] = existingField;
+                    console.log(`New field on table ${tableLabel} with label ${existingField.label} and slug ${existingField.slug} added under name ${existingField.label}`)
                 }
-                //update existing cached fields 
-                //after adding new fields to avoid naming conflicts between old and new fields
-                for (const cachedFieldLabel in cachedTable.structure) {
-                    let cachedField = cachedTable.structure[cachedFieldLabel as keyof typeof cachedTable.structure] as SmartSuiteField;
-                    const [existingFieldLabel, existingField] = Object.entries(existingTable.structure).find(([_existingFieldLabel, _existingField]) => _existingField.slug === cachedField.slug) ?? [];
-                    if (!existingFieldLabel || !existingField) {
-                        console.log("No existing field found for " + cachedFieldLabel + ", slug: " + cachedField.slug + ", type: " + cachedField.field_type + ". This field will be removed from " + tableLabel + ".");
-                        //remove cached field
-                        delete cachedTable.structure[cachedFieldLabel];
-                        continue;
-                    }
-                    cachedTable.structure[cachedFieldLabel as keyof typeof cachedTable.structure] = existingField //update cached field with existing field details
+            }
+            //update existing cached fields 
+            //after adding new fields to avoid naming conflicts between old and new fields
+            for (const cachedFieldLabel in cachedTable.structure) {
+                let cachedField = cachedTable.structure[cachedFieldLabel as keyof typeof cachedTable.structure] as SmartSuiteField;
+                const [existingFieldLabel, existingField] = Object.entries(existingTable.structure).find(([_existingFieldLabel, _existingField]) => _existingField.slug === cachedField.slug) ?? [];
+                if (!existingFieldLabel || !existingField) {
+                    console.log("No existing field found for " + cachedFieldLabel + ", slug: " + cachedField.slug + ", type: " + cachedField.field_type + ". This field will be removed from " + tableLabel + ".");
+                    //remove cached field
+                    delete cachedTable.structure[cachedFieldLabel];
+                    continue;
                 }
+                cachedTable.structure[cachedFieldLabel as keyof typeof cachedTable.structure] = existingField //update cached field with existing field details
             }
         }
 
+
         //write updated tables to database model
+
+        /* potential refactor to remove excess tables
+        const allTables: SmartSuiteTable[] = [];
+        for (const workspaceKey in cachedTables) {
+            for (const tableKey in cachedTables[workspaceKey]) {
+                allTables.push(cachedTables[workspaceKey][tableKey]);
+            }
+        }
+
+        const tableDefinitions = allTables.map(table => `export const ${table.id} = ${JSON.stringify(table)};`).join('\n');
+        const tsContent = `${tableDefinitions}\n\nconst tables = ${JSON.stringify(cachedTables, null, 2)} as const;\n\nexport default tables;`;
+        */
         const tsContent = `const tables = ${JSON.stringify(cachedTables, null, 2)} as const;\n\nexport default tables;`;
         let filePath = path.resolve(__dirname, '../src/tables.ts');
         await fs.writeFile(filePath, tsContent, 'utf8');

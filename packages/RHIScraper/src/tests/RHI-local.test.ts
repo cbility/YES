@@ -5,7 +5,7 @@ import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import tables from "../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 
-const { RHILoginsTable } = tables.s5ch1upc;
+const { RHILoginsTable } = tables;
 
 await bootstrapEnvironment();
 

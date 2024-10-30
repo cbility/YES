@@ -4,7 +4,7 @@ import tables from "../../../SmartSuite/dist/tables.js"
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
 
-const { invoicesTable, SDPInvoiceItemsTable, invoiceTemplatesTable, opportunitiesTable, quoteItemsTable } = tables.s5ch1upc;
+const { invoicesTable, SDPInvoiceItemsTable, invoiceTemplatesTable, opportunitiesTable, quoteItemsTable } = tables;
 
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();

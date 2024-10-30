@@ -1,7 +1,7 @@
 import SmartSuite from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js";
 import tables from "../../../SmartSuite/dist/tables.js"
 
-const { configurationsTable, updatesTable, RHIAccountsTable, RHILoginsTable } = tables.s5ch1upc;
+const { configurationsTable, updatesTable, RHIAccountsTable, RHILoginsTable } = tables;
 
 interface LoginID { loginID: string };
 

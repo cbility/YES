@@ -1,23 +1,19 @@
 //docs: https://developers.smartsuite.com/docs/intro
 
-//utility types 
-const notWriteable = Symbol('NotWriteable');
-type NotWriteable<T> = T & { [notWriteable]: true }; //may be used to remove types if including them in an update request cases an error
-//TODO: check if there are any of the above types
+//makes all readonly custom field properties optional and makes all fields optional except the id and application_id field
+type Update<Record extends SmartSuiteBaseRecord> = Partial<Omit<{
+    [Slug in keyof Record]: UpdateCell<Record[Slug]>
+}, "id" | "application_id">> & { id: string, application_id: TableID }
 
-
-type test = string | {}
-type test1 = Extract<test, SmartSuiteCustomFieldCell>
-
-type Update<Record> = Partial<{
-    [Slug in keyof Record]: Record[Slug] extends SmartSuiteCustomFieldCell ? {
-        [Key in keyof Record[Slug]]: Record[Slug][Key] extends Readonly<any>
-        ? Record[Slug][Key] | undefined
-        : Record[Slug][Key];
-    } : Record[Slug]
-}> & { id: string };  //makes all readonly custom field properties optional and makes all fields optional except the id field
-
-type Inner<Object extends {}> = Object[keyof Object]; // helper for returning inner values of an object type
+type UpdateCell<FieldCell extends SmartSuiteCell> = FieldCell extends SmartSuiteCustomFieldCell
+    ? {
+        [K in (MutableProps<FieldCell> & RequiredProps<FieldCell>)]: FieldCell[K];
+    } & {
+        [K in (MutableProps<FieldCell> & OptionalProps<FieldCell>)]?: FieldCell[K];
+    } & {
+        readonly [K in ReadOnlyProps<FieldCell>]?: FieldCell[K] | undefined;
+    }
+    : SmartSuiteCell //TODO: update to use FieldCell instead of SmartSuiteCell and define all cells as their specific types
 
 //FIELD CELLS
 
@@ -74,7 +70,7 @@ interface ColorPickerFieldCell extends null {
     name?: string; //Color name (optional)
     value: string //Color hex value
 }
-interface FullNameFieldCell extends null {
+interface FullNameFieldCell {
     title?: number; //1: "Mr.", 2: "Mrs."... numbers larger than 2 are custom and per field
     first_name?: string;
     middle_name?: string;
@@ -366,7 +362,7 @@ interface SmartSuiteBaseRecord {
 interface FilterElement {
     field: string,
     comparison: FilterComparison
-    value: SmartSuiteCell
+    value: SmartSuiteCell | { date_mode: string; date_mode_value: string }
 }
 interface FilterBody {
     "filter": {

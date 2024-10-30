@@ -5,7 +5,7 @@ import SmartSuiteAPIHandler from "../../../../SmartSuite/dist/SmartSuiteAPIHandl
 import tables from "../../../../SmartSuite/dist/tables.js";
 import bootstrapEnvironment from "../../../../Common/dist/bootstrapEnvironment.js";
 
-const { opportunitiesTable, quoteItemsTable } = tables.s5ch1upc;
+const { opportunitiesTable, quoteItemsTable } = tables;
 if (process.env.NODE_ENV !== "production") {
     await bootstrapEnvironment();
 }

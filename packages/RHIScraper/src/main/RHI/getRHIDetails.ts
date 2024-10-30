@@ -5,7 +5,7 @@ const postcodes = new PostcodesIO("https://api.postcodes.io");
 import tables from "../../../../SmartSuite/dist/tables.js";
 import { RecordFromTableID } from "../../../../SmartSuite/src/SmartSuiteAPIHandler.js";
 
-const { RHIsTable } = tables.s5ch1upc;
+const { RHIsTable } = tables;
 
 export default async function getRHIDetails(
     accountID: string,
@@ -16,7 +16,7 @@ export default async function getRHIDetails(
     //go to accreditation
     await page.goto("https://rhi.ofgem.gov.uk/Accreditation/ApplyAccreditation.aspx?mode=13");
 
-    const RHIRecords: RecordFromTableID<typeof RHIsTable.id>[] = [];
+    const RHIRecords: Update<RecordFromTableID<typeof RHIsTable.id>>[] = [];
 
     //get accreditation information and push to RHIRecords
     const accreditationSummaryHTML = await page.content();
@@ -25,7 +25,7 @@ export default async function getRHIDetails(
         "#mainPlaceHolder_ContentPlaceHolder_gvEditOrViewAccredAppList > tbody > tr").length - 1;
 
     for (let tableRow = 2; tableRow <= numRows + 1; tableRow++) {
-        const RHI: RecordFromTableID<typeof RHIsTable.id> = await getRHIAccreditationDetails(tableRow, accountID, page, summary$, shallow);
+        const RHI: Update<RecordFromTableID<typeof RHIsTable.id>> = await getRHIAccreditationDetails(tableRow, accountID, page, summary$, shallow);
         RHIRecords.push(RHI);
         await page.goto("https://rhi.ofgem.gov.uk/Accreditation/ApplyAccreditation.aspx?mode=13");
     }

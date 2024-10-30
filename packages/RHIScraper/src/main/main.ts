@@ -13,7 +13,7 @@ const {
     RHIAccountsTable,
     RHIsTable,
     RHILoginsTable,
-} = tables.s5ch1upc;
+} = tables;
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
     await bootstrapEnvironment();
