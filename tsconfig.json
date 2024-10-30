@@ -115,6 +115,9 @@
             "path": "./packages/RHIScraper"
         },
         {
+            "path": "./packages/ROScraper"
+        },
+        {
             "path": "./packages/QuickFile"
         },
         {

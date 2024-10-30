@@ -1,0 +1,27 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./dist", /* Specify an output folder for all emitted files. */
+        "rootDir": "./src",
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ]
+    },
+    "include": [
+        "src/**/*",
+        "../SmartSuite/src/SmartSuite.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "src/tests/**/*"
+    ],
+    "references": [
+        {
+            "path": "../SmartSuite"
+        },
+        {
+            "path": "../QuickFile"
+        },
+    ]
+}
