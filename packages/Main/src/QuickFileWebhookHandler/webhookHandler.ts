@@ -335,7 +335,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             newInvoices.map(newInvoice => newInvoice.Id)
         );
 
-        const nonExistingNewInvoices = newInvoices.filter(newInvoice => existingSSinvoices.find(existingInvoice => existingInvoice.Id === newInvoice.Id));
+        const nonExistingNewInvoices = newInvoices.filter(newInvoice => !existingSSinvoices.find(existingInvoice => existingInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == newInvoice.Id));
 
         if (nonExistingNewInvoices.length === 0) throw new Error("All new invoices already have SS records");
 
@@ -391,8 +391,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             )
         } else return [];
     }
-    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
-        /*
+    /**
         Check if invoices already exist in SS.
             Takes no action if exists already (invoice has been created from SS)
         Creates if does not exist
@@ -401,6 +400,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             Doesn't link SDP items as can't tell what project the invoice is for
             Assigns the record to the Invoicing team.
         */
+    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
+
         const SSInvoices = await SS.getRecordsByFieldValues(
             invoicesTable.id,
             invoicesTable.structure["QuickFile Invoice ID"].slug,
@@ -408,9 +409,12 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         let newSSInvoices: Omit<Update<RecordFromTableID<typeof invoicesTable.id>>, "id">[] = [];
         for (const newInvoice of newInvoices) {
-            if (SSInvoices.map(SSInvoice => SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug]).includes(newInvoice.Id)) {
+            const existingInvoice = SSInvoices.find(existingInvoice => existingInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == newInvoice.Id)
+            if (existingInvoice) {
+                console.log("Invoice with ID " + newInvoice.Id + " already exists on SmartSuite");
                 continue; //do nothing if invoice already exists
             }
+            console.log("Invoice with ID " + newInvoice.Id + " does not exist on SmartSuite. Creating invoice...")
             const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
             const QFInvoice = await QF.invoiceGet({ InvoiceID: newInvoice.Id });
 
