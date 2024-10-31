@@ -10,6 +10,23 @@ import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
 import getReducedAccountDetails from "./RO/getReducedAccountDetails.js";
 
+const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
+
+process.on('uncaughtException', async function (err) { //handle uncaught exceptions
+    console.log(err);
+    await fetch(
+        PLY_ERROR_LOG_URL,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: 'RO Scraper uncaught exception: ' + err })
+        }
+    );
+});
+
+
 const {
     ROAccountsTable,
     ROStationsTable,
