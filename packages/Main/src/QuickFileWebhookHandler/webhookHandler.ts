@@ -59,7 +59,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 case "INV": {
                     if (newInvoice.FromRecurring) {
-                        console.log("New Invoice from recurring template ID: " + newInvoice.Id, + ", template ID " + newInvoice.RecurringParentId);
+                        console.log("New Invoice from recurring template ID: " + newInvoice.Id + ", template ID " + newInvoice.RecurringParentId);
                         //create new recurring invoice
                         await createNewRecurringInvoices([newInvoice]);
                     } else {
