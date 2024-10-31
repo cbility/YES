@@ -321,21 +321,30 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return updatedTemplates;
     }
-    async function createNewRecurringInvoices(newInvoices: RecurringInvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
-        /*
-        Create new invoice linked to recurring invoice template
+    /**
+        Checks if an invoice exists already and if not creates a new invoice linked to recurring invoice template.
         Create invoice with link to recurring template, issue and due date, discount, total amount, Client ID, Invoice ID and QuickFile status to match QuickFile
-            Also set Invoice Type, assignee, 
-        Assigns the record to the Invoicing team.
+            Also sets Invoice Type and assigns the record to the Invoicing team.
         */
+    async function createNewRecurringInvoices(newInvoices: RecurringInvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
+
         let newSSInvoices: Omit<Update<RecordFromTableID<typeof invoicesTable.id>>, "id">[] = [];
+
+        const existingSSinvoices = await SS.getRecordsByFieldValues(invoicesTable.id,
+            invoicesTable.structure["QuickFile Invoice ID"].slug,
+            newInvoices.map(newInvoice => newInvoice.Id)
+        );
+
+        const nonExistingNewInvoices = newInvoices.filter(newInvoice => existingSSinvoices.find(existingInvoice => existingInvoice.Id === newInvoice.Id));
+
+        if (nonExistingNewInvoices.length === 0) throw new Error("All new invoices already have SS records");
 
         const SSinvoiceTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
             invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
             newInvoices.map(newInvoice => newInvoice.RecurringParentId)
-        )
+        );
 
-        for (const newInvoice of newInvoices) {
+        for (const newInvoice of nonExistingNewInvoices) {
 
             let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == newInvoice.RecurringParentId)
             if (!SSInvoiceTemplate) {
