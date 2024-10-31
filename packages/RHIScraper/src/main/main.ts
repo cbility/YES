@@ -151,6 +151,7 @@ export default async function main(
         );
 
         if (accountID) {
+            console.log("updating RHIIs for account with ID " + accountID);
             //only get RHIs for accounts on record
             const RHIDetails = await getRHIDetails(accountID, page, shallow);
             RHIDetails.forEach((RHI) => {

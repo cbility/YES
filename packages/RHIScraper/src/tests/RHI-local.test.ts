@@ -50,7 +50,7 @@ const browserArgs = {
 
 (async () => {
 
-    const COMPLETE_UPDATE = false;
+    const COMPLETE_UPDATE = true;
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
