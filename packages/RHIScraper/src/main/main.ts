@@ -130,8 +130,9 @@ export default async function main(
                 RHIDetails[0].title as string
                 ]; // Set account using linked RHIs
 
+            //don't update account on RHIs
             RHIDetails.forEach((RHI) => {
-                RHI[RHIsTable.structure["RHI Account"].slug] = null;
+                RHI[RHIsTable.structure["RHI Account"].slug] = undefined;
 
                 if (!(RHI.title as string in ExistingRHIRecords)) {
                     return; //don't add RHIs that we don't have an AS password for
