@@ -248,13 +248,17 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
             invoiceTemplateIDs
         )
-        if (existingTemplates.length === invoiceTemplateIDs.length) {
+        const nonExistingInvoiceTemplateIDs = invoiceTemplateIDs.filter(invoiceTemplateID => !existingTemplates.find(existingTemplate =>
+            existingTemplate[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == invoiceTemplateID)
+        )
+
+        if (nonExistingInvoiceTemplateIDs.length === 0) {
             console.log("All new invoice templates already exist")
             return [];
         }
         const invoicingTeam = await getTeam(INVOICING_TEAM_ID);
         const newSSTemplates: Omit<Update<RecordFromTableID<typeof invoiceTemplatesTable.id>>, "id">[] = [];
-        for (const invoiceTemplateID of invoiceTemplateIDs) {
+        for (const invoiceTemplateID of nonExistingInvoiceTemplateIDs) {
             try {
                 const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
 
