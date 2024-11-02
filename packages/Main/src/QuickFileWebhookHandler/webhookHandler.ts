@@ -24,7 +24,10 @@ process.on('uncaughtException', async function (err) { //handle uncaught excepti
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ message: 'Webhook handler Uncaught exception: ' + err })
+            body: JSON.stringify({
+                message: 'Webhook handler Uncaught exception: ' + err,
+                link: "https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252FquickFileWebhookHandler"
+            })
         }
     );
 });
@@ -830,7 +833,10 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: "Quickfile Webhook handler; timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack })
+                body: JSON.stringify({
+                    message: "Quickfile Webhook handler; timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack,
+                    link: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252FquickFileWebhookHandler/log-events/${lambdaContext?.logStreamName ?? ""}`
+                })
             }
         );
         return errorMessage;
