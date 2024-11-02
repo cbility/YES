@@ -63,12 +63,12 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 case "INV": {
                     if (newInvoice.FromRecurring) {
                         console.log("New Invoice from recurring template ID: " + newInvoice.Id + ", template ID " + newInvoice.RecurringParentId);
-                        //create new recurring invoice
+                        //create new recurring invoice if not existing
                         await createNewRecurringInvoices([newInvoice]);
                     } else {
                         //create invoice if not existing
                         console.log("New Invoice: " + newInvoice.Id);
-                        await insertNewSDPInvoices([newInvoice]);
+                        await createNewSDPInvoices([newInvoice]);
                     }
                     break;
                 }
@@ -407,7 +407,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             Doesn't link SDP items as can't tell what project the invoice is for
             Assigns the record to the Invoicing team.
         */
-    async function insertNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
+    async function createNewSDPInvoices(newInvoices: InvoicesCreated[]): Promise<RecordFromTableID<typeof invoicesTable.id>[]> {
 
         const SSInvoices = await SS.getRecordsByFieldValues(
             invoicesTable.id,

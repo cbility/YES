@@ -7,9 +7,9 @@ const testEvent = {
     "rawQueryString": "",
     "headers": {
         "x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
-        "content-length": "291",
+        "content-length": "378",
         "x-amzn-tls-version": "TLSv1.2",
-        "x-amzn-trace-id": "Root=1-67210369-7c8a18df0802c8f41a00c3d1",
+        "x-amzn-trace-id": "Root=1-6724d1ff-7cd194bc58f7ba46520a72f5",
         "x-forwarded-proto": "https",
         "host": "zzgwpptcirookdzrt7ctu73gs40ouytr.lambda-url.eu-west-2.on.aws",
         "x-forwarded-port": "443",
@@ -29,13 +29,13 @@ const testEvent = {
             "sourceIp": "13.79.122.255",
             "userAgent": "quickfile-webhook-service/1.0"
         },
-        "requestId": "de7630a9-a1b2-493d-8ccc-f2939763c3f8",
+        "requestId": "238d0f23-8320-4b57-94f0-293ff6840239",
         "routeKey": "$default",
         "stage": "$default",
-        "time": "29/Oct/2024:15:46:49 +0000",
-        "timeEpoch": 1730216809106
+        "time": "01/Nov/2024:13:05:03 +0000",
+        "timeEpoch": 1730466303942
     },
-    "body": "{\"PayLoad\": {\"InvoicesCreated\":[{\"TimeStamp\":\"2024-10-29T15:45:11\",\"Id\":34048907,\"InvoiceType\":\"INV\",\"FromRecurring\":false,\"RecurringParentId\":0}],\"Timestamp\":\"2024-10-29T15:46:48.8847297+00:00\",\"Signature\":\"36da4c323abeaab5ebfe24537a707bf3\",\"Hookid\":\"e40f26ee-935f-45c3-87bc-3951df615b19\"}}",
+    "body": "{\"PayLoad\": {\"InvoicesCreated\":[{\"TimeStamp\":\"2024-11-01T12:32:00\",\"Id\":34093267,\"InvoiceType\":\"INV\",\"FromRecurring\":false,\"RecurringParentId\":0}],\"InvoicesSent\":[{\"TimeStamp\":\"2024-11-01T12:33:10\",\"Id\":34093267,\"InvoiceType\":\"INV\"}],\"Timestamp\":\"2024-11-01T12:34:57.9521647+00:00\",\"Signature\":\"d9911dc5a77c7d50ad92a709baa88622\",\"Hookid\":\"bd487b53-596a-4341-ad32-d71c48dcc523\"}}",
     "isBase64Encoded": false
 }
 
