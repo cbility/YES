@@ -9,7 +9,7 @@ on:
       - 'packages/Common/src/**/*'
       - 'packages/SmartSuite/src/**/*'
       - 'packages/QuickFile/**/*'
-      - 'packages/Main/src/.QuickFileWebhookHandler/**/*'
+      - 'packages/Main/src/QuickFileWebhookHandler/**/*'
       - 'tsconfig.json'
       - 'package.json'
 
