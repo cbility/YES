@@ -24,7 +24,7 @@ process.on('uncaughtException', async function (err) { //handle uncaught excepti
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ message: 'Uncaught exception: ' + err })
+            body: JSON.stringify({ message: 'Webhook handler Uncaught exception: ' + err })
         }
     );
 });
@@ -830,7 +830,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: "timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack })
+                body: JSON.stringify({ message: "Quickfile Webhook handler; timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack })
             }
         );
         return errorMessage;
