@@ -46,8 +46,6 @@ export default async function getRODetails(
                 [ROStationsTable.structure["Oldest REGOs not issued"].slug]: { date: stationSubmissionDetail.firstUnexpiredREGOsNotIssued, include_time: false } as DateFieldCell,
                 [ROStationsTable.structure["Oldest ROCs not issued"].slug]: { date: stationSubmissionDetail.firstUnexpiredROCsNotIssued, include_time: false } as DateFieldCell,
                 [ROStationsTable.structure["Last Submission"].slug]: { date: stationSubmissionDetail.lastSubmission, include_time: false } as DateFieldCell,
-                [ROStationsTable.structure["ROCs Pending Transfer"].slug]: stationSubmissionDetail.pendingTransferROCs,
-                [ROStationsTable.structure["REGOs Pending Transfer"].slug]: stationSubmissionDetail.pendingTransferREGOs,
             }
 
             ROStationDetails.push(stationDetail);
@@ -237,8 +235,6 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
     firstUnexpiredREGOsNotIssued: string | null;
     firstUnexpiredROCsNotIssued: string | null;
     lastSubmission: string | null;
-    pendingTransferROCs: number;
-    pendingTransferREGOs: number;
 }> {
     if (page.url() !== "https://renewablesandchp.ofgem.gov.uk/OutputData/ViewOutputHistory.aspx") {
         await Promise.all([page.goto("https://renewablesandchp.ofgem.gov.uk/OutputData/ViewOutputHistory.aspx"),
@@ -298,8 +294,6 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
         firstUnexpiredREGOsNotIssued: earliestREGONotIssuedDate,
         firstUnexpiredROCsNotIssued: earliestROCNotIssuedDate,
         lastSubmission: lastSubmissionDate,
-        pendingTransferROCs: 0, //TODO: get this figure
-        pendingTransferREGOs: 0, //TODO: get this figure
     };
 
     function formatDateForSelector(year: number, month: number): string {
@@ -337,6 +331,9 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
         }
     }
 
+    /**
+     * Get end date of earliest period where certificates have not issues and have not expired for the specified scheme.
+     */
     function getEarliestNotIssuedDate(submissionPageHTML: string, scheme: "RO" | "REGO"): { earliestNotIssuedDate: string, lastSubmissionDate: string | null } {
         const $ = cheerio.load(submissionPageHTML);
         const lastSubmissionElem = $("#ctl00_ContentPlaceHolder_dgOutputHistory > tbody > tr:nth-child(2) > td:nth-child(4)");
@@ -346,10 +343,10 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
         //get ISO string representing last submission or null if no submissions
         const lastSubmissionDateString = convertToISODateString(lastSubmissionElem.text().trim());
 
-        // initialise earliest not issued date as month after latest submission where there are submissions
-        // and as oldest unexpired period where there are no submissions
+        // initialise earliest not issued date as month after latest submission where there are submissions on or after the oldest unexpired period
+        // and as oldest unexpired period where there are no submissions on or after the oldest unexpired period
         let initialEarliestNotIssuedDate: Date = new Date();
-        if (lastSubmissionDateString) {
+        if (lastSubmissionDateString && new Date(lastSubmissionDateString) >= oldestUnexpiredPeriod) {
             initialEarliestNotIssuedDate = new Date(lastSubmissionDateString);
             initialEarliestNotIssuedDate.setMonth(initialEarliestNotIssuedDate.getMonth() + 1);
         } else { // if there are no submissions

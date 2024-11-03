@@ -5,9 +5,7 @@ import chromium from "@sparticuz/chromium-min";
 chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
 
-export async function handler(event: { body: string, queryStringParameters: { shallow?: boolean } }) {
-
-    const shallow: boolean = Boolean(event.queryStringParameters?.shallow);
+export async function handler(event: { body: string }, lambdaContext?: { logStreamName: string }) {
 
     console.log("EVENT: \n" + JSON.stringify(event, null, 2));
 
@@ -21,7 +19,7 @@ export async function handler(event: { body: string, queryStringParameters: { sh
                 "https://github.com/Sparticuz/chromium/releases/download/v119.0.2/chromium-v119.0.2-pack.tar",
             ),
             headless: chromium.headless,
-        }, shallow);
+        }, lambdaContext);
 
         const response = {
             statusCode: 200,

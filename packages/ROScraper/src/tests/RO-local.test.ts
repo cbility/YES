@@ -10,7 +10,7 @@ const { ROLoginsTable } = tables;
 await bootstrapEnvironment();
 
 const browserArgs = {
-    headless: "shell", //using old faster headless mode, set to false to disable headless
+    headless: false, //"shell", //using old faster headless mode, set to false to disable headless
     defaultViewport: null,
     args: [
         "--autoplay-policy=user-gesture-required",
@@ -50,7 +50,7 @@ const browserArgs = {
 
 (async () => {
 
-    const COMPLETE_UPDATE = true;
+    const COMPLETE_UPDATE = false;
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
@@ -338,11 +338,10 @@ const browserArgs = {
         updateLogins(25, 0);
     } else {
         //change inputs here
-        const body = JSON.parse('[{ "loginID": "672008d6249b633feb15b84a"}]')
+        const body = JSON.parse('[{ "loginID": "665dc186430b68ef15407dda"}]')
         await main(body,
             puppeteer as unknown as PuppeteerCoreNode,
-            browserArgs,
-            false);
+            browserArgs);
         return;
     }
 

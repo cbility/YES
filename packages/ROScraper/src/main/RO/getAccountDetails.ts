@@ -2,6 +2,7 @@ import tables from "../../../../SmartSuite/dist/tables.js";
 import { Page } from "puppeteer-core";
 import * as cheerio from "cheerio";
 import getAccountCertificates from "./getAccountCertificates.js";
+import getPendingTransfers from "./getPendingTransfers.js";
 
 const { ROAccountsTable } = tables;
 
@@ -33,6 +34,7 @@ export default async function getAccountDetails(page: Page) {
 
     const { rocsTradeable, regosTradeable } = await getAccountCertificates(page);
 
+    const { rocsPending, regosPending } = await getPendingTransfers(page);
 
     return {
         address: {
@@ -49,5 +51,7 @@ export default async function getAccountDetails(page: Page) {
         organisationReference,
         regosTradeable,
         rocsTradeable,
+        rocsPending,
+        regosPending,
     }
 }

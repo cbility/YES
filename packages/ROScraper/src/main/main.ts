@@ -9,6 +9,7 @@ import { PuppeteerNode as PuppeteerCoreNode } from "puppeteer-core";
 import bootstrapEnvironment from "../../../Common/dist/bootstrapEnvironment.js";
 import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHandler.js"
 import getReducedAccountDetails from "./RO/getReducedAccountDetails.js";
+import transferCertificates from "./RO/transferCertificates.js";
 
 const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
 
@@ -31,6 +32,7 @@ const {
     ROAccountsTable,
     ROStationsTable,
     ROLoginsTable,
+    "RO Certificate Transfer Agreements": ROTransferAgreementsTable,
 } = tables;
 
 if (process.env.NODE_ENV !== "production") { //set environment variables using local .env
@@ -44,7 +46,7 @@ export default async function main(
     inputs: { loginID: string }[],
     puppeteer: PuppeteerCoreNode,
     browserArgs: object,
-    shallow: boolean = false //can be set to true to skip over some information checking to improve performance
+    lambdaContext?: { logStreamName?: string } // lambda context object used to log errors with link to log stream
 ) {
     if (inputs.length === 0) throw new Error("Empty input array");
     if (!("loginID" in inputs[0])) throw new Error("No loginID in first input"); //check for correct format
@@ -57,9 +59,10 @@ export default async function main(
         loginIDs,
     );
 
-    //get all existing station records
-    const ExistingROStationsList = await ss.getAllRecords(ROStationsTable.id);
-    const ExistingROAccountsList = await ss.getAllRecords(ROAccountsTable.id);
+    //get all existing station, account and transfer agreement records
+    const existingROStationsList = await ss.getAllRecords(ROStationsTable.id);
+    const existingROAccountsList = await ss.getAllRecords(ROAccountsTable.id);
+    const transferAgreements = await ss.getAllRecords(ROTransferAgreementsTable.id);
 
     //parse login records as dictionary with record IDs as keys for fast lookup of record details from ID
     const loginRecords: Record<string, RecordFromTableID<typeof ROLoginsTable.id>> = {};
@@ -69,13 +72,13 @@ export default async function main(
 
     //Parse station records and save as dictionary for fast lookup of record IDs from station names
     const ExistingROStations: Record<string, string> = {}; //map of station names to station record IDs
-    for (const station of ExistingROStationsList) {
+    for (const station of existingROStationsList) {
         ExistingROStations[station[ROStationsTable.structure["Station Name"].slug] as string] = station.id;
     }
 
     //Parse account records and save as dictionary for fast lookup of record IDs from account references
     const ExistingROAccounts: Record<string, string> = {}; //map of account references to account record IDs
-    for (const account of ExistingROAccountsList) {
+    for (const account of existingROAccountsList) {
         ExistingROAccounts[account[ROAccountsTable.structure["Organisation Reference"].slug] as string] = account.id;
     }
 
@@ -155,28 +158,36 @@ export default async function main(
         const updatedStationRecordList = await getStationDetails(page);
 
         //schedule station for update or creation depending on if its record already exists
+        //transfer certificates for existing stations according to certificate transfer agreements
         for (const station of updatedStationRecordList) {
-            const stationRecordID: string | undefined = ExistingROStations[station[ROStationsTable.structure["Station Name"].slug] as string];
+            const stationName = station[ROStationsTable.structure["Station Name"].slug] as string;
+            const stationRecordID: string | undefined = ExistingROStations[stationName];
             if (stationRecordID) { //if station record exists already
                 updatedStationDetails.push({
                     ...station,
                     id: stationRecordID
-                })
+                });
             } else {
                 newStationDetails.push(station)
             }
         }
+
+        //initialise flag for transferring certificates
+        let certificatesAvailableForTransfer = false;
+
         if (
             updatedLoginRecord[ROLoginsTable.structure["Login Type"].slug] ===
             "65b2625f-97fb-49f1-8e37-0f46a952b19b" //restricted
         ) { //FOR RESTRICTED LOGINS
-            //update account name or create new account (using account name only) if missing
-            //use generator name from accreditation table
-            //update stations normally if account already linked to login. If account is missing it has to be created first
+            // Update reduced account details only, as full account details not available
+            // Update account if already existing and create new account if missing
 
             const { generatorName, generatorReference, rocsTradeable, regosTradeable } = await getReducedAccountDetails(page);
             //check for preexisting account record
             const accountRecordID: string | undefined = ExistingROAccounts[generatorReference];
+
+            // Note if certificates are available for transfer so they can be transferred later
+            certificatesAvailableForTransfer = !!(rocsTradeable + regosTradeable);
 
             updateAccount(accountRecordID, generatorReference, {
                 application_id: ROAccountsTable.id,
@@ -185,9 +196,6 @@ export default async function main(
                 [ROAccountsTable.structure["ROCs Tradeable"].slug]: rocsTradeable,
                 [ROAccountsTable.structure["REGOs Tradeable"].slug]: regosTradeable,
             });
-
-            // go to next login
-            continue;
         } else if (
             updatedLoginRecord[ROLoginsTable.structure["Login Type"].slug] ===
             "d06a096d-c6d5-4fb5-bc6a-5b3ff1cba09a" //superuser
@@ -196,6 +204,9 @@ export default async function main(
             //update stations normally if account already linked to login. If account is missing it has to be created first
 
             const accountDetails = await getAccountDetails(page);
+
+            // Note if certificates are available for transfer so they can be transferred later
+            certificatesAvailableForTransfer = !!(accountDetails.rocsTradeable + accountDetails.regosTradeable);
 
             const accountRecordID: string | undefined = ExistingROAccounts[accountDetails.organisationReference];
 
@@ -215,15 +226,78 @@ export default async function main(
                 [ROAccountsTable.structure["Organisation Reference"].slug]: accountDetails.organisationReference,
                 [ROAccountsTable.structure["REGOs Tradeable"].slug]: accountDetails.regosTradeable,
                 [ROAccountsTable.structure["ROCs Tradeable"].slug]: accountDetails.rocsTradeable,
+                [ROAccountsTable.structure["ROCs Pending Transfer"].slug]: accountDetails.rocsPending,
+                [ROAccountsTable.structure["REGOs Pending Transfer"].slug]: accountDetails.regosPending,
             }
 
             updateAccount(accountRecordID, accountDetails.organisationReference, { ...updatedAccountRecord, id: accountRecordID })
-            //go to next login
-            continue;
         }
+        //check if there are any ROCs or REGOs available for transfer on the account 
+        if (certificatesAvailableForTransfer) {
+
+            const accountTransferAgreements: RecordFromTableID<typeof ROTransferAgreementsTable.id>[] = [];
+
+            //loop through stations on account and get transfer agreements for those stations
+            for (const accountStation of updatedStationRecordList) {
+                const stationName = accountStation[ROStationsTable.structure["Station Name"].slug] as string;
+                //get certificate transfer agreements for station
+                const stationTransferAgreements = transferAgreements.filter(agreementRecord => {
+                    //get lookup list of transfer stations linked to agreement
+                    const transferStationList = agreementRecord[ROTransferAgreementsTable.structure["Station Name"].slug] as string[][];
+                    //select agreement if station is included in agreement
+                    const isForCorrectStation = transferStationList.some(transferStationLookup => transferStationLookup.some(transferStationName => transferStationName === stationName));
+                    return isForCorrectStation;
+                });
+                accountTransferAgreements.push(...stationTransferAgreements);
+            }
+
+            //group agreements into ROC and REGO agreements for faster transfer processing
+            const rocAgreements = accountTransferAgreements.filter(agreement => agreement[ROTransferAgreementsTable.structure["Certificate Type"].slug] === "lquDx");
+            const regoAgreements = accountTransferAgreements.filter(agreement => agreement[ROTransferAgreementsTable.structure["Certificate Type"].slug] === "fdLzM");
+
+            //loop through transfer agreements for each certificate type , check if agreement is valid and transfer certificates
+            for (const transferAgreement of rocAgreements) {
+                try {
+                    const { stationNames, certificateType, transfereeReference, startDate, endDate } = parseCertificateAgreement(transferAgreement, accountTransferAgreements);
+                    for (const stationName of stationNames) {
+                        const certificateTransferResult = await transferCertificates(page, { stationName, certificateType, startDate, endDate, transfereeReference, userPassword: loginRecordToUpdate[ROLoginsTable.structure["Password"].slug] as string });
+                        if (!certificateTransferResult) continue;
+                        const { certificatesTransferred, transferTime } = certificateTransferResult
+                        const stationRecord = updatedStationDetails.find(station => station[ROStationsTable.structure["Station Name"].slug] === stationName);
+                        if (!stationRecord) throw new Error(`Station ${stationName} not found in updated station list but has had certificates transferred`);
+                        stationRecord[ROStationsTable.structure["Latest ROC Transfer Volume"].slug] = certificatesTransferred;
+                        stationRecord[ROStationsTable.structure["Latest ROC Transfer Reference"].slug] = transfereeReference;
+                        stationRecord[ROStationsTable.structure['Latest ROC Transfer Date'].slug] = { date: transferTime.toISOString(), include_time: true };
+                    }
+                } catch (transferAgreementError) {
+                    // catch errors with transfer agreement configuration for this station and log to Ply
+                    await logErrorToPly(transferAgreementError as Error);
+                }
+            }
+            for (const transferAgreement of regoAgreements) {
+                try {
+                    const { stationNames, certificateType, transfereeReference, startDate, endDate } = parseCertificateAgreement(transferAgreement, accountTransferAgreements);
+                    for (const stationName of stationNames) {
+                        const certificateTransferResult = await transferCertificates(page, { stationName, certificateType, startDate, endDate, transfereeReference, userPassword: loginRecordToUpdate[ROLoginsTable.structure["Password"].slug] as string });
+                        if (!certificateTransferResult) continue;
+                        const { certificatesTransferred, transferTime } = certificateTransferResult;
+                        const stationRecord = updatedStationDetails.find(station => station[ROStationsTable.structure["Station Name"].slug] === stationName);
+                        if (!stationRecord) throw new Error(`Station ${stationName} not found in updated station list but has had certificates transferred`);
+                        stationRecord[ROStationsTable.structure["Latest REGO Transfer Volume"].slug] = certificatesTransferred;
+                        stationRecord[ROStationsTable.structure["Latest REGO Transfer Reference"].slug] = transfereeReference;
+                        stationRecord[ROStationsTable.structure['Latest REGO Transfer Date'].slug] = { date: transferTime.toISOString(), include_time: true };
+                    }
+                } catch (transferAgreementError) {
+                    // catch errors with transfer agreement configuration for this station and log to Ply
+                    await logErrorToPly(transferAgreementError as Error);
+                }
+            }
+        }
+        continue; //go to next login
+
         /**
-             * Schedule account record for creation or update
-             * Update account structure so logins and stations can be linked to correct accounts
+             * Schedule account record for creation or update.
+             * Update account structure object so logins and stations can be linked to correct accounts.
              */
         function updateAccount(accountRecordID: string | undefined,
             accountReference: string,
@@ -243,7 +317,7 @@ export default async function main(
                     loginUsername: loginRecordToUpdate[ROLoginsTable.structure["Username"].slug] as string,
                     loginID: loginRecordID
                 })
-                //list all stations on current account structure and on logged into account and remove duplicated before pushing to structure
+                //list all stations on current account structure and on logged into account and remove duplicates before pushing to structure
                 const updatedStationsStructure = updatedStationRecordList.map(station => ({
                     stationName: station[ROStationsTable.structure["Station Name"].slug] as string,
                 }));
@@ -299,7 +373,7 @@ export default async function main(
 
     if (dedupeUpdatedAccountDetails.length > 0) {
         console.log("Updating " + dedupeUpdatedAccountDetails.length + " accounts");
-        const updatedAccountRecordsList = await ss.bulkUpdateRecords(ROAccountsTable.id, dedupeUpdatedAccountDetails, true, true, { entireTableRecords: ExistingROAccountsList });
+        const updatedAccountRecordsList = await ss.bulkUpdateRecords(ROAccountsTable.id, dedupeUpdatedAccountDetails, true, true, { entireTableRecords: existingROAccountsList });
         console.log("Account details updated");
     }
 
@@ -345,7 +419,7 @@ export default async function main(
     //update existing stations
     if (dedupeUpdatedStationDetails.length > 0) {
         console.log("Updating " + dedupeUpdatedStationDetails.length + " existing stations");
-        await ss.bulkUpdateRecords(ROStationsTable.id, dedupeUpdatedStationDetails, true, true, { entireTableRecords: ExistingROStationsList });
+        await ss.bulkUpdateRecords(ROStationsTable.id, dedupeUpdatedStationDetails, true, true, { entireTableRecords: existingROStationsList });
         console.log("Existing station details updated");
     }
 
@@ -357,6 +431,61 @@ export default async function main(
     }
 
     console.log("Update Complete");
+
+    function parseCertificateAgreement(transferAgreement: RecordFromTableID<typeof ROTransferAgreementsTable.id>,
+        accountTransferAgreements: RecordFromTableID<typeof ROTransferAgreementsTable.id>[]): { stationNames: string[], certificateType: "roc" | "rego", transfereeReference: string, startDate: Date, endDate: Date } {
+        const certificateTypeID = transferAgreement[ROTransferAgreementsTable.structure["Certificate Type"].slug] as "fdLzM" | "lquDx";
+        const certificateType = certificateTypeID === "fdLzM" ? "rego" :
+            certificateTypeID === "lquDx" ? "roc" :
+                undefined as never;
+        const effectiveRange = transferAgreement[ROTransferAgreementsTable.structure["Contract Effective Range"].slug] as DateRangeFieldCell;
+        const startDate = new Date(effectiveRange.from_date.date);
+        const endDate = new Date(effectiveRange.to_date.date);
+        const stationNames = (transferAgreement[ROTransferAgreementsTable.structure["Station Name"].slug] as string[][]).flat();
+
+        //get lookup field value for transferee number and throw error if it does not contain a single transferee number
+        const transfereeReferenceList = transferAgreement[ROTransferAgreementsTable.structure["Transferee Number"].slug] as string[];
+        if (transfereeReferenceList.length != 1) throw new Error(`${transfereeReferenceList.length} transferee numbers linked for ${transferAgreement.title}. 
+                There can only be a single transferee number for each agreement. Certificates will not be transferred for this agreement`);
+        const transfereeReference = transfereeReferenceList[0][0];
+
+        //check for agreements that contradict the current agreement and throw error if any are found
+        const overlapCheck = accountTransferAgreements.find(_transferAgreement => {
+            const _stationNames = (_transferAgreement[ROTransferAgreementsTable.structure["Station Name"].slug] as string[][]).flat();
+            const _effectiveRange = _transferAgreement[ROTransferAgreementsTable.structure["Contract Effective Range"].slug] as DateRangeFieldCell;
+            const _startDate = new Date(_effectiveRange.from_date.date);
+            const _endDate = new Date(_effectiveRange.to_date.date);
+            const _certificateTypeID = _transferAgreement[ROTransferAgreementsTable.structure["Certificate Type"].slug] as "fdLzM" | "lquDx";
+            const _transfereeReference = (_transferAgreement[ROTransferAgreementsTable.structure["Transferee Number"].slug] as string[])[0][0];
+            //check if any station in teh checked agreement is the same as a transfer name in the current agreement
+            const stationNameCheck = stationNames.some(stationName => _stationNames.some(_stationName => _stationName == stationName));
+            return stationNameCheck && _transfereeReference !== transfereeReference && _certificateTypeID === certificateTypeID && (_startDate <= endDate || _endDate >= startDate);
+        });
+        if (overlapCheck) throw new Error(`Transfer Agreement ${overlapCheck.title} overlaps with ${transferAgreement.title} and is for a different organisation. 
+                Certificates will not be transferred for ${transferAgreement.title}`);
+        return { stationNames, certificateType, transfereeReference, startDate, endDate };
+    }
+
+    async function logErrorToPly(error: Error) { //notifies of errors using Ply automation, and logs to console
+        const errorMessage = error.toString();
+        const stack = error.stack;
+        console.log(errorMessage);
+        console.log(stack);
+        fetch(
+            PLY_ERROR_LOG_URL,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: "RO Scraper:" + errorMessage + " | " + stack,
+                    link: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252FquickFileWebhookHandler/log-events/${lambdaContext?.logStreamName ?? ""}`
+                })
+            }
+        );
+        return errorMessage;
+    }
 }
 
 /**
