@@ -35,6 +35,7 @@ export async function handler(event: { test?: boolean, testInputs: { loginID: st
             if (event.test) {
                 const testRHILogins: ScraperInput[] = event.testInputs; //for testing purposes
                 const testRHIInput: OfgemCheckInput = {
+                    mode: "RHI",
                     all: getBatches(testRHILogins),
                     current: {
                         inputs: JSON.stringify(getBatches(testRHILogins)[0]?.inputs ?? []),
@@ -88,6 +89,7 @@ export async function handler(event: { test?: boolean, testInputs: { loginID: st
             }
 
             const rhiInputBatches: OfgemCheckInput = {
+                mode: "RHI",
                 all: rhiBatches,
                 current: {
                     inputs: JSON.stringify(rhiBatches[0]?.inputs ?? []),
@@ -105,6 +107,7 @@ export async function handler(event: { test?: boolean, testInputs: { loginID: st
             if (event.test) {
                 const testLogins: ScraperInput[] = event.testInputs; //for testing purposes
                 const testInput: OfgemCheckInput = {
+                    mode: "RHI",
                     all: getBatches(testLogins),
                     current: {
                         inputs: JSON.stringify(getBatches(testLogins)[0]?.inputs ?? []),
@@ -160,6 +163,7 @@ export async function handler(event: { test?: boolean, testInputs: { loginID: st
             }
 
             const roInputBatches: OfgemCheckInput = {
+                mode: "RO",
                 all: roBatches,
                 current: {
                     inputs: JSON.stringify(roBatches[0]?.inputs ?? []),

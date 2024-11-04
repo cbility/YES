@@ -7,6 +7,7 @@ interface ScraperBatch { //single batch of inputs for scraper
 }
 
 interface OfgemCheckInput { //input for Ofgem Check step function
+    mode: "RHI" | "RO",
     all: ScraperBatch[],
     current: {
         inputs: string, //stringified ScraperInput[]
