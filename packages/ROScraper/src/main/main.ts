@@ -32,6 +32,7 @@ const {
     ROAccountsTable,
     ROStationsTable,
     ROLoginsTable,
+    "RO Updates": ROUpdatesTable,
     "RO Certificate Transfer Agreements": ROTransferAgreementsTable,
 } = tables;
 
@@ -438,6 +439,11 @@ export default async function main(
         console.log("New station details added");
     }
 
+    //log update in updates table
+    await ss.addNewRecord(ROUpdatesTable.id, {
+        application_id: ROUpdatesTable.id,
+        [ROUpdatesTable.structure["Updated RO Logins"].slug]: inputs.map(input => input.loginID),
+    });
     console.log("Update Complete");
 
     function parseCertificateAgreement(transferAgreement: RecordFromTableID<typeof ROTransferAgreementsTable.id>,
