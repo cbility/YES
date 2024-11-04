@@ -22,8 +22,9 @@ export default async function transferCertificates(page: Page, {
 
 
     //parse output date 
-    const startDateValue = getDateValue(startDate);
-    const endDateValue = getDateValue(endDate);
+    const startDateValue = getStartDateValue(startDate);
+    const now = new Date();
+    const endDateValue = endDate < now ? getEndDateValue(endDate) : getEndDateValue(now);
 
     if (page.url() != `https://renewablesandchp.ofgem.gov.uk/CertificateTransfer/TransferRequestCreate.aspx?scheme=${certificateType}`) {
         //navigate to certificate options page first to satisfy portal navigation
@@ -54,15 +55,19 @@ export default async function transferCertificates(page: Page, {
     await orgReferenceInput.type(transfereeReference);
 
     //enter issue date period start
-    const issueDateInputOrig = await page.$("#ctl00_ContentPlaceHolder_txtDateFrom");
-    if (!issueDateInputOrig) throw new Error(`Could not find issue date start input field while transferring certificates for ${stationName}`);
-    await issueDateInputOrig.click();
-    await page.waitForNavigation();
+    let inactiveElement = await page.$("#ctl00_ContentPlaceHolder_lblTransferor1");
+    if (!inactiveElement) throw new Error(`Could not find inactive element field while transferring certificates for ${stationName}`);
+    await inactiveElement.click();
+    await page.waitForSelector("#ctl00_ContentPlaceHolder_txtDateFrom");
     const issueDateInput = await page.$("#ctl00_ContentPlaceHolder_txtDateFrom");
     if (!issueDateInput) throw new Error(`Could not find issue date start input field while transferring certificates for ${stationName}`);
     await issueDateInput.click({ clickCount: 3 }); // Select all existing text
     await issueDateInput.press('Backspace');       // Clear selected text
     await issueDateInput.type("01/01/2000");        //Type new date
+
+    inactiveElement = await page.$("#ctl00_ContentPlaceHolder_lblTransferor1");
+    if (!inactiveElement) throw new Error(`Could not find inactive element field while transferring certificates for ${stationName}`);
+    await inactiveElement.click();
 
     //select transfer period start and end
     await page.select('#ctl00_ContentPlaceHolder_ddlOutputPeriodStartDate', startDateValue);
@@ -78,8 +83,11 @@ export default async function transferCertificates(page: Page, {
     await page.waitForNavigation();
 
     const selectAllButton = await page.$('#ctl00_ContentPlaceHolder_chkSelectAll');
-    if (!selectAllButton) throw new Error(`Select all button not found for ${stationName}`);
-    selectAllButton.click();
+    if (!selectAllButton) {
+        console.log(`No ${certificateType.toUpperCase()}s found issued to ${stationName} within bounds of agreement, ${startDate} to ${endDate}`);
+        return null;
+    }
+    await selectAllButton.click();
     await page.waitForNavigation();
 
     const submitButton = await page.$("#ctl00_ContentPlaceHolder_btnSubmit");
@@ -124,13 +132,28 @@ export default async function transferCertificates(page: Page, {
     return { certificatesTransferred: +(certificatesTransferred ?? 0), transferTime: new Date() }
 }
 
-function getDateValue(date: Date) {
+function getStartDateValue(date: Date) {
     //get date value for use in date select field
 
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
 
     return `01/${month}/${year} 00:00:00`;
+}
+
+function getEndDateValue(date: Date) {
+    // Get the last date of the month for use in date select field
+
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Get the current month (1-indexed)
+
+    // Create a date for the first day of the next month
+    const lastDayOfMonth = new Date(year, month, 0); // Passing 0 as day gives us the last day of the current month
+
+    const day = String(lastDayOfMonth.getDate()).padStart(2, '0');
+    const formattedMonth = String(lastDayOfMonth.getMonth() + 1).padStart(2, '0');
+
+    return `${day}/${formattedMonth}/${year} 00:00:00`;
 }
 
 

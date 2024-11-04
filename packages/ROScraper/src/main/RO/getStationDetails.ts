@@ -271,11 +271,11 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
     await Promise.all([filterResultsButton.click(), page.waitForNavigation()]);
     try {
         let periodEndDateButton = await page.$("#ctl00_ContentPlaceHolder_dgOutputHistory > tbody > tr:nth-child(1) > th:nth-child(4) > a");
-        if (!periodEndDateButton) throw new Error("No period End Date button found. There may be no output data for this station in this period.");
+        if (!periodEndDateButton) throw new Error("No period End Date button found. There may be no output data for this station.");
         //sort results by period end date
         await Promise.all([periodEndDateButton.click(), page.waitForNavigation()]);
         periodEndDateButton = await page.$("#ctl00_ContentPlaceHolder_dgOutputHistory > tbody > tr:nth-child(1) > th:nth-child(4) > a");
-        if (!periodEndDateButton) throw new Error("No period End Date button found. There may be no output data for this station in this period.");
+        if (!periodEndDateButton) throw new Error("No period End Date button found. There may be no output data for this station.");
         await Promise.all([periodEndDateButton.click(), page.waitForNavigation()]);
 
         //get ROC not issued info

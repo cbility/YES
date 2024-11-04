@@ -172,8 +172,9 @@ export default async function main(
             }
         }
 
-        //initialise flag for transferring certificates
-        let certificatesAvailableForTransfer = false;
+        //initialise flags for transferring certificates
+        let rocsAvailableForTransfer = 0;
+        let regosAvailableForTransfer = 0;
 
         if (
             updatedLoginRecord[ROLoginsTable.structure["Login Type"].slug] ===
@@ -187,7 +188,8 @@ export default async function main(
             const accountRecordID: string | undefined = ExistingROAccounts[generatorReference];
 
             // Note if certificates are available for transfer so they can be transferred later
-            certificatesAvailableForTransfer = !!(rocsTradeable + regosTradeable);
+            rocsAvailableForTransfer = rocsTradeable;
+            regosAvailableForTransfer = regosTradeable;
 
             updateAccount(accountRecordID, generatorReference, {
                 application_id: ROAccountsTable.id,
@@ -206,7 +208,8 @@ export default async function main(
             const accountDetails = await getAccountDetails(page);
 
             // Note if certificates are available for transfer so they can be transferred later
-            certificatesAvailableForTransfer = !!(accountDetails.rocsTradeable + accountDetails.regosTradeable);
+            rocsAvailableForTransfer = accountDetails.rocsTradeable;
+            regosAvailableForTransfer = accountDetails.regosTradeable;
 
             const accountRecordID: string | undefined = ExistingROAccounts[accountDetails.organisationReference];
 
@@ -233,7 +236,8 @@ export default async function main(
             updateAccount(accountRecordID, accountDetails.organisationReference, { ...updatedAccountRecord, id: accountRecordID })
         }
         //check if there are any ROCs or REGOs available for transfer on the account 
-        if (certificatesAvailableForTransfer) {
+        if (!!(rocsAvailableForTransfer + regosAvailableForTransfer)) {
+            console.log(`${rocsAvailableForTransfer} ROCs and ${regosAvailableForTransfer} REGOs available for transfer on this account`)
 
             const accountTransferAgreements: RecordFromTableID<typeof ROTransferAgreementsTable.id>[] = [];
 
@@ -257,6 +261,7 @@ export default async function main(
 
             //loop through transfer agreements for each certificate type , check if agreement is valid and transfer certificates
             for (const transferAgreement of rocAgreements) {
+                console.log(`Checking for ROCs included in ${transferAgreement.title}`);
                 try {
                     const { stationNames, certificateType, transfereeReference, startDate, endDate } = parseCertificateAgreement(transferAgreement, accountTransferAgreements);
                     for (const stationName of stationNames) {
@@ -275,6 +280,7 @@ export default async function main(
                 }
             }
             for (const transferAgreement of regoAgreements) {
+                console.log(`Checking for REGOs included in ${transferAgreement.title}`)
                 try {
                     const { stationNames, certificateType, transfereeReference, startDate, endDate } = parseCertificateAgreement(transferAgreement, accountTransferAgreements);
                     for (const stationName of stationNames) {
@@ -292,6 +298,8 @@ export default async function main(
                     await logErrorToPly(transferAgreementError as Error);
                 }
             }
+        } else {
+            console.log(`No ROCs or REGOs available for transfer for ${loginRecordToUpdate[ROLoginsTable.structure["Username"].slug]}`);
         }
         continue; //go to next login
 
