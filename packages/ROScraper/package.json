@@ -2,7 +2,7 @@
     "type": "module",
     "scripts": {
         "start": "node ./dist/tests/RO-local.test.js",
-        "build": "tsc -build ./tsconfig.json --verbose --pretty"
+        "build": "tsc -build ./tsconfig.prod.json --verbose --pretty"
     },
     "dependencies": {
         "@sparticuz/chromium-min": "^119.0.2",
