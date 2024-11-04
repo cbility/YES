@@ -1,4 +1,4 @@
-name: Deploy RHI Scraper
+name: Deploy RO Scraper
 on: 
   push:
     branches:
