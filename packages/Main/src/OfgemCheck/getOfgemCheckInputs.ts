@@ -12,108 +12,187 @@ if (process.env.NODE_ENV !== 'production') { //use local environment variables i
 
 const ss = new SmartSuite("s5ch1upc", process.env.TECHNICAL_SMARTSUITE_KEY as string);
 
+const { RHILoginsTable, RHIAccountsTable, ROLoginsTable, ROAccountsTable, configurationsTable } = tables;
 const batchSize = 40; //max size of batch of logins for scraper. Cannot take more than 15 minutes to process.
 
-const { RHILoginsTable, RHIAccountsTable, configurationsTable } = tables;
 
-//Record IDs for scraper config records in Configuration table
-const completeUpdateConfigID = "663d4044175c1b3c979a9afd";
-const projectUpdateConfigID = "665f350a343198c25eda5fe6";
-const serviceUpdateConfigID = "665f353ba173734d1df2211a";
-
-
-export async function handler(event: { test?: boolean, inputs: { loginID: string }[] }) {
+export async function handler(event: { test?: boolean, testInputs: { loginID: string }[], mode: "RHI" | "RO" }) {
     console.log("EVENT: " + JSON.stringify(event));
 
-    if (event.test) {
-        const testLogins: ScraperInput[] = event.inputs; //for testing purposes
-        const testInput: OfgemCheckInput = {
-            all: getBatches(testLogins),
-            current: {
-                inputs: JSON.stringify(getBatches(testLogins)[0]?.inputs ?? []),
-                batchIndex: 0,
-                isFinal: getBatches(testLogins).length <= 1,
-            }
-        }
-        return testInput;
-    }
-
-    // get configuration table in RHI Scraper
+    // get configuration table in Scraper
     const configurations: Record<string, unknown>[] = await ss.getAllRecords(configurationsTable.id);
-
-    const nextCompleteUpdate = getNextDate(configurations, completeUpdateConfigID);
-    const nextProjectUpdate = getNextDate(configurations, projectUpdateConfigID);
-    const nextServiceUpdate = getNextDate(configurations, serviceUpdateConfigID);
     const now = new Date(); //current date and time
 
-    let batches: ScraperBatch[] = [];
+    switch (event.mode) {
+        case "RHI":
+        case undefined: // RHI mode is default
 
-    //declare inputs for batching
-    let projectInputs: ScraperInput[] = [];
-    let filteredServiceInputs: ScraperInput[] = [];
+            //Record IDs for scraper config records in Configuration table
+            const completeRHIUpdateConfigID = "663d4044175c1b3c979a9afd";
+            const projectRHIUpdateConfigID = "665f350a343198c25eda5fe6";
+            const serviceRHIUpdateConfigID = "665f353ba173734d1df2211a";
 
-    if (nextCompleteUpdate <= now) {
-        console.log("Getting all logins")
+            if (event.test) {
+                const testRHILogins: ScraperInput[] = event.testInputs; //for testing purposes
+                const testRHIInput: OfgemCheckInput = {
+                    all: getBatches(testRHILogins),
+                    current: {
+                        inputs: JSON.stringify(getBatches(testRHILogins)[0]?.inputs ?? []),
+                        batchIndex: 0,
+                        isFinal: getBatches(testRHILogins).length <= 1,
+                    }
+                }
+                return testRHIInput;
+            }
 
-        const allLogins = await ss.getAllRecords(RHILoginsTable.id);
-        const allLoginIDs: ScraperInput[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
-        batches = getBatches(allLoginIDs);
+            const nextCompleteRHIUpdate = getNextDate(configurations, completeRHIUpdateConfigID);
+            const nextProjectRHIUpdate = getNextDate(configurations, projectRHIUpdateConfigID);
+            const nextRHIServiceUpdate = getNextDate(configurations, serviceRHIUpdateConfigID);
 
-        await updateLastDate(completeUpdateConfigID);
+            let rhiBatches: ScraperBatch[] = [];
 
-    } else {
+            //declare inputs for batching
+            let projectRHIInputs: ScraperInput[] = [];
+            let filteredServiceRHIInputs: ScraperInput[] = [];
 
-        if (nextProjectUpdate <= now) {
-            console.log("Getting project logins")
-            projectInputs = await getRelevantLoginIds(RHIAccountsTable.structure["Active Project Count"].slug);
+            if (nextCompleteRHIUpdate <= now) {
+                console.log("Getting all logins")
 
-            await updateLastDate(projectUpdateConfigID);
-        }
+                const allRHILogins = await ss.getAllRecords(RHILoginsTable.id);
+                const allRHILoginIDs: ScraperInput[] = allRHILogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
+                rhiBatches = getBatches(allRHILoginIDs);
 
-        if (nextServiceUpdate <= now) {
-            console.log("Getting service logins")
-            const serviceInputs = await getRelevantLoginIds(RHIAccountsTable.structure["Active Service Count"].slug);
-            //remove previously checked logins
-            const projectLoginIDs = new Set(projectInputs.map(projectInput => projectInput.loginID));
-            filteredServiceInputs = serviceInputs.filter(
-                (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
-            );
+                await updateLastDate(completeRHIUpdateConfigID);
 
-            await updateLastDate(serviceUpdateConfigID);
-        }
-        batches = getBatches([...projectInputs, ...filteredServiceInputs])
-    }
+            } else {
 
-    const inputBatches: OfgemCheckInput = {
-        all: batches,
-        current: {
-            inputs: JSON.stringify(batches[0]?.inputs ?? []),
-            batchIndex: 0,
-            isFinal: batches.length <= 1,
-        }
-    }
-    return inputBatches;
-};
+                if (nextProjectRHIUpdate <= now) {
+                    console.log("Getting project logins")
+                    projectRHIInputs = await getRelevantLoginIds(RHIAccountsTable.structure["Active Project Count"].slug, RHIAccountsTable.structure["Login ID"].slug, RHIAccountsTable.id);
 
-async function getRelevantLoginIds(DeliverableCountSlug: string) {
+                    await updateLastDate(projectRHIUpdateConfigID);
+                }
+
+                if (nextRHIServiceUpdate <= now) {
+                    console.log("Getting service logins")
+                    const serviceInputs = await getRelevantLoginIds(RHIAccountsTable.structure["Active Service Count"].slug, RHIAccountsTable.structure["Login ID"].slug, RHIAccountsTable.id);
+                    //remove previously checked logins
+                    const projectLoginIDs = new Set(projectRHIInputs.map(projectInput => projectInput.loginID));
+                    filteredServiceRHIInputs = serviceInputs.filter(
+                        (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
+                    );
+
+                    await updateLastDate(serviceRHIUpdateConfigID);
+                }
+                rhiBatches = getBatches([...projectRHIInputs, ...filteredServiceRHIInputs])
+            }
+
+            const rhiInputBatches: OfgemCheckInput = {
+                all: rhiBatches,
+                current: {
+                    inputs: JSON.stringify(rhiBatches[0]?.inputs ?? []),
+                    batchIndex: 0,
+                    isFinal: rhiBatches.length <= 1,
+                }
+            }
+            return rhiInputBatches;
+        case "RO":
+            //Record IDs for scraper config records in Configuration table
+            const completeROUpdateConfigID = "6720ca7477e5ffcf022429fa";
+            const projectROUpdateConfigID = "6720ca67594a6fce6985a6d0";
+            const serviceROUpdateConfigID = "6720ca6e1516bb73d7778557";
+
+            if (event.test) {
+                const testLogins: ScraperInput[] = event.testInputs; //for testing purposes
+                const testInput: OfgemCheckInput = {
+                    all: getBatches(testLogins),
+                    current: {
+                        inputs: JSON.stringify(getBatches(testLogins)[0]?.inputs ?? []),
+                        batchIndex: 0,
+                        isFinal: getBatches(testLogins).length <= 1,
+                    }
+                }
+                return testInput;
+            }
+
+            // get configuration table in Scraper
+
+            const nextCompleteROUpdate = getNextDate(configurations, completeROUpdateConfigID);
+            const nextProjectROUpdate = getNextDate(configurations, projectROUpdateConfigID);
+            const nextServiceROUpdate = getNextDate(configurations, serviceROUpdateConfigID);
+
+            let roBatches: ScraperBatch[] = [];
+
+            //declare inputs for batching
+            let projectROInputs: ScraperInput[] = [];
+            let filteredServiceROInputs: ScraperInput[] = [];
+
+            if (nextCompleteROUpdate <= now) {
+                console.log("Getting all logins")
+
+                const allLogins = await ss.getAllRecords(ROLoginsTable.id);
+                const allLoginIDs: ScraperInput[] = allLogins.map((login: Record<string, unknown>) => ({ loginID: login.id as string }));
+                roBatches = getBatches(allLoginIDs);
+
+                await updateLastDate(completeROUpdateConfigID);
+
+            } else {
+
+                if (nextProjectROUpdate <= now) {
+                    console.log("Getting project logins")
+                    projectROInputs = await getRelevantLoginIds(ROAccountsTable.structure["Live Projects Count"].slug, ROAccountsTable.structure["Login Record ID"].slug, ROAccountsTable.id);
+
+                    await updateLastDate(projectROUpdateConfigID);
+                }
+
+                if (nextServiceROUpdate <= now) {
+                    console.log("Getting service logins")
+                    const serviceInputs = await getRelevantLoginIds(ROAccountsTable.structure["Live Services Count"].slug, ROAccountsTable.structure["Login Record ID"].slug, ROAccountsTable.id);
+                    //remove previously checked logins
+                    const projectLoginIDs = new Set(projectROInputs.map(projectInput => projectInput.loginID));
+                    filteredServiceROInputs = serviceInputs.filter(
+                        (serviceInput) => !projectLoginIDs.has(serviceInput.loginID)
+                    );
+
+                    await updateLastDate(serviceROUpdateConfigID);
+                }
+                roBatches = getBatches([...projectROInputs, ...filteredServiceROInputs])
+            }
+
+            const roInputBatches: OfgemCheckInput = {
+                all: roBatches,
+                current: {
+                    inputs: JSON.stringify(roBatches[0]?.inputs ?? []),
+                    batchIndex: 0,
+                    isFinal: roBatches.length <= 1,
+                }
+            }
+            return roInputBatches;
+        default:
+            const exhaustivenessCheck: never = event.mode;
+            throw new Error(`Invalid mode ${event.mode}. Mode must be "RHI" or "RO".`);
+    };
+
+}
+
+async function getRelevantLoginIds(DeliverableCountSlug: string, loginIDSlug: string, accountTableID: typeof RHIAccountsTable.id | typeof ROAccountsTable.id) {
     //get loginIDs that have either active projects or active services
-    const accountsToUpdate = await ss.filterRecords(RHIAccountsTable.id, [
+    const accountsToUpdate = await ss.filterRecords(accountTableID, [
         {
             field: DeliverableCountSlug,
             comparison: "is_greater_than",
             value: 0,
         },
         {
-            field: RHIAccountsTable.structure["Login ID"].slug,
+            field: loginIDSlug,
             comparison: "is_not_empty",
             value: "",
         },
     ]);
 
     let loginIDs: ScraperInput[] = accountsToUpdate.map((accountRecord: Record<string, any>) => (
-        { loginID: accountRecord[RHIAccountsTable.structure["Login ID"].slug] }
+        { loginID: accountRecord[loginIDSlug] }
     ));
-
     return loginIDs;
 }
 

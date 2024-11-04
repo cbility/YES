@@ -82,3 +82,18 @@ jobs:
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
           environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+
+    - name: AWS Lambda Deploy logROOfgemCheckOutputs
+      uses: appleboy/lambda-action@v0.2.0
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: 'eu-west-2'
+          function_name: logROOfgemCheckOutputs
+          zip_file: deployment.zip
+          memory_size: 128
+          timeout: 30
+          handler: ./packages/Main/dist/OfgemCheck/logROOfgemCheckOutputs.handler
+          role: arn:aws:iam::211125712927:role/service-role/logROOfgemCheckOutputs-role-22ck4i3d
+          runtime: nodejs18.x
+          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production

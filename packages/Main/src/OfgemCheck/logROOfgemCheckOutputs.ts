@@ -11,7 +11,7 @@ const { updatesTable } = tables;
 
 const now = new Date();
 
-export async function handler(batches: ScraperBatch[], mode?: "RO" | "RHI") {
+export async function handler(batches: ScraperBatch[]) {
 
     console.log("EVENT: \n" + JSON.stringify(batches, null, 2));
 
@@ -32,19 +32,6 @@ export async function handler(batches: ScraperBatch[], mode?: "RO" | "RHI") {
         ).flat()
 
     console.log(`fails: ${fails}`);
-
-    //Create successes record
-    if (mode != "RO") { //RO scraper logs successes in main scraper program
-        if (successes.length > 0) {
-            const successRecord: Record<string, string | string[]> = {
-                [updatesTable.structure["Updated Logins"].slug]: successes,
-                [updatesTable.structure["Date"].slug]: now.toISOString(),
-                [updatesTable.structure["Run success"].slug]: "Success",
-            }
-            //add record to SS
-            await ss.addNewRecord(updatesTable.id, successRecord);
-        }
-    }
 
     //Create fails record
 
