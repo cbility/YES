@@ -1,0 +1,66 @@
+name: Deploy RHI Scraper
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/ROScraper/**/*'
+      - 'packages/SmartSuite/src/**/*'
+      - 'packages/Common/src/**/*'
+      - '.github/workflows/deployROScraper.yaml'
+      - 'tsconfig.json'
+      - 'package.json'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install and build
+      run: | 
+        npm ci --omit=dev
+        cd packages/ROScraper
+        npm ci --omit=dev
+        npm run build --if-present
+      env:
+        CI: true
+
+    - name: Zip
+      run: |
+        mkdir zip
+        zip -r ./zip/deployment.zip node_modules packages/*/dist packages/*/node_modules package.json
+        ls
+      env:
+        CI: true
+    
+    - name: Upload to S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: ro-scraper
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-west-2'
+        SOURCE_DIR: './zip'
+
+    - name: Update Lambda Configuration
+      uses: appleboy/lambda-action@v0.2.0
+      with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: 'eu-west-2'
+          function_name: roScraper
+          environment: TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          handler: ./packages/RHIScraper/dist/lambda/indexROScraper.handler
+          s3_bucket: ro-scraper
+          s3_key: deployment.zip
+
