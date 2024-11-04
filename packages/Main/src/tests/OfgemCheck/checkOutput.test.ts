@@ -2,6 +2,7 @@ import { handler } from '../../OfgemCheck/checkScraperOutput.js';
 
 const checkOutputLambdaEvent = {
     "inputBatches": {
+        mode: "RHI" as const,
         "all": [
             {
                 "inputs": [
