@@ -362,7 +362,7 @@ async function getROSubmissionDetails(stationName: string, page: Page): Promise<
             const currentPeriodEndString = convertToISODateString($(row).find('td').eq(3).text().trim());
             if (!currentPeriodEndString) return; //if there is no date in this submission skip to next
             const currentPeriodEnd = new Date(currentPeriodEndString);
-            if (currentPeriodEnd.getMonth() < oldestUnexpiredPeriod.getMonth()) return; //if this submission is older than the oldest period where certificates have not expired then skip to next
+            if (currentPeriodEnd < oldestUnexpiredPeriod) return; //if this submission is older than the oldest period where certificates have not expired then skip to next
 
             //get text in scheme column
             const schemeText = $(row).find('td').eq(1).text().trim();
