@@ -10,7 +10,7 @@ const { ROLoginsTable } = tables;
 await bootstrapEnvironment();
 
 const browserArgs = {
-    headless: false, //"shell", //using old faster headless mode, set to false to disable headless
+    headless: "shell", //using old faster headless mode, set to false to disable headless
     defaultViewport: null,
     args: [
         "--autoplay-policy=user-gesture-required",
@@ -50,7 +50,7 @@ const browserArgs = {
 
 (async () => {
 
-    const COMPLETE_UPDATE = false;
+    const COMPLETE_UPDATE = true;
 
     if (COMPLETE_UPDATE) {
         if (process.env.NODE_ENV !== "production") { //set environment variables using local .env

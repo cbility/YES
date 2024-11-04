@@ -157,17 +157,6 @@ const tables = {
         "slug": "sc2844b378",
         "field_type": "numberfield"
       },
-      "Operation Type": {
-        "label": "Operation Type",
-        "slug": "se95441437",
-        "field_type": "singleselectfield",
-        "choices": [
-          {
-            "value": "LlyDG",
-            "label": "s"
-          }
-        ]
-      },
       "Record ID": {
         "label": "Record ID",
         "slug": "s2bd5fc78b",
@@ -5237,13 +5226,13 @@ const tables = {
         "target_field_type": "textfield"
       },
       "Suspended REGOs Expiring": {
-        "label": "Suspended REGOs Expiring",
+        "label": "Not Issued REGOs Expiring",
         "slug": "s22ebf4c7f",
         "field_type": "formulafield",
         "target_field_type": "datefield"
       },
       "Suspended ROCs Expiring": {
-        "label": "Suspended ROCs Expiring",
+        "label": "Not Issued ROCs Expiring",
         "slug": "s31sego8",
         "field_type": "formulafield",
         "target_field_type": "datefield"
@@ -5397,6 +5386,18 @@ const tables = {
         "label": "ROCs Pending Transfer",
         "slug": "s62zh4tq",
         "field_type": "numberfield"
+      },
+      "Live Projects Count": {
+        "label": "Live Projects Count",
+        "slug": "se4b12e367",
+        "field_type": "formulafield",
+        "target_field_type": "numberfield"
+      },
+      "Live Services Count": {
+        "label": "Live Services Count",
+        "slug": "sl8ivod8",
+        "field_type": "formulafield",
+        "target_field_type": "numberfield"
       }
     }
   },
@@ -7364,6 +7365,109 @@ const tables = {
         "slug": "s99a70448b",
         "field_type": "lookupfield",
         "target_field_type": "userfield"
+      }
+    }
+  },
+  "RO Updates": {
+    "name": "RO Updates",
+    "id": "6720ca1b19875260cd1f76c0",
+    "structure": {
+      "Title": {
+        "label": "Title",
+        "slug": "title",
+        "field_type": "recordtitlefield"
+      },
+      "First Created": {
+        "label": "First Created",
+        "slug": "first_created",
+        "field_type": "firstcreatedfield"
+      },
+      "Last Updated": {
+        "label": "Last Updated",
+        "slug": "last_updated",
+        "field_type": "lastupdatedfield"
+      },
+      "Followed by": {
+        "label": "Followed by",
+        "slug": "followed_by",
+        "field_type": "userfield"
+      },
+      "Open Comments": {
+        "label": "Open Comments",
+        "slug": "comments_count",
+        "field_type": "commentscountfield"
+      },
+      "Auto Number": {
+        "label": "Auto Number",
+        "slug": "autonumber",
+        "field_type": "autonumberfield"
+      },
+      "Update Complete": {
+        "label": "Update Complete",
+        "slug": "sed70935b7",
+        "field_type": "datefield"
+      },
+      "Accreditation Depth": {
+        "label": "Accreditation Depth",
+        "slug": "sb756561f2",
+        "field_type": "singleselectfield",
+        "choices": [
+          {
+            "value": "X48kg",
+            "label": "Basic Accreditation"
+          },
+          {
+            "value": "2HIsR",
+            "label": " All Accreditation"
+          },
+          {
+            "value": "ENcWc",
+            "label": "Meter Support"
+          }
+        ]
+      },
+      "Run success": {
+        "label": "Run success",
+        "slug": "sda0be9742",
+        "field_type": "singleselectfield",
+        "choices": [
+          {
+            "value": "aLEHA",
+            "label": "Success"
+          },
+          {
+            "value": "n3Z9L",
+            "label": "Fail"
+          }
+        ]
+      },
+      "Updated Accounts": {
+        "label": "Updated Accounts",
+        "slug": "s078b2d75d",
+        "field_type": "formulafield",
+        "target_field_type": "textfield"
+      },
+      "Updated RHIs": {
+        "label": "Updated Stations",
+        "slug": "sc8ff0756c",
+        "field_type": "formulafield",
+        "target_field_type": "textfield"
+      },
+      "Login Count": {
+        "label": "Login Count",
+        "slug": "sf2662a817",
+        "field_type": "countfield"
+      },
+      "Station Count": {
+        "label": "Station Count",
+        "slug": "s93e777e47",
+        "field_type": "formulafield",
+        "target_field_type": "numberfield"
+      },
+      "Updated RO Logins": {
+        "label": "Updated RO Logins",
+        "slug": "s691a86db0",
+        "field_type": "linkedrecordfield"
       }
     }
   }
