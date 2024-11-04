@@ -1,8 +1,8 @@
-from RHI import *
+from common.RHI import *
 import gspread.utils as utils
 import time
 
-from gspread_functions import gspread_get_RHI_logins
+from common.gspread_functions import gspread_get_RHI_logins
 
 #log onto each ORG and creat additional user
 
@@ -11,7 +11,7 @@ last_login_col = utils.a1_to_rowcol('W1')[1]
 dates_col = utils.a1_to_rowcol('J1')[1]; 
 fdates_col = utils.a1_to_rowcol('X1')[1]
 
-worksheet, client = gspread_connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
+worksheet, client = common.gspread_connect_to_sheet('RHI Complex (Working edit)','RHI Meters Complex')
 
 #get data from google sheet
 rhis, usernames, passwords, last_login_succesful, _, _ = gspread_get_RHI_logins(rhi_col,
@@ -19,7 +19,7 @@ rhis, usernames, passwords, last_login_succesful, _, _ = gspread_get_RHI_logins(
 
 
 rhi_users = []
-for [username,indices] in condense_list_with_indices(usernames):
+for [username,indices] in common.gspread_functions.condense_list_with_indices(usernames):
     rhi_users.append([username, passwords[indices[0]], [rhis[i] for i in indices], indices])
 
 #rhi_users = [rhi_users[1]] #uncomment this line to only run the code for one ORG

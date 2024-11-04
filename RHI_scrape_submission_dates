@@ -1,0 +1,49 @@
+from common import RHI, init, gspread_functions as sheets
+import logging
+import gspread.utils as utils
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)  # Set the desired logger level for this logger
+
+if __name__ == "__main__":
+    use_smartsuite = False
+    rhi_users = []
+    worksheet = None
+
+    if use_smartsuite:
+        rhi_users = ss.get_RHIs_to_update([ss.RHIs.fields["Last Submitted"].id])
+
+        with init.bootstrap(local_logging=True, local_driver=True) as driver:
+            new_dates = RHI.scrape_last_submitted(
+                rhi_users, driver=driver, use_smartsuite=True
+            )
+
+    elif not use_smartsuite:
+        rhi_col = utils.a1_to_rowcol("D1")[1]
+        userpass_col = 3
+        rhi_col = utils.a1_to_rowcol("D1")[1]
+        userpass_col = 3
+        last_login_col = utils.a1_to_rowcol("X1")[1]
+        dates_col = utils.a1_to_rowcol("K1")[1]
+        fdates_col = utils.a1_to_rowcol("Y1")[1]
+
+        worksheet, client = sheets.gspread_connect_to_sheet(
+            "RHI Complex (Working edit)", "RHI Meters Complex"
+        )
+
+        # get data from google sheet
+        rhi_users = sheets.gspread_get_RHI_logins(
+            rhi_col, userpass_col, last_login_col, dates_col, fdates_col, worksheet
+        )
+
+        # rhi_users = [rhi_users[1]] #uncomment this line to only run the code for one ORG
+
+        with init.bootstrap(local_logging=True, local_driver=True) as driver:
+            new_dates = RHI.scrape_last_submitted(
+                rhi_users, driver=driver, use_smartsuite=False, worksheet=worksheet
+            )
+
+    # export dates to sheet
+    sheets.gspread_export_RHI_dates(dates_col, new_dates)
+
+    logger.info("done")

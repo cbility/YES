@@ -10,6 +10,19 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 
-import Smartsuite_API as ss
+import common.SmartSuite as ss
 
-print(ss.get_RHIs_to_update())
+ss.get_record_details("650168ce39fcf6ca2940a6fe", )
+
+price 
+s9640ecb64
+Charged Hourly?
+sd9c921c76
+Record ID (System Field)
+s6c2a26789
+Job Type
+sb47b33cd0
+Job Code (System Field)
+sd9c00d85f
+Job Description
+s30f4806c7
