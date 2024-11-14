@@ -24,6 +24,7 @@ Here's the structure of this project:
 │ │ ├── tsconfig.json # individual package typescript configuration
 │ │ ├── tsconfig.prod.json # individual package production typescript configuration
 │ │ └── src # source code files
+| ├── ROScraper # contains code automating a browser that retrieves information from the Renewables and CHP register and updates SmartSuite
 │ ├── Main # contains code that uses several other packages
 │ │ ├── tsconfig.json # individual package typescript configuration
 │ │ ├── OfgemCheck # used in an AWS step function that updates the YES RHI database 
@@ -91,11 +92,6 @@ For example, on windows, you can use fnm:
 
 1. Run a test
 
-    Initialise environment variables
-    ```shell
-        .\loadEnv.ps1
-    ```
-
     Compile project for dev environment
     ```shell
         tsc -b
@@ -114,7 +110,9 @@ For example, on windows, you can use fnm:
 
 3. Bundle Ply code for pasting into code blocks
 
-    Code in the `Ply` package if for use in code blocks in the low-code platform ply.io. Code pasted into these code blocks cannot have any imports or dependencies. Use rollup to package all dependencies into a single file before updating a code block. Other code that is included in the file for testing purposes and should not be included in the Ply code block is highlighted with comment sections.
+    Code in the `Ply` package is for use in code blocks in the low-code platform ply.io. Code pasted into these code blocks cannot have any imports or dependencies. Use rollup to package all dependencies into a single file before updating a code block. 
+    
+    Other code that is included in the file for testing purposes and should not be included in the Ply code block is highlighted with comment sections.
 
     Navigate to Ply package, compile and bundle code using rollup
      ```shell
@@ -122,7 +120,11 @@ For example, on windows, you can use fnm:
         tsc -b
         npx rollup -c  
     ```
+    \
     Bundled scripts can be found in the Ply/rollup directory.
+    \
+    \
+    Note that there is a limit on how many lines of code can be included in a Ply code block. Because of this limit it is a good idea to only import the tables that are required from the SmartSuite database. If the limit is exceeded then redundant definitions can be removed from the rolled up package to reduce the length of the script.
 
 4. Compile EDC Scraper into .exe file
 
