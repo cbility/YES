@@ -518,7 +518,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 for (const QFitem of QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? []) {
                     const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFitem.ItemName?.slice(0, 7)));
                     try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)
+                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName)
                         //set values
                         SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
                         SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
@@ -530,7 +530,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 for (const QFTask of QFInvoice.Invoice_Get.Body.InvoiceDetails.TaskLines?.Task ?? []) {
                     const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFTask.ItemName?.slice(0, 7)));
                     try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFTask.ItemName + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)
+                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFTask.ItemName)
                         //set values
                         SSItem[SDPInvoiceItemsTable.structure["Hours"].slug] = QFTask.Qty;
                         SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
@@ -540,7 +540,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     }
                 }
 
-                if (itemErrors.length > 0) await logErrorToPly(new Error(itemErrors.join(" | "))); //log all item error with one message
+                if (itemErrors.length > 0) await logErrorToPly(new Error(itemErrors.join(" | ") +  + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)); //log all item error with one message
             } catch (error) {
                 await logErrorToPly(error as Error);
             }
@@ -820,6 +820,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 [opportunitiesTable.structure["QuickFile Status"].slug]: QFQuote.Invoice_Get.Body.InvoiceDetails.Status,
             }
         )
+        console.log(`Opportunity with ID ${SSOpportunities[0].id} updated`);
     }
     async function logErrorToPly(error: Error) { //emails error messages to technical@yourenergysource using Ply automation, and logs to console
         const errorMessage = error.toString();
