@@ -471,7 +471,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             invoiceIds);
         if (SSInvoices.length === 0) throw new Error("No Invoices found for QuickFile Invoice ID(s) " + invoiceIds.join(", ") + ". The webhook handler tried to update these invoices."); //throw error and break out
 
-        const SSInvoiceItems = await SS.getRecordsByFieldValues(
+        const allSSInvoiceItems = await SS.getRecordsByFieldValues(
             SDPInvoiceItemsTable.id,
             SDPInvoiceItemsTable.structure["QuickFile Invoice ID"].slug,
             invoiceIds);
@@ -514,33 +514,33 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
                 let itemErrors: string[] = [];
 
-                //set updated invoice item values
-                for (const QFitem of QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? []) {
-                    const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFitem.ItemName?.slice(0, 7)));
-                    try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFitem.ItemName)
-                        //set values
-                        SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
-                        SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
-                    } catch (error) {
-                        itemErrors.push((error as Error).toString());
-                    }
-                }
-                //set updated invoice task values (hourly charged jobs)
-                for (const QFTask of QFInvoice.Invoice_Get.Body.InvoiceDetails.TaskLines?.Task ?? []) {
-                    const SSItem = SSInvoiceItems.find(_SSItem => ((_SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === QFTask.ItemName?.slice(0, 7)));
-                    try {
-                        if (!SSItem) throw new Error("No SS item found for QF invoice item " + QFTask.ItemName)
-                        //set values
-                        SSItem[SDPInvoiceItemsTable.structure["Hours"].slug] = QFTask.Qty;
-                        SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
-                        SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFTask.ItemDescription;
-                    } catch (error) {
-                        itemErrors.push((error as Error).toString());
-                    }
-                }
+                //get SS items in this invoice
+                const SSInvoiceItems = allSSInvoiceItems.filter(item => item[SDPInvoiceItemsTable.structure["QuickFile Invoice ID"].slug] == invoiceId)
 
-                if (itemErrors.length > 0) await logErrorToPly(new Error(itemErrors.join(" | ") +  + ". Updating invoice, " + invoiceId + ", SS ID " + SSInvoice.id)); //log all item error with one message
+                const QFItems = QFInvoice.Invoice_Get.Body.InvoiceDetails.ItemLines?.Item ?? [];
+                const QFTasks = QFInvoice.Invoice_Get.Body.InvoiceDetails.TaskLines?.Task ?? [];
+
+                //set updated invoice item values
+                for (const SSItem of SSInvoiceItems) {
+                    const QFitem = QFItems.find(_QFItem => ((SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === _QFItem.ItemName?.slice(0, 7)));
+                    const QFTask = QFTasks.find(_QFTask => ((SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === _QFTask.ItemName?.slice(0, 7)));
+                    try {
+                        if (!QFitem && !QFTask ) throw new Error("No QF item or task found for SS invoice item " + SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug]);
+                        if (QFitem && QFTask) throw new Error("QF item AND QF task found for SS invoice item " + SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug]);
+                        //set values
+                        if (QFitem) {
+                            SSItem[SDPInvoiceItemsTable.structure["Price"].slug] = QFitem.UnitCost;
+                            SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFitem.ItemDescription;
+                        } else if (QFTask) {
+                            SSItem[SDPInvoiceItemsTable.structure["Hours"].slug] = QFTask.Qty;
+                            SSItem[SDPInvoiceItemsTable.structure["Hourly Rate"].slug] = QFTask.UnitCost;
+                            SSItem[SDPInvoiceItemsTable.structure["Item Description"].slug] = QFTask.ItemDescription;
+                        }
+                    } catch (error) {
+                        itemErrors.push((error as Error).toString());
+                    }
+                }
+                if (itemErrors.length > 0) await logErrorToPly(new Error(itemErrors.join(" | ") + ". Updating invoice with ID " + invoiceId + ", SS ID " + SSInvoice.id)); //log all item error with one message
             } catch (error) {
                 await logErrorToPly(error as Error);
             }
@@ -551,9 +551,9 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             false
         );
         //update invoice items
-        if (SSInvoiceItems.length > 0) {
+        if (allSSInvoiceItems.length > 0) {
             const updatedItems = await SS.bulkUpdateRecords(SDPInvoiceItemsTable.id,
-                SSInvoiceItems,
+                allSSInvoiceItems,
                 false
             );
             return { updatedInvoices, updatedItems };
