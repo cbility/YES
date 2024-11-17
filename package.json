@@ -1,6 +1,7 @@
 {
     "type": "module",
     "scripts": {
+        "install-all": "npm install && cd packages/RHIScraper && npm install && cd ../ROScraper && npm install && cd ../..",
         "build": "tsc -build packages/Main/",
         "build-ofgem-check": "tsc -build packages/Main/tsconfig.OfgemCheck.prod.json",
         "build-qf-webhookHandler": "tsc -build packages/Main"

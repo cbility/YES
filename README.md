@@ -74,11 +74,11 @@ For example, on windows, you can use fnm:
 
     Navigate to the project root directory
     ```shell
-        cd /path/to/project
+        cd /path/to/project/
     ```
     Install dependencies
     ```shell
-        npm install
+        npm run install-all
     ```
 
 3. Add local environment variables
@@ -94,16 +94,16 @@ For example, on windows, you can use fnm:
 
     Compile project for dev environment
     ```shell
-        tsc -b
+        npx tsc -b
     ```
     run a test:
     ```shell
-        node 'packages\main\tests\OfgemCheck\checkOutput.test.js'
+        node 'packages\Main\dist\tests\OfgemCheck\checkOutput.test.js'
     ```
 
 2. Test the RHI Scraper
     ```shell
-        tsc -b
+        npx tsc -b
         npm run start --prefix packages/RHIScraper
     ```
     You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
@@ -117,7 +117,7 @@ For example, on windows, you can use fnm:
     Navigate to Ply package, compile and bundle code using rollup
      ```shell
         cd packages/Ply
-        tsc -b
+        npx tsc -b
         npx rollup -c  
     ```
     \
@@ -133,8 +133,10 @@ For example, on windows, you can use fnm:
     Compile scraper
      ```shell
         cd packages/EDCScraper
+        npm install
         npx puppeteer browsers install
-        tsc 
-        nexe dist/main.js --build --loglevel verbose --output RHIMeterReadingDownload.exe
+        npx tsc 
+        npx nexe dist/main.js --build --loglevel verbose --output RHIMeterReadingDownload.exe
     ```
+    \
     The contents of the `packages/EDCScraper` directory should then be placed in the `C:\Dropbox\Energy Source (1) (1)\3) Meter reading service & EDC\RHI Meter Reading Download` directory.
