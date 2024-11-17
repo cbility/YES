@@ -835,7 +835,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: "Quickfile Webhook handler; timestamp: " + events.Timestamp + " | " + errorMessage + " | " + stack,
+                    message: "Quickfile Webhook handler; timestamp: " + events.Timestamp + " | " + errorMessage,
                     link: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252FquickFileWebhookHandler/log-events/${lambdaContext?.logStreamName ?? ""}`
                 })
             }
