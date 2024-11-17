@@ -72,7 +72,7 @@ For example, on windows, you can use fnm:
 
 2. Install local development dependencies
 
-    Navigate to the project root directory
+    Navigate to the project root directory if not already there
     ```shell
         cd /path/to/project/
     ```
@@ -106,7 +106,7 @@ For example, on windows, you can use fnm:
         npx tsc -b
         npm run start --prefix packages/RHIScraper
     ```
-    You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file
+    You can control what is tested (and whether the browser runs headless or not) via the src/RHIScraper/RHI-local.ts file. The RO scraper is tested similarly.
 
 3. Bundle Ply code for pasting into code blocks
 
@@ -118,7 +118,7 @@ For example, on windows, you can use fnm:
      ```shell
         cd packages/Ply
         npx tsc -b
-        npx rollup -c  
+        npx rollup -c
     ```
     \
     Bundled scripts can be found in the Ply/rollup directory.
