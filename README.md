@@ -12,7 +12,7 @@ Cloud deployment is managed by pushing to the main branch of https://github.com/
 Here's the structure of this project:
 ```
 .
-├── package.json # define dependencies needed for production (excluding RHI Scraper production) and development
+├── package.json # define dependencies needed for cproduction and development common to all packages
 ├── package-lock.json
 ├── tsconfig.json #  main project typescript configuration
 ├── packages
@@ -88,7 +88,7 @@ For example, on windows, you can use fnm:
         QUICKFILE_API_KEY=QuickFile API key
     ```
 
-### Run Local tests and tasks
+### Run local tests and tasks
 
 1. Run a test
 
