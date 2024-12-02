@@ -57,7 +57,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 case "REC": {
                     console.log("New Recurring Invoice ID: " + newInvoice.Id);
                     //upsert new template invoice to SS table
-                    await upsertNewInvoiceTemplates([newInvoice.Id]);
+                    await createNewInvoiceTemplates([newInvoice.Id]);
                     break;
                 }
                 case "INV": {
@@ -241,7 +241,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
     return "success";
 
 
-    async function upsertNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
+    async function createNewInvoiceTemplates(invoiceTemplateIDs: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
         /*
        Create new recurring invoice template with client ID, discount, QuickFile status, invoice ID, invoice Number, interval, start date and Total Payment amount
        Ignore if record already exists
@@ -299,32 +299,48 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         /*
         Update invoice template with client ID, QuickFile Status, Discount, Invoice Number, interval, start date and Total Payment amount
         */
-        const updatedSSTemplates: Omit<Update<RecordFromTableID<typeof invoiceTemplatesTable.id>>, "id">[] = [];
+        //create list for storing updated template objects
+        const updatedSSTemplates: Update<RecordFromTableID<typeof invoiceTemplatesTable.id>>[] = [];
+        //get existing template objects from SS
+        const existingSSTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
+            invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
+            invoiceIds);
+
         for (const invoiceID of invoiceIds) {
-            const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
+            try {
+                const existingSSTemplate = existingSSTemplates.find(existingTemplate =>
+                    existingTemplate[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == invoiceID);
+                if (!existingSSTemplate) throw new Error("Updated invoice Template with ID " + invoiceID + " not found on SmartSuite");
+                const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
 
-            const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
-            )?.value as string;
-            if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
-                invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
+                const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
+                )?.value as string;
+                if (!quickFileStatusValue) throw new Error("QF Invoice Status '" + QFTemplate.Invoice_Get.Body.InvoiceDetails.Status + "' is not found in the existing options " +
+                    invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.map(choice => choice.label).join(", "));
 
-            const updatedSSTemplate = {
-                [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: String(QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID) as string,
-                [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
-                [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
-                [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
-                    quickFileStatusValue,
-                [invoiceTemplatesTable.structure["Interval"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
-                [invoiceTemplatesTable.structure["Start Date"].slug]: {
-                    date: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
-                    include_time: false,
-                } as DateFieldCell,
-                [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount as number,
+                const updatedSSTemplate = {
+                    application_id: invoiceTemplatesTable.id,
+                    id: existingSSTemplate.id,
+                    [invoiceTemplatesTable.structure["QuickFile Invoice Client ID"].slug]: String(QFTemplate.Invoice_Get.Body.InvoiceDetails.ClientID) as string,
+                    [invoiceTemplatesTable.structure["QuickFile Invoice Number"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.InvoiceNumber as string,
+                    [invoiceTemplatesTable.structure["Total Payment (Inc. VAT) (System Field)"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.TotalAmount as number,
+                    [invoiceTemplatesTable.structure["QuickFile Status (System Field)"].slug]:
+                        quickFileStatusValue,
+                    [invoiceTemplatesTable.structure["Interval"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.Interval as string,
+                    [invoiceTemplatesTable.structure["Start Date"].slug]: {
+                        date: QFTemplate.Invoice_Get.Body.InvoiceDetails.RecurringProfileSettings.StartDate,
+                        include_time: false,
+                    } as DateFieldCell,
+                    [invoiceTemplatesTable.structure["Discount"].slug]: QFTemplate.Invoice_Get.Body.InvoiceDetails.Discount as number,
+                }
+                updatedSSTemplates.push(updatedSSTemplate);
+            } catch (error) {
+                await logErrorToPly((error as Error));
             }
-            updatedSSTemplates.push(updatedSSTemplate);
         }
-        const updatedTemplates = await SS.bulkAddNewRecords(invoiceTemplatesTable.id,
+        const updatedTemplates = await SS.bulkUpdateRecords(invoiceTemplatesTable.id,
             updatedSSTemplates,
+            false
         );
         return updatedTemplates;
     }
@@ -356,7 +372,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             let SSInvoiceTemplate = SSinvoiceTemplates.find(template => template[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == newInvoice.RecurringParentId)
             if (!SSInvoiceTemplate) {
                 await logErrorToPly(new Error("SS Recurring template with ID " + newInvoice.RecurringParentId + " not found on SS. Adding to SS."));
-                SSInvoiceTemplate = (await upsertNewInvoiceTemplates([newInvoice.RecurringParentId]))[0];
+                SSInvoiceTemplate = (await createNewInvoiceTemplates([newInvoice.RecurringParentId]))[0];
             }
 
             const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
@@ -525,7 +541,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     const QFitem = QFItems.find(_QFItem => ((SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === _QFItem.ItemName?.slice(0, 7)));
                     const QFTask = QFTasks.find(_QFTask => ((SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug] as string).slice(0, 7) === _QFTask.ItemName?.slice(0, 7)));
                     try {
-                        if (!QFitem && !QFTask ) throw new Error("No QF item or task found for SS invoice item " + SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug]);
+                        if (!QFitem && !QFTask) throw new Error("No QF item or task found for SS invoice item " + SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug]);
                         if (QFitem && QFTask) throw new Error("QF item AND QF task found for SS invoice item " + SSItem[SDPInvoiceItemsTable.structure["Item Name"].slug]);
                         //set values
                         if (QFitem) {
