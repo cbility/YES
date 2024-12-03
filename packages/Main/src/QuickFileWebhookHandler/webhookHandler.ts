@@ -89,7 +89,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 for (const updatedInvoice of events.InvoicesUpdated!) {
                     switch (updatedInvoice.InvoiceType) {
                         case "REC": {
-                            console.log("Updated Recurring Invoice ID: " + updatedInvoice.Id);
+                            console.log("Updated Recurring Invoice Template ID: " + updatedInvoice.Id);
                             await updateSSInvoiceTemplates([updatedInvoice.Id]);
                             break;
                         }
