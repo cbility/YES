@@ -823,12 +823,12 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
         if (SSOpportunities.length === 0) throw new Error("No Opportunity found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id); //throw error and break out
         if (SSOpportunities.length > 1) {
-            logErrorToPly(new Error(SSOpportunities.length + " Opportunities found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id + ". All IDs: " +
+            await logErrorToPly(new Error(SSOpportunities.length + " Opportunities found for accepted/declined QuickFile quote with ID " + estimateStatusChange.Id + ". All IDs: " +
                 SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id));
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: estimateStatusChange.Id });
 
-        SS.updateRecord(opportunitiesTable.id,
+        await SS.updateRecord(opportunitiesTable.id,
             SSOpportunities[0].id,
             {
                 [opportunitiesTable.structure["Response Received"].slug]:
