@@ -843,7 +843,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         const stack = error.stack;
         console.log(errorMessage);
         console.log(stack);
-        fetch(
+        await fetch(
             PLY_ERROR_LOG_URL,
             {
                 method: 'POST',
