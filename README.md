@@ -12,7 +12,7 @@ Cloud deployment is managed by pushing to the main branch of https://github.com/
 Here's the structure of this project:
 ```
 .
-├── package.json # define dependencies needed for cproduction and development common to all packages
+├── package.json # define dependencies needed for production and development common to all packages
 ├── package-lock.json
 ├── tsconfig.json #  main project typescript configuration
 ├── packages
