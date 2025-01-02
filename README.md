@@ -96,9 +96,13 @@ For example, on windows, you can use fnm:
     ```shell
         npx tsc -b
     ```
-    run a test:
+    run a test, e.g. :
     ```shell
         node 'packages\Main\dist\tests\OfgemCheck\checkOutput.test.js'
+    ```
+    or 
+     ```shell
+        node 'packages\Main\dist\tests\QFWebhookHandler\webhookHandler.test.js'
     ```
 
 2. Test the RHI Scraper
