@@ -264,6 +264,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         for (const invoiceTemplateID of nonExistingInvoiceTemplateIDs) {
             try {
                 const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceTemplateID }) as RecurringTemplateGetResponse;
+                console.log(`New Invoice Template: ${QFTemplate}`);
 
                 const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
                 )?.value as string;
@@ -295,7 +296,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         );
         return createdTemplates;
     }
-    async function updateSSInvoiceTemplates(invoiceIds: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
+    async function updateSSInvoiceTemplates(templateIds: number[]): Promise<RecordFromTableID<typeof invoiceTemplatesTable.id>[]> {
         /*
         Update invoice template with client ID, QuickFile Status, Discount, Invoice Number, interval, start date and Total Payment amount
         */
@@ -304,14 +305,15 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         //get existing template objects from SS
         const existingSSTemplates = await SS.getRecordsByFieldValues(invoiceTemplatesTable.id,
             invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug,
-            invoiceIds);
+            templateIds);
 
-        for (const invoiceID of invoiceIds) {
+        for (const templateID of templateIds) {
             try {
                 const existingSSTemplate = existingSSTemplates.find(existingTemplate =>
-                    existingTemplate[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == invoiceID);
-                if (!existingSSTemplate) throw new Error("Updated invoice Template with ID " + invoiceID + " not found on SmartSuite");
-                const QFTemplate = await QF.invoiceGet({ InvoiceID: invoiceID }) as RecurringTemplateGetResponse;
+                    existingTemplate[invoiceTemplatesTable.structure["QuickFile Invoice Template ID"].slug] == templateID);
+                if (!existingSSTemplate) throw new Error("Updated invoice Template with ID " + templateID + " not found on SmartSuite");
+                const QFTemplate = await QF.invoiceGet({ InvoiceID: templateID }) as RecurringTemplateGetResponse;
+                console.log(`Updated invoice template: ${QFTemplate}`);
 
                 const quickFileStatusValue = invoiceTemplatesTable.structure["QuickFile Status (System Field)"].choices.find(choice => choice.label === QFTemplate.Invoice_Get.Body.InvoiceDetails.Status
                 )?.value as string;
@@ -377,6 +379,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
 
             const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
             const QFInvoice = await QF.invoiceGet({ InvoiceID: newInvoice.Id });
+            console.log(`New Invoice from recurring template: ${QFInvoice}`);
 
             const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
             const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
@@ -440,6 +443,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             console.log("Invoice with ID " + newInvoice.Id + " does not exist on SmartSuite. Creating invoice...")
             const invoicingTeam = await getTeam(INVOICING_TEAM_ID); //get IDs of invoicing team utilising caching
             const QFInvoice = await QF.invoiceGet({ InvoiceID: newInvoice.Id });
+            console.log(`New Invoice: ${QFInvoice}`);
 
             const issueDate = QFInvoice.Invoice_Get.Body.InvoiceDetails.IssueDate;
             const termDaysInMs = QFInvoice.Invoice_Get.Body.InvoiceDetails.TermDays * 24 * 60 * 60 * 1000;
@@ -498,6 +502,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == invoiceId);
                 if (!SSInvoice) throw new Error("No SmartSuite Invoice found for QuickFile Invoice ID " + invoiceId + ". The Webhook handler tried to update this invoice.");
                 const QFInvoice = await QF.invoiceGet({ InvoiceID: invoiceId });
+                console.log(`Updated Invoice: ${QFInvoice}`);
                 if (QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType !== "INVOICE") throw new Error("Handler expected an invoice of type INVOICE but received type + " +
                     QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceType + " when processing invoice ID " + QFInvoice.Invoice_Get.Body.InvoiceDetails.InvoiceID)
 
@@ -676,6 +681,8 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
         Update SmartSuite Quote Items price, line item description and quantity/hours  to match QuickFile
         */
         if (QFQuote === undefined) QFQuote = await QF.invoiceGet({ InvoiceID: quoteId }); //allow QF quote to be passed in if fetched earlier
+
+        console.log(`Updated Quote: ${QFQuote}`);
 
         const SSOpportunities = await SS.getRecordsByFieldValues(
             opportunitiesTable.id,
