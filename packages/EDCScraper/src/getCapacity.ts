@@ -24,10 +24,22 @@ export default async function getCapacity(page: Page, rhiNumber: string): Promis
                 viewDetailsButton.click()
             ]);
             //get capacity
-            const capacityText = await page.evaluate(() => {
-                const capacityElement = document.querySelector('#mainPlaceHolder_ContentPlaceHolder_gvAccredAppQuestionsAndAnswers > tbody > tr:nth-child(8) > td:nth-child(3)');  // For example, extracting text from <h1>
-                return capacityElement ? capacityElement.textContent : null;
+            const capacityText: string | null = await page.evaluate(() => {
+                // Get all the rows in the table
+                const rows = document.querySelectorAll<HTMLTableRowElement>('#mainPlaceHolder_ContentPlaceHolder_gvAccredAppQuestionsAndAnswers > tbody > tr');
+                let capacityElement: HTMLTableCellElement | undefined = undefined;
+            
+                // Loop through each row to find HA120
+                rows.forEach(row => {
+                    const firstColumnText = row.cells[0] ? row.cells[0].textContent?.trim() : ''; 
+                    if (firstColumnText === 'HA120') {
+                        capacityElement = row.cells[2] as HTMLTableCellElement; 
+                    }
+                });
+                return capacityElement ? (capacityElement as HTMLTableCellElement).textContent: null;
             });
+            
+            
             if (!capacityText) throw new Error("Capacity not found on page");
             capacity = parseInt(capacityText);
             break;
