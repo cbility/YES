@@ -732,7 +732,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     id: SSitem.id as string,
                     [quoteItemsTable.structure["Quantity"].slug]: item.Qty,
                     [quoteItemsTable.structure["Line Item Description"].slug]: item.ItemDescription,
-                    [quoteItemsTable.structure["Price"].slug]: (item.LineTotal / item.Qty)
+                    [quoteItemsTable.structure["Custom Price"].slug]: (item.LineTotal / item.Qty)
                 };
                 return updatedItem;
             }).filter(updatedItem => !!updatedItem) //remove ignored items
