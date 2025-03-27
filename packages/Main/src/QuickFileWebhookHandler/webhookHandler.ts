@@ -124,6 +124,15 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 break;
             }
+            case "InvoicesPaid": {
+                console.log(events.InvoicesPaid?.length + " invoices marked as paid: " + events.InvoicesPaid?.map(invoice => invoice.Id).join(","));
+                try {
+                    await updateSDPInvoices(events.InvoicesPaid!.map(invoice => invoice.Id))
+                } catch (error) {
+                    await logErrorToPly(error as Error);
+                }
+                break;
+            }
             case "InvoicesSent": {
                 console.log(events.InvoicesSent?.length + " Invoices sent.");
                 for (const sentInvoice of events.InvoicesSent!) {
