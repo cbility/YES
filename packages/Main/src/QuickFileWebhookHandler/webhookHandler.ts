@@ -124,6 +124,15 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 }
                 break;
             }
+            case "InvoicesPaid": {
+                console.log(events.InvoicesPaid?.length + " invoices marked as paid: " + events.InvoicesPaid?.map(invoice => invoice.Id).join(","));
+                try {
+                    await updateSDPInvoices(events.InvoicesPaid!.map(invoice => invoice.Id))
+                } catch (error) {
+                    await logErrorToPly(error as Error);
+                }
+                break;
+            }
             case "InvoicesSent": {
                 console.log(events.InvoicesSent?.length + " Invoices sent.");
                 for (const sentInvoice of events.InvoicesSent!) {
@@ -595,9 +604,13 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
             await logErrorToPly(new Error("No SS Invoices found for sent QF Invoices with IDs " + invoiceIDs.join(", ")));
             return [];
         }
+        //update SS invoices on send to catch cases where invoice is updated and sent in one action
+        await updateSDPInvoices(sentInvoices.map(invoice => invoice.Id));
 
         for (const sentInvoice of sentInvoices) {
             try {
+
+
                 const SSInvoice = SSInvoices.find(_SSInvoice => _SSInvoice[invoicesTable.structure["QuickFile Invoice ID"].slug] == sentInvoice.Id);
                 if (!SSInvoice) throw new Error("No SS Invoice found for invoice ID " + sentInvoice.Id + ". The webhook handler tried to mark this invoice as sent");
                 const QFInvoice = await QF.invoiceGet({ InvoiceID: sentInvoice.Id });
@@ -728,7 +741,7 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                     id: SSitem.id as string,
                     [quoteItemsTable.structure["Quantity"].slug]: item.Qty,
                     [quoteItemsTable.structure["Line Item Description"].slug]: item.ItemDescription,
-                    [quoteItemsTable.structure["Price"].slug]: (item.LineTotal / item.Qty)
+                    [quoteItemsTable.structure["Custom Price"].slug]: (item.LineTotal / item.Qty)
                 };
                 return updatedItem;
             }).filter(updatedItem => !!updatedItem) //remove ignored items
@@ -798,6 +811,9 @@ export default async function quickFileWebhookHandler(lambdaEvent: QuickFileEven
                 SSOpportunities.map((opp: any) => opp.id).join(", ") + ". Proceeding with ID " + SSOpportunities[0].id));
         }
         const QFQuote = await QF.invoiceGet({ InvoiceID: sentQuote.Id });
+
+        //update SS opportunity when quote sent to catch cases where quote is updated and sent in one action
+        await updateSSOpportunity(sentQuote.Id, QFQuote);
 
         const issueDate = new Date(QFQuote.Invoice_Get.Body.InvoiceDetails.IssueDate);
         const termDaysInMs = MS_IN_A_DAY * (SSOpportunities[0][opportunitiesTable.structure["Term Days (System Field)"].slug] as number);
