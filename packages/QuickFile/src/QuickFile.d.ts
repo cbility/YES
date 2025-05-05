@@ -475,7 +475,9 @@ interface InvoicesViewed extends InvoiceEvent {
 interface InvoicesSent extends InvoiceEvent {
     InvoiceType: "INV" | "EST" | "REC";
 }
-interface InvoicesPaid extends InvoiceEvent { //Online payment channel only
+interface InvoicesPaid { //Online payment channel only
+    InvoiceId: number;
+    TimeStamp: string; //YYYY-MM-DDTHH:mm:ss
     PaymentId: number; //Unique payment record ID
     PaymentMethod: "PAYPAL" | "SAGEPAY" | "WORLDPAY" | "PAYSENSE" | "BITPAY" | "STRIPE";
 }
