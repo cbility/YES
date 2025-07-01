@@ -1,6 +1,7 @@
-{"engines": {
-    "node": "20.11.1"
-  },
+{
+    "engines": {
+        "node": ">=22.0.0"
+    },
     "type": "module",
     "scripts": {
         "install-all": "npm install && cd packages/RHIScraper && npm install && cd ../ROScraper && npm install && cd ../..",
