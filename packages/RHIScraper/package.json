@@ -5,7 +5,7 @@
         "build": "tsc -build ./tsconfig.prod.json --verbose --pretty"
     },
     "dependencies": {
-        "@sparticuz/chromium-min": "^119.0.2",
+        "@sparticuz/chromium": "^137.0.1",
         "@types/aws-lambda": "^8.10.138",
         "@types/node": "^22.5.3",
         "cheerio": "^1.0.0-rc.12",

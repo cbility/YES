@@ -1,9 +1,9 @@
 import main from "../main/main.js"
 import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium-min";
+import chromium from "@sparticuz/chromium";
 
-chromium.setHeadlessMode = true;
-chromium.setGraphicsMode = false;
+//chromium.setHeadlessMode = true;
+//chromium.setGraphicsMode = false;
 
 export async function handler(event: { body: string, queryStringParameters: { shallow?: boolean } }) {
 
@@ -16,9 +16,9 @@ export async function handler(event: { body: string, queryStringParameters: { sh
     try {
         await main(inputs, puppeteer, {
             args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
+            //defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+            headless: true,
         }, shallow);
 
         const response = {

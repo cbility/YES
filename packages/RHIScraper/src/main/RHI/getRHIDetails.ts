@@ -1,3 +1,4 @@
+/// <reference path="../../../types/postcodesio-client.d.ts" />
 import { Page } from "puppeteer-core";
 import * as cheerio from "cheerio";
 import PostcodesIO from "postcodesio-client";
