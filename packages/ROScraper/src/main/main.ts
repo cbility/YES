@@ -11,7 +11,7 @@ import type { RecordFromTableID } from "../../../SmartSuite/dist/SmartSuiteAPIHa
 import getReducedAccountDetails from "./RO/getReducedAccountDetails.js";
 import transferCertificates from "./RO/transferCertificates.js";
 
-const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
+const PLY_ERROR_LOG_URL = process.env.SLACK_URL as string;
 
 process.on('uncaughtException', async function (err) { //handle uncaught exceptions
     console.log(err);

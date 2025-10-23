@@ -59,7 +59,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: 'eu-west-2'
           function_name: roScraper
-          environment: TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          environment: TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production, SLACK_URL=${{ secrets.SLACK_URL }}
           handler: ./packages/ROScraper/dist/lambda/indexROScraper.handler
           s3_bucket: ro-scraper
           s3_key: deployment.zip

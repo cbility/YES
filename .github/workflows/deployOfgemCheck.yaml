@@ -51,7 +51,7 @@ jobs:
         role: arn:aws:iam::211125712927:role/service-role/getOfgemCheckInputs-role-t1i80v5u
         handler: ./packages/Main/dist/OfgemCheck/getOfgemCheckInputs.handler
         runtime: nodejs18.x
-        environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+        environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production, SLACK_URL=${{ secrets.SLACK_URL }}
 
     - name: AWS Lambda Deploy CheckScraperOutput
       uses: appleboy/lambda-action@v0.2.0
@@ -66,8 +66,8 @@ jobs:
           handler: ./packages/Main/dist/OfgemCheck/checkScraperOutput.handler
           role: arn:aws:iam::211125712927:role/service-role/CheckScraperOutput-role-15sxaq49
           runtime: nodejs18.x
-          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
-    
+          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production, SLACK_URL=${{ secrets.SLACK_URL }}
+
     - name: AWS Lambda Deploy logOfgemCheckOutputs
       uses: appleboy/lambda-action@v0.2.0
       with:
@@ -81,7 +81,7 @@ jobs:
           handler: ./packages/Main/dist/OfgemCheck/logOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logOfgemCheckOutputs-role-frk9f39p
           runtime: nodejs18.x
-          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production, SLACK_URL=${{ secrets.SLACK_URL }}
 
     - name: AWS Lambda Deploy logROOfgemCheckOutputs
       uses: appleboy/lambda-action@v0.2.0
@@ -96,4 +96,4 @@ jobs:
           handler: ./packages/Main/dist/OfgemCheck/logROOfgemCheckOutputs.handler
           role: arn:aws:iam::211125712927:role/service-role/logROOfgemCheckOutputs-role-22ck4i3d
           runtime: nodejs18.x
-          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production
+          environment: QUICKFILE_API_KEY=${{ secrets.QUICKFILE_API_KEY }}, TECHNICAL_SMARTSUITE_KEY=${{ secrets.TECHNICAL_SMARTSUITE_KEY }}, NODE_ENV=production, SLACK_URL=${{ secrets.SLACK_URL }}

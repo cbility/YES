@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const MS_IN_A_DAY = 24 * 60 * 60 * 1000;
-const PLY_ERROR_LOG_URL = "https://app-server.ply.io/api/incoming/webhooks/RKMxR0PJ/";
+const PLY_ERROR_LOG_URL = process.env.SLACK_URL as string;
 const INVOICING_TEAM_ID = "6694e97231153a5c57cefb61";
 let cachedTeams: Team[] = []; //cache for teams used through function i.e. invoicing team
 
